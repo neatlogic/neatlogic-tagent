@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tagent.dao.mapper.TagentMapper">
+
+    <select id="search" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT `id`,
+               `ip`,
+               `port`,
+               `name`,
+               `version`,
+               `os_id` as osId,
+               `os_type` as osType,
+               `os_version` as osVersion,
+               `osbit`,
+               `credential`,
+               `runner_id` as runnerId,
+               `runner_group_id` as runnerGroupId,
+               `runner_ip` as runnerIp,
+               `runner_port` as runnerPort,
+               `user`,
+               `pcpu`,
+               `mem`,
+               `status`,
+               `fcd`,
+               `lcd`
+        FROM `tagent`
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+</mapper>
+
