@@ -10,6 +10,7 @@ import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -30,6 +31,10 @@ public class TagentVo extends BasePageVo {
     private String version;
     @EntityField(name = "osId", type = ApiParamType.STRING)
     private Long osId;
+    @EntityField(name = "系统名", type = ApiParamType.STRING)
+    private String osName;
+    @EntityField(name = "系统名/系统版本", type = ApiParamType.STRING)
+    private String osNameVersion;
     @EntityField(name = "系统类型", type = ApiParamType.STRING)
     private String osType;
     @EntityField(name = "系统版本", type = ApiParamType.STRING)
@@ -108,6 +113,18 @@ public class TagentVo extends BasePageVo {
 
     public void setOsId(Long osId) {
         this.osId = osId;
+    }
+
+    public String getOsName() {
+        return osName;
+    }
+
+    public void setOsName(String osName) {
+        this.osName = osName;
+    }
+
+    public String getOsNameVersion() {
+        return osName + File.separator + osVersion;
     }
 
     public String getOsType() {

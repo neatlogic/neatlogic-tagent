@@ -3,27 +3,29 @@
 <mapper namespace="codedriver.framework.tagent.dao.mapper.TagentMapper">
 
     <select id="search" resultType="codedriver.framework.tagent.dto.TagentVo">
-        SELECT `id`,
-               `ip`,
-               `port`,
-               `name`,
-               `version`,
-               `os_id` as osId,
-               `os_type` as osType,
-               `os_version` as osVersion,
-               `osbit`,
-               `credential`,
-               `runner_id` as runnerId,
-               `runner_group_id` as runnerGroupId,
-               `runner_ip` as runnerIp,
-               `runner_port` as runnerPort,
-               `user`,
-               `pcpu`,
-               `mem`,
-               `status`,
-               `fcd`,
-               `lcd`
-        FROM `tagent`
+        SELECT t.`id`,
+               t.`ip`,
+               t.`port`,
+               t.`name`,
+               t.`version`,
+               t.`os_id` as osId,
+               t.`os_type` as osType,
+               t.`os_version` as osVersion,
+               t.`osbit`,
+               t.`credential`,
+               t.`runner_id` as runnerId,
+               t.`runner_group_id` as runnerGroupId,
+               t.`runner_ip` as runnerIp,
+               t.`runner_port` as runnerPort,
+               t.`user`,
+               t.`pcpu`,
+               t.`mem`,
+               t.`status`,
+               t.`fcd`,
+               t.`lcd`,
+               tos.name as osName
+        FROM `tagent` t
+        LEFT JOIN `tagent_os` tos ON t.`os_id` = tos.`id`
         <if test="needPage == true">
             LIMIT #{startNum}, #{pageSize}
         </if>
