@@ -43,10 +43,12 @@ public class TagentVo extends BasePageVo {
     private String osbit;
     @EntityField(name = "密码", type = ApiParamType.STRING)
     private String credential;
-    @EntityField(name = "runner id", type = ApiParamType.STRING)
+    @EntityField(name = "runner id", type = ApiParamType.LONG)
     private Long runnerId;
-    @EntityField(name = "runner组id", type = ApiParamType.STRING)
+    @EntityField(name = "runner组id", type = ApiParamType.LONG)
     private Long runnerGroupId;
+    @EntityField(name = "runner组name", type = ApiParamType.STRING)
+    private String runnerGroupName;
     @EntityField(name = "runner ip", type = ApiParamType.STRING)
     private String runnerIp;
     @EntityField(name = "runner port", type = ApiParamType.STRING)
@@ -173,6 +175,14 @@ public class TagentVo extends BasePageVo {
 
     public void setRunnerGroupId(Long runnerGroupId) {
         this.runnerGroupId = runnerGroupId;
+    }
+
+    public String getRunnerGroupName() {
+        return runnerGroupName;
+    }
+
+    public void setRunnerGroupName(String runnerGroupName) {
+        this.runnerGroupName = runnerGroupName;
     }
 
     public String getRunnerIp() {
