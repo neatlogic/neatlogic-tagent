@@ -48,11 +48,13 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 			@Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
 	})
 	@Output({
-			@Param(name = "tbodyList",explode = TagentVo[].class,desc = "所有的tagent")
+			@Param(name = "tbodyList",explode = TagentVo[].class,desc = "tagent列表")
 	})
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TagentVo tagentVo = JSONObject.toJavaObject(jsonObj,TagentVo.class);
+		int rowNum = tagentMapper.searchTagentCount();
+		tagentVo.setRowNum(rowNum);
 		return TableResultUtil.getResult(tagentMapper.searchTagent(tagentVo),tagentVo);
 	}
 

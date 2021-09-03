@@ -10,10 +10,13 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
+import codedriver.framework.tagent.dto.TagentOSVo;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -39,7 +42,7 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
 
     @Description(desc = "获取所有tagentOS类型")
     @Output({
-            @Param(name = "tagentOStype",type = ApiParamType.JSONARRAY,desc = "所有tagentOS类型")
+            @Param(name = "tbodyList",explode = TagentOSVo.class,desc = "tagentOS类型列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

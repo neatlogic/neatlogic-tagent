@@ -147,6 +147,15 @@
         ORDER BY g.`id` DESC, nk.`id` DESC
     </select>
 
+    <select id="searchTagentCount" resultType="int">
+        select count(distinct t.`id`)
+        from tagent t;
+    </select>
+
+    <select id="searchTagentRunerCount" resultType="int">
+        select count(distinct g.id)
+        from runnergroup g;
+    </select>
 
 </mapper>
 
