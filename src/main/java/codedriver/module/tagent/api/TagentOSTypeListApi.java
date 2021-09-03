@@ -42,7 +42,7 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
 
     @Description(desc = "获取所有tagentOS类型")
     @Output({
-            @Param(name = "tbodyList",explode = TagentOSVo.class,desc = "tagentOS类型列表")
+            @Param(name = "tbodyList",explode = TagentOSVo[].class,desc = "tagentOS类型列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
