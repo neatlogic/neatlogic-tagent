@@ -1,6 +1,6 @@
 package codedriver.framework.tagent.dao.mapper;
 
-import codedriver.framework.autoexec.dto.RunnerGroupVo;
+import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
 
@@ -19,5 +19,7 @@ public interface TagentMapper {
 
     int searchTagentCount();
 
-    int searchTagentRunerCount();
+    int searchTagentRunnerCount();
+
+    TagentVo getTagentById(Long tagentId);
 }
