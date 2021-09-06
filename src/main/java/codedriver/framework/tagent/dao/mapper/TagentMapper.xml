@@ -50,14 +50,14 @@
                 OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
-                ORDER BY t.`id` DESC
+        ORDER BY t.`id` DESC
         <if test="needPage == true">
             LIMIT #{startNum}, #{pageSize}
         </if>) t LEFT JOIN runner ar ON t.`runner_id` = ar.`id`
         LEFT JOIN runnergroup apg ON t.`runner_group_id` = apg.`id`
         LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
         LEFT JOIN `tagent_os` tos ON t.`os_id` = tos.`id`
-                ORDER BY t.`id` DESC
+        ORDER BY t.`id` DESC
     </select>
 
     <select id="searchTagentVersion" resultType="java.lang.String">
@@ -66,57 +66,57 @@
     </select>
 
     <select id="searchTagentOSType" resultType="codedriver.framework.tagent.dto.TagentOSVo">
-        select `id` as id,
+        select `id`   as id,
                `name` as name
         from tagent_os
     </select>
 
-    <select id="searchTagentRunnerGroup" resultType="codedriver.framework.autoexec.dto.RunnerGroupVo">
-        select `id`,`name`
+    <select id="searchTagentRunnerGroup" resultType="codedriver.framework.dto.runner.RunnerGroupVo">
+        select `id`, `name`
         from runnergroup
     </select>
 
-    <resultMap id="runnerGroupMap" type="codedriver.framework.autoexec.dto.RunnerGroupVo">
-        <id column="id" property="id" />
-        <result column="name" property="name" />
-        <collection property="groupNetworkList" ofType="codedriver.framework.autoexec.dto.GroupNetworkVo">
-            <id column="networkId" property="id" />
-            <result column="groupId" property="groupId" />
-            <result column="networkIp" property="networkIp" />
-            <result column="mask" property="mask" />
+    <resultMap id="runnerGroupMap" type="codedriver.framework.dto.runner.RunnerGroupVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <collection property="groupNetworkList" ofType="codedriver.framework.dto.runner.GroupNetworkVo">
+            <id column="networkId" property="id"/>
+            <result column="groupId" property="groupId"/>
+            <result column="networkIp" property="networkIp"/>
+            <result column="mask" property="mask"/>
         </collection>
-        <collection property="runnerList" ofType="codedriver.framework.autoexec.dto.RunnerVo">
-            <id column="runnerId" property="id" />
-            <result column="runnerName" property="name" />
-            <result column="url" property="url" />
-            <result column="accessKey" property="accessKey" />
-            <result column="accessSecret" property="accessSecret" />
-            <result column="authType" property="authType" />
-            <result column="host" property="host" />
-            <result column="port" property="port" />
-            <result column="nettyIp" property="nettyIp" />
-            <result column="nettyPort" property="nettyPort" />
+        <collection property="runnerList" ofType="codedriver.framework.dto.runner.RunnerVo">
+            <id column="runnerId" property="id"/>
+            <result column="runnerName" property="name"/>
+            <result column="url" property="url"/>
+            <result column="accessKey" property="accessKey"/>
+            <result column="accessSecret" property="accessSecret"/>
+            <result column="authType" property="authType"/>
+            <result column="host" property="host"/>
+            <result column="port" property="port"/>
+            <result column="nettyIp" property="nettyIp"/>
+            <result column="nettyPort" property="nettyPort"/>
         </collection>
     </resultMap>
-    
+
     <select id="searchRunnerGroupInformation" parameterType="java.lang.String" resultMap="runnerGroupMap">
         SELECT
         g.`id` as id,
-        g.`name`  as name,
-        nk.`id`  as networkId,
-        nk.`group_id`  as groupId,
-        nk.`network_ip`  as networkIp,
-        nk.`mask`  as mask,
-        r.`id` as  runnerId,
-        r.`name`  as runnerName,
-        r.`url`  as url,
+        g.`name` as name,
+        nk.`id` as networkId,
+        nk.`group_id` as groupId,
+        nk.`network_ip` as networkIp,
+        nk.`mask` as mask,
+        r.`id` as runnerId,
+        r.`name` as runnerName,
+        r.`url` as url,
         r.`host` as host,
         r.`port`,
         r.`netty_ip` as nettyIp,
         r.`netty_port` as nettyPort,
-        r.`access_key`  as accessKey,
-        r.`access_secret`  as accessSecret,
-        r.`auth_type`  as authType
+        r.`access_key` as accessKey,
+        r.`access_secret` as accessSecret,
+        r.`auth_type` as authType
         FROM
         (SELECT DISTINCT
         rg.`id`,
@@ -152,9 +152,21 @@
         from tagent t;
     </select>
 
-    <select id="searchTagentRunerCount" resultType="int">
+    <select id="searchTagentRunnerCount" resultType="int">
         select count(distinct g.id)
         from runnergroup g;
+    </select>
+
+    <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo">
+        select t.`ip`,
+               t.`port`,
+               t.`name`,
+               t.`version`,
+               t.`os_id`      as osId,
+               t.`os_type`    as osType,
+               t.`os_version` as osVersion
+        from tagent t
+        where id = #{value}
     </select>
 
 </mapper>

@@ -1,7 +1,7 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.autoexec.dto.RunnerGroupVo;
+import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
@@ -51,7 +51,7 @@ public class TagentRunnerGroupListApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentVo tagentVo =JSONObject.toJavaObject(paramObj, TagentVo.class);
-        int rowNum =tagentMapper.searchTagentRunerCount();
+        int rowNum =tagentMapper.searchTagentRunnerCount();
         tagentVo.setRowNum(rowNum);
         List<RunnerGroupVo> runnerGroupVoList =tagentMapper.searchTagentRunnerGroup();
         return TableResultUtil.getResult(runnerGroupVoList, tagentVo);
