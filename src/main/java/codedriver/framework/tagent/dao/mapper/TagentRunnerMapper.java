@@ -5,7 +5,7 @@ import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.dto.runner.RunnerVo;
 
-public interface RunnerMapper {
+public interface TagentRunnerMapper {
     int checkGroupNameIsRepeats(RunnerGroupVo runnerGroupVo);
 
     void updateRunnerGroup(RunnerGroupVo runnerGroupVo);

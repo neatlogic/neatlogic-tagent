@@ -6,8 +6,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.RunnerMapper;
-import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
+import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ import javax.annotation.Resource;
 public class RunnerDeleteApi extends PrivateApiComponentBase {
 
     @Resource
-    RunnerMapper runnerMapper;
+    TagentRunnerMapper tagentRunnerMapper;
 
     @Override
     public String getName() {
@@ -46,10 +45,10 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
+        if (tagentRunnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
-        runnerMapper.deleteRunnerById(id);
+        tagentRunnerMapper.deleteRunnerById(id);
         return null;
     }
 

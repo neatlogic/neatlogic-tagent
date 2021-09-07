@@ -7,8 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 public enum TagentStatus implements IEnum {
-    CONNECTED("connected","已连接"),
-    DISCONNECTED("disconnected","未连接");
+    CONNECTED("connected", "已连接"),
+    DISCONNECTED("disconnected", "未连接");
     private final String value;
     private final String text;
 
@@ -16,6 +16,7 @@ public enum TagentStatus implements IEnum {
         this.value = value;
         this.text = text;
     }
+
     public String getValue() {
         return value;
     }

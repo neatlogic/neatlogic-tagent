@@ -11,7 +11,7 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.RunnerMapper;
+import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerGroupNetworkSameException;
 import codedriver.framework.tagent.exception.RunnerGroupNetworkNameRepeatsException;
@@ -28,7 +28,8 @@ import java.util.List;
 public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    RunnerMapper runnerMapper;
+    TagentRunnerMapper tagentRunnerMapper;
+
     @Override
     public String getName() {
         return "Tagent代理组保存接口";
@@ -47,8 +48,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "id"),
-            @Param(name = "name",type = ApiParamType.STRING,isRequired = false,desc = "runner 分组名"),
-            @Param(name = "groupNetworkList",type = ApiParamType.JSONARRAY,isRequired = false,desc = "runner 分组网段列表"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = false, desc = "runner 分组名"),
+            @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner 分组网段列表"),
     })
     @Output({
     })
@@ -59,7 +60,7 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
         if (id != null) {
-            if (runnerMapper.checkRunnerGroupIdIsExist(id)==0) {
+            if (tagentRunnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
             }
             if (!CollectionUtils.isEmpty(groupNetworkList)) {
@@ -70,18 +71,18 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+            if (tagentRunnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
                 throw new RunnerGroupNetworkNameRepeatsException(name);
             }
-            runnerMapper.updateRunnerGroup(runnerGroupVo);
+            tagentRunnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
-            runnerMapper.insertRunnerGroup(runnerGroupVo);
+            tagentRunnerMapper.insertRunnerGroup(runnerGroupVo);
         }
-        runnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
+        tagentRunnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
         if (groupNetworkList != null && groupNetworkList.size() > 0) {
             for (GroupNetworkVo networkVo : groupNetworkList) {
                 networkVo.setGroupId(runnerGroupVo.getId());
-                runnerMapper.insertNetwork(networkVo);
+                tagentRunnerMapper.insertNetwork(networkVo);
             }
         }
 

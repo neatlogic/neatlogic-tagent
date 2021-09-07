@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="codedriver.framework.tagent.dao.mapper.RunnerMapper">
+<mapper namespace="codedriver.framework.tagent.dao.mapper.TagentRunnerMapper">
 
     <select id="checkGroupNameIsRepeats" resultType="int"
             parameterType="codedriver.framework.dto.runner.RunnerGroupVo">
@@ -50,8 +50,8 @@
     <select id="checkRunnerNameIsExist" resultType="int" parameterType="codedriver.framework.dto.runner.RunnerVo">
         select count(1)
         from runner
-        where `id`!=#{id}
-        and `name` =#{name};
+        where `id` != #{id}
+          and `name` = #{name};
     </select>
 
     <update id="updateRunner" parameterType="codedriver.framework.dto.runner.RunnerVo">
@@ -81,16 +81,18 @@
             SELECT LAST_INSERT_ID() AS id
         </selectKey>
         INSERT INTO runner(
-        `name`, url, access_key, access_secret, auth_type, `netty_ip`, `netty_port`, `group_id`,`public_key`,`private_key`
+        `name`, url, access_key, access_secret, auth_type, `netty_ip`, `netty_port`,
+        `group_id`,`public_key`,`private_key`
         ) VALUES(
-        #{name}, #{url}, #{accessKey}, #{accessSecret}, #{authType}, #{nettyIp}, #{nettyPort},#{groupId},#{publicKey},#{privateKey}
+        #{name}, #{url}, #{accessKey}, #{accessSecret}, #{authType}, #{nettyIp},
+        #{nettyPort},#{groupId},#{publicKey},#{privateKey}
         )
     </insert>
 
     <select id="checkRunnerIdIsExist" resultType="int">
         select count(1)
         from runner
-        where `id`=#{id}
+        where `id` = #{id}
     </select>
 
     <delete id="deleteRunnerById">

@@ -7,9 +7,10 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.RunnerMapper;
+import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.enums.RunnerAuthType;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
+import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerNameRepeatsException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import javax.annotation.Resource;
 public class RunnerSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    RunnerMapper runnerMapper;
+    TagentRunnerMapper tagentRunnerMapper;
 
     @Override
     public String getName() {
@@ -59,19 +60,19 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         if (runnerVo.getName() != null) {
-            if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
+            if (tagentRunnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
                 throw new RunnerNameRepeatsException(runnerVo.getName());
             }
             if (runnerVo.getId() != null) {
-                if (runnerMapper.checkRunnerIdIsExist(runnerVo.getId())==0) {
-                    throw new RunnerGroupIdNotFoundException(runnerVo.getId());
+                if (tagentRunnerMapper.checkRunnerIdIsExist(runnerVo.getId()) == 0) {
+                    throw new RunnerIdNotFoundException(runnerVo.getId());
                 }
-                runnerMapper.updateRunner(runnerVo);
+                tagentRunnerMapper.updateRunner(runnerVo);
             } else {
-                if (runnerMapper.checkRunnerIdIsExist(runnerVo.getGroupId())==0) {
+                if (tagentRunnerMapper.checkRunnerGroupIdIsExist(runnerVo.getGroupId()) == 0) {
                     throw new RunnerGroupIdNotFoundException(runnerVo.getGroupId());
                 }
-                runnerMapper.insertRunner(runnerVo);
+                tagentRunnerMapper.insertRunner(runnerVo);
             }
         }
         return null;

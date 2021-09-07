@@ -38,14 +38,14 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
 
     @Description(desc = "获取tagent代理组信息")
     @Input({
-            @Param(name = "keyword",type = ApiParamType.STRING,desc = "关键词")
+            @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词")
     })
     @Output({
-            @Param(name = "tagentRunnerGroupInformation",explode = RunnerGroupVo[].class,desc = "所有tagent代理组")
+            @Param(name = "tagentRunnerGroupInformation", explode = RunnerGroupVo[].class, desc = "所有tagent代理组")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        RunnerGroupVo groupVo =JSONObject.toJavaObject(paramObj,RunnerGroupVo.class);
+        RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
 //        int rowNum = tagentMapper.searchRunnerGroupCount();
         return tagentMapper.searchRunnerGroupInformation(groupVo);
     }

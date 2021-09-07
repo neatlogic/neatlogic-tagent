@@ -7,8 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 public enum RunnerAuthType implements IEnum {
-    BASIC("basic","basic"),
-    HMAC("hmac","hmac");
+    BASIC("basic", "basic"),
+    HMAC("hmac", "hmac");
     private final String value;
     private final String text;
 
@@ -16,6 +16,7 @@ public enum RunnerAuthType implements IEnum {
         this.value = value;
         this.text = text;
     }
+
     public String getValue() {
         return value;
     }
