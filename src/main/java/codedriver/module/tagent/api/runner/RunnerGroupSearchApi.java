@@ -8,6 +8,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -46,8 +47,9 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerGroupVo groupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
-//        int rowNum = tagentMapper.searchRunnerGroupCount();
-        return tagentMapper.searchRunnerGroupInformation(groupVo);
+        int rowNum = tagentMapper.searchRunnerGroupCount();
+        groupVo.setRowNum(rowNum);
+        return TableResultUtil.getResult(tagentMapper.searchRunnerGroupInformation(groupVo),groupVo);
     }
 
 

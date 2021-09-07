@@ -22,4 +22,6 @@ public interface TagentMapper {
     int searchTagentRunnerCount();
 
     TagentVo getTagentById(Long tagentId);
+
+    int searchRunnerGroupCount();
 }

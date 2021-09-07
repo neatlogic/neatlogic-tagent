@@ -167,5 +167,10 @@
         where id = #{value}
     </select>
 
+    <select id="searchRunnerGroupCount" resultType="int">
+        select count(1)
+        from runnergroup
+    </select>
+
 </mapper>
 
