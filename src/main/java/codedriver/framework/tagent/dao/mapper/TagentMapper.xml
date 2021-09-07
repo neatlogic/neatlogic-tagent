@@ -92,8 +92,6 @@
             <result column="accessKey" property="accessKey"/>
             <result column="accessSecret" property="accessSecret"/>
             <result column="authType" property="authType"/>
-            <result column="host" property="host"/>
-            <result column="port" property="port"/>
             <result column="nettyIp" property="nettyIp"/>
             <result column="nettyPort" property="nettyPort"/>
         </collection>

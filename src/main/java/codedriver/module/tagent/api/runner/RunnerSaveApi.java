@@ -1,9 +1,8 @@
 package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.autoexec.dto.RunnerVo;
-import codedriver.framework.common.constvalue.ActionType;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;

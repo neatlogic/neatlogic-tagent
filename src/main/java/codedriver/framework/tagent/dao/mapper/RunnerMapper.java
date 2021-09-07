@@ -1,8 +1,9 @@
 package codedriver.framework.tagent.dao.mapper;
 
-import codedriver.framework.autoexec.dto.GroupNetworkVo;
-import codedriver.framework.autoexec.dto.RunnerGroupVo;
-import codedriver.framework.autoexec.dto.RunnerVo;
+
+import codedriver.framework.dto.runner.GroupNetworkVo;
+import codedriver.framework.dto.runner.RunnerGroupVo;
+import codedriver.framework.dto.runner.RunnerVo;
 
 public interface RunnerMapper {
     int checkGroupNameIsRepeats(RunnerGroupVo runnerGroupVo);

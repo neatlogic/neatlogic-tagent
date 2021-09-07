@@ -1,9 +1,9 @@
 package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.autoexec.dto.GroupNetworkVo;
-import codedriver.framework.autoexec.dto.RunnerGroupVo;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dto.runner.GroupNetworkVo;
+import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
