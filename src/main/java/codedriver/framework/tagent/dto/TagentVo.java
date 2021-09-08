@@ -45,6 +45,8 @@ public class TagentVo extends BasePageVo {
     private String credential;
     @EntityField(name = "runner id", type = ApiParamType.LONG)
     private Long runnerId;
+    @EntityField(name = "runner name", type = ApiParamType.STRING)
+    private String runnerName;
     @EntityField(name = "runner组id", type = ApiParamType.LONG)
     private Long runnerGroupId;
     @EntityField(name = "runner组name", type = ApiParamType.STRING)
@@ -167,6 +169,14 @@ public class TagentVo extends BasePageVo {
 
     public void setRunnerId(Long runnerId) {
         this.runnerId = runnerId;
+    }
+
+    public String getRunnerName() {
+        return runnerName;
+    }
+
+    public void setRunnerName(String runnerName) {
+        this.runnerName = runnerName;
     }
 
     public Long getRunnerGroupId() {
