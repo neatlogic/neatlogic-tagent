@@ -6,13 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
-public enum TagentStatus implements IEnum {
-    CONNECTED("connected", "已连接"),
-    DISCONNECTED("disconnected", "未连接");
+public enum RunnerAuthType implements IEnum {
+    BASIC("basic", "basic"),
+    HMAC("hmac", "hmac");
     private final String value;
     private final String text;
 
-    TagentStatus(String value, String text) {
+    RunnerAuthType(String value, String text) {
         this.value = value;
         this.text = text;
     }
@@ -28,7 +28,7 @@ public enum TagentStatus implements IEnum {
     @Override
     public List getValueTextList() {
         JSONArray array = new JSONArray();
-        for (TagentStatus type : values()) {
+        for (RunnerAuthType type : values()) {
             array.add(new JSONObject() {
                 {
                     this.put("value", type.getValue());
