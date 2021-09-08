@@ -2,6 +2,7 @@ package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.restful.annotation.Input;
@@ -11,7 +12,6 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerGroupNetworkSameException;
 import codedriver.framework.tagent.exception.RunnerGroupNetworkNameRepeatsException;
@@ -28,7 +28,7 @@ import java.util.List;
 public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentRunnerMapper tagentRunnerMapper;
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -60,7 +60,7 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
         if (id != null) {
-            if (tagentRunnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
+            if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
             }
             if (!CollectionUtils.isEmpty(groupNetworkList)) {
@@ -71,18 +71,18 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            if (tagentRunnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
                 throw new RunnerGroupNetworkNameRepeatsException(name);
             }
-            tagentRunnerMapper.updateRunnerGroup(runnerGroupVo);
+            runnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
-            tagentRunnerMapper.insertRunnerGroup(runnerGroupVo);
+            runnerMapper.insertRunnerGroup(runnerGroupVo);
         }
-        tagentRunnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
+        runnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
         if (groupNetworkList != null && groupNetworkList.size() > 0) {
             for (GroupNetworkVo networkVo : groupNetworkList) {
                 networkVo.setGroupId(runnerGroupVo.getId());
-                tagentRunnerMapper.insertNetwork(networkVo);
+                runnerMapper.insertNetwork(networkVo);
             }
         }
 

@@ -2,12 +2,12 @@ package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.enums.RunnerAuthType;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 public class RunnerSaveApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentRunnerMapper tagentRunnerMapper;
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -59,22 +59,29 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
-        if (runnerVo.getName() != null) {
-            if (tagentRunnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
+        Long id = runnerVo.getId();
+        if (runnerVo.getName() == null) {
+            return null;
+        }
+        if (id != null) {
+            if (runnerMapper.checkRunnerIdIsExist(runnerVo.getId()) == 0) {
+                throw new RunnerIdNotFoundException(runnerVo.getId());
+            }
+            if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
                 throw new RunnerNameRepeatsException(runnerVo.getName());
             }
-            if (runnerVo.getId() != null) {
-                if (tagentRunnerMapper.checkRunnerIdIsExist(runnerVo.getId()) == 0) {
-                    throw new RunnerIdNotFoundException(runnerVo.getId());
-                }
-                tagentRunnerMapper.updateRunner(runnerVo);
-            } else {
-                if (tagentRunnerMapper.checkRunnerGroupIdIsExist(runnerVo.getGroupId()) == 0) {
-                    throw new RunnerGroupIdNotFoundException(runnerVo.getGroupId());
-                }
-                tagentRunnerMapper.insertRunner(runnerVo);
+            runnerMapper.updateRunner(runnerVo);
+        }else {
+            if (runnerMapper.checkRunnerNameIsExistByName(runnerVo) > 0) {
+                throw new RunnerNameRepeatsException(runnerVo.getName());
             }
+            if (runnerMapper.checkRunnerGroupIdIsExist(runnerVo.getGroupId()) == 0) {
+                throw new RunnerGroupIdNotFoundException(runnerVo.getGroupId());
+            }
+            runnerMapper.insertRunner(runnerVo);
+
         }
+
         return null;
     }
 

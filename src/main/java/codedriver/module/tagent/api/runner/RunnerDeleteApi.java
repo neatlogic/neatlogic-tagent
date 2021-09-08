@@ -2,11 +2,11 @@ package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 public class RunnerDeleteApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentRunnerMapper tagentRunnerMapper;
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -45,10 +45,10 @@ public class RunnerDeleteApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
-        if (tagentRunnerMapper.checkRunnerIdIsExist(id) == 0) {
+        if (runnerMapper.checkRunnerIdIsExist(id) == 0) {
             throw new RunnerIdNotFoundException(id);
         }
-        tagentRunnerMapper.deleteRunnerById(id);
+        runnerMapper.deleteRunnerById(id);
         return null;
     }
 

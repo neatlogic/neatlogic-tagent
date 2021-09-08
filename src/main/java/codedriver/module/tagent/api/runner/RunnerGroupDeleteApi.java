@@ -2,24 +2,26 @@ package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.dao.mapper.TagentRunnerMapper;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
+@Transactional
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentRunnerMapper tagentRunnerMapper;
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -46,11 +48,11 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
         if (id != null) {
-            if (tagentRunnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
+            if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
             }
-            tagentRunnerMapper.deleteRunnerGroupById(id);
-            tagentRunnerMapper.deleteGroupNetWork(id);
+            runnerMapper.deleteRunnerGroupById(id);
+            runnerMapper.deleteGroupNetWork(id);
         }
         return null;
     }
