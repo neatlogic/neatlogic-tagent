@@ -43,6 +43,8 @@ public class TagentVo extends BasePageVo {
     private String osbit;
     @EntityField(name = "密码", type = ApiParamType.STRING)
     private String credential;
+    @EntityField(name = "账号id", type = ApiParamType.LONG)
+    private Long accountId;
     @EntityField(name = "runner id", type = ApiParamType.LONG)
     private Long runnerId;
     @EntityField(name = "runner name", type = ApiParamType.STRING)
@@ -161,6 +163,14 @@ public class TagentVo extends BasePageVo {
 
     public void setCredential(String credential) {
         this.credential = credential;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 
     public Long getRunnerId() {
