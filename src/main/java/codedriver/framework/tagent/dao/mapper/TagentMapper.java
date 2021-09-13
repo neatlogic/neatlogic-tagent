@@ -2,6 +2,7 @@ package codedriver.framework.tagent.dao.mapper;
 
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
+import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 
 import java.util.List;
@@ -24,4 +25,18 @@ public interface TagentMapper {
     TagentVo getTagentById(Long tagentId);
 
     int searchRunnerGroupCount();
+
+    TagentVo selectTagentById(Long id);
+
+    void deleteTagentById(Long id);
+
+    List<TagentVersionVo> getVersionList();
+
+    int updateTagentById(TagentVo tagent);
+
+    TagentOSVo getOsByName(String toLowerCase);
+
+    void insertOs(TagentOSVo newOS);
+
+    Long getAccountIdById(Long id);
 }
