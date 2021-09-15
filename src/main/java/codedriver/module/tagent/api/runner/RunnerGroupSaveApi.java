@@ -60,6 +60,9 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
+        if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+            throw new RunnerGroupNetworkNameRepeatsException(name);
+        }
         if (id != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
@@ -72,14 +75,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                     }
                 }
             }
-            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
-                throw new RunnerGroupNetworkNameRepeatsException(name);
-            }
             runnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
-            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
-                throw new RunnerGroupNetworkNameRepeatsException(name);
-            }
             runnerMapper.insertRunnerGroup(runnerGroupVo);
         }
         runnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
