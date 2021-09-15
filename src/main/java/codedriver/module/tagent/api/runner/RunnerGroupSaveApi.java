@@ -48,7 +48,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "id"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = false, desc = "runner 分组名"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 分组名"),
+            @Param(name = "description", type = ApiParamType.STRING, isRequired = false, desc = "描述"),
             @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner 分组网段列表"),
     })
     @Output({
@@ -76,6 +77,9 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
             }
             runnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
+            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+                throw new RunnerGroupNetworkNameRepeatsException(name);
+            }
             runnerMapper.insertRunnerGroup(runnerGroupVo);
         }
         runnerMapper.deleteGroupNetWork(runnerGroupVo.getId());
