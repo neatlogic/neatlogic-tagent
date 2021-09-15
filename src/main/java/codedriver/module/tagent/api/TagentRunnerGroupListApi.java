@@ -26,7 +26,7 @@ public class TagentRunnerGroupListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return null;
+        return "获取所有代理组";
     }
 
     @Override
