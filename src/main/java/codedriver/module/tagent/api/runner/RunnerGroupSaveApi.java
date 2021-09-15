@@ -48,7 +48,8 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "id"),
-            @Param(name = "name", type = ApiParamType.STRING, isRequired = false, desc = "runner 分组名"),
+            @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 分组名"),
+            @Param(name = "description", type = ApiParamType.STRING, isRequired = false, desc = "描述"),
             @Param(name = "groupNetworkList", type = ApiParamType.JSONARRAY, isRequired = false, desc = "runner 分组网段列表"),
     })
     @Output({
@@ -59,6 +60,9 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         String name = paramObj.getString("name");
         List<GroupNetworkVo> groupNetworkList = runnerGroupVo.getGroupNetworkList();
+        if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
+            throw new RunnerGroupNetworkNameRepeatsException(name);
+        }
         if (id != null) {
             if (runnerMapper.checkRunnerGroupIdIsExist(id) == 0) {
                 throw new RunnerGroupIdNotFoundException(id);
@@ -70,9 +74,6 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                         throw new RunnerGroupNetworkSameException(checkIpMask);//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
                     }
                 }
-            }
-            if (runnerMapper.checkGroupNameIsRepeats(runnerGroupVo) > 0) {
-                throw new RunnerGroupNetworkNameRepeatsException(name);
             }
             runnerMapper.updateRunnerGroup(runnerGroupVo);
         } else {
