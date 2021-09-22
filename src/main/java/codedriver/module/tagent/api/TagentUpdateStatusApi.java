@@ -47,7 +47,7 @@ public class TagentUpdateStatusApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "ip", type = ApiParamType.STRING, desc = "tagentIP"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "tagent端口"),
-            @Param(name = "status", type = ApiParamType.STRING, desc = "状态(connect,disconnect)"),
+            @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnect,connect", isRequired = true, desc = "tagent状态"),
             @Param(name = "runnerId", type = ApiParamType.STRING, desc = "runner id"),
             @Param(name = "runnerGroupId", type = ApiParamType.LONG, desc = "runner组id"),
             @Param(name = "runnerIp", type = ApiParamType.STRING, desc = "runner ip"),//是否需要
