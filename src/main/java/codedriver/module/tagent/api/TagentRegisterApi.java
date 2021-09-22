@@ -222,7 +222,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 data.put("runnerGroupId", runnerGroupId);
                 data.put("runnerList", runnerArray);
 
-                // 密码同步至自动化和发布 (或实现TagentHook接口即可)
+                // 密码同步至自动化和发布 (或实现TagentHook接口即可)  TODO密码由账号管理了，这块逻辑有可能删除
                 if (TagentHookFactory.componentMap.size() > 0) {
                     for (String key : TagentHookFactory.componentMap.keySet()) {
                         try {
