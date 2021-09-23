@@ -17,6 +17,9 @@ import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
+import codedriver.framework.tagent.exception.RunnerGroupIsEmptyException;
+import codedriver.framework.tagent.exception.RunnerNotFoundInGroupException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.module.tagent.common.Constants;
 import com.alibaba.fastjson.JSONObject;
@@ -138,11 +141,11 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 }
             }
             if (runnerGroupId == null) {
-                throw new RuntimeException("can not find runner group by agent ip " + agentIp);
+                throw new RunnerGroupIdNotFoundException(agentIp);
             } else {
                 List<RunnerVo> runnerList = runnerMapper.getRunnerByGroupId(runnerGroupId);
                 if (runnerList == null || runnerList.size() == 0) {
-                    throw new RuntimeException("this runner group is empty, please add a new runner, group id is " + runnerGroupId);
+                    throw new RunnerGroupIsEmptyException(runnerGroupId);
                 }
 
                 RunnerVo runnerVo = null;
@@ -177,7 +180,9 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
 
                 if (runnerVo == null && requestRunnerVo != null) {
                     runnerVo = requestRunnerVo;// 兼容旧的模式，通过runner ip找
-                    Assert.notNull(runnerVo, "can not found runner in runner group id : " + runnerGroupId);
+                    if (runnerVo == null) {
+                        throw new RunnerNotFoundInGroupException(runnerGroupId);
+                    }
                 }
                 paramObj.put("runnerGroupId", runnerGroupId);
                 if (StringUtils.isNotBlank(paramObj.getString("id"))) {
