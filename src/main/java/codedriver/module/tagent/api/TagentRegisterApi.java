@@ -201,12 +201,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                     }
                 }
                 if (paramObj.containsKey("credential")) {
-                    String key = paramObj.getString("credential");
-                    if (key.startsWith("{ENCRYPTED}")) {
-                        tagentVo.setCredential(key.substring(11));
-                    } else {
-                        tagentVo.setCredential("RC4:" + RC4Util.encrypt(Constants.encryptKey, key));
-                    }
+                    tagentVo.setCredential(paramObj.getString("credential"));
                 }
                 Long saveTagentId = tagentService.saveTagent(tagentVo);
                 JSONArray runnerArray = new JSONArray();
