@@ -13,8 +13,6 @@ import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.tagent.tagenthandler.core.TagentHookBase;
-import codedriver.framework.tagent.tagenthandler.core.TagentHookFactory;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
@@ -99,7 +97,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             // !!! 规避直接复制tagent目录的导致id相同的情况，只重新注册断开连接的tagent
             // 如果有id,则根据id更新其他信息，如果没有id,则根据ip + port 确定唯一性后保存
             if (tagentId != null) {
-                TagentVo tagentOrigin = tagentMapper.selectTagentById(tagentId);
+                TagentVo tagentOrigin = tagentMapper.searchTagentById(tagentId);
                 if (tagentOrigin != null && tagentOrigin.getRunnerId() != null) {
                     RunnerVo runner = runnerMapper.getRunnerById(tagentOrigin.getRunnerId());
                     if (runner != null) {
@@ -221,19 +219,6 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 data.put("runnerPort", runnerVo.getPort());
                 data.put("runnerGroupId", runnerGroupId);
                 data.put("runnerList", runnerArray);
-
-                // 密码同步至自动化和发布 (或实现TagentHook接口即可)  TODO密码由账号管理了，这块逻辑有可能删除
-                if (TagentHookFactory.componentMap.size() > 0) {
-                    for (String key : TagentHookFactory.componentMap.keySet()) {
-                        try {
-                            TagentHookBase component = (TagentHookBase) TagentHookFactory.componentMap.get(key);
-                            paramObj.put("credential", RC4Util.decrypt(Constants.encryptKey, tagentVo.getCredential()));
-                            component.updateTagentPwd(paramObj);
-                        } catch (Exception e) {
-                            logger.error("tagent:" + tagentVo.toString() + " password sync failed." + ExceptionUtils.getStackTrace(e));
-                        }
-                    }
-                }
             }
 
         } catch (Exception e) {

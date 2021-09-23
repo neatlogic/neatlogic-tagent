@@ -49,7 +49,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
         if (id != null) {
-            TagentVo tagent = tagentMapper.selectTagentById(id);
+            TagentVo tagent = tagentMapper.searchTagentById(id);
             if (tagent == null) {
                 throw new TagentIdNotFoundException(id);
             }
