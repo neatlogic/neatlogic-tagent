@@ -4,7 +4,6 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
-import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
@@ -21,7 +20,6 @@ import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerGroupIsEmptyException;
 import codedriver.framework.tagent.exception.RunnerNotFoundInGroupException;
 import codedriver.framework.tagent.service.TagentService;
-import codedriver.module.tagent.common.Constants;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -79,8 +77,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             @Param(name = "osbit", type = ApiParamType.STRING, desc = "操作系统位数"),
             @Param(name = "osVersion", type = ApiParamType.STRING, desc = "os版本"),
             @Param(name = "pcpu", type = ApiParamType.STRING, desc = "cpu占用"),
-            @Param(name = "mem", type = ApiParamType.STRING, desc = "内存占用"),
-            @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnect,connect", isRequired = true, desc = "tagent状态")
+            @Param(name = "mem", type = ApiParamType.STRING, desc = "内存占用")
 
     })
     @Output({
@@ -99,7 +96,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             // !!! 规避直接复制tagent目录的导致id相同的情况，只重新注册断开连接的tagent
             // 如果有id,则根据id更新其他信息，如果没有id,则根据ip + port 确定唯一性后保存
             if (tagentId != null) {
-                TagentVo tagentOrigin = tagentMapper.searchTagentById(tagentId);
+                TagentVo tagentOrigin = tagentMapper.getTagentById(tagentId);
                 if (tagentOrigin != null && tagentOrigin.getRunnerId() != null) {
                     RunnerVo runner = runnerMapper.getRunnerById(tagentOrigin.getRunnerId());
                     if (runner != null) {
@@ -124,7 +121,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
 
             String agentIp = paramObj.getString("ip");
 
-            List<GroupNetworkVo> networkList = tagentMapper.getAllNetworkMask();
+            List<GroupNetworkVo> networkList = tagentMapper.getGroupNetworkList();
 
             RunnerVo requestRunnerVo = runnerMapper.getRunnerByIp(requestIp);
 

@@ -63,7 +63,7 @@ public class TagentUpdateStatusApi extends PrivateApiComponentBase {
         try {
             paramObj.put("runnerIp", IpUtil.getIpAddr(UserContext.get().getRequest()));
             TagentVo tagent = JSONObject.toJavaObject(paramObj, TagentVo.class);
-            tagentMapper.updateTagentByIpAndPort(tagent);
+            tagentMapper.updateTagent(tagent);
         } catch (Exception e) {
             status = false;
             logger.error("tagent status update failed, " + ExceptionUtils.getStackTrace(e));
