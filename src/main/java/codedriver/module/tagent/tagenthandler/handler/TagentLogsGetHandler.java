@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class TagentGetLogsHandler extends TagentHandlerBase {
+public class TagentLogsGetHandler extends TagentHandlerBase {
 
     @Resource
     ResourceCenterMapper resourceCenterMapper;

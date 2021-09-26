@@ -31,9 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentGetLogsApi extends PrivateBinaryStreamApiComponentBase {
+public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(TagentGetLogsApi.class);
+    private final static Logger logger = LoggerFactory.getLogger(TagentLogsGetApi.class);
 
     @Resource
     TagentMapper tagentMapper;
