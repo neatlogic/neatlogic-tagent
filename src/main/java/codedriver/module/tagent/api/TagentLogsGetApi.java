@@ -54,7 +54,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/getlogs";
+        return "tagent/exec/getLogs";
     }
 
     @Input({
@@ -63,6 +63,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
+        String result = null;
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {
@@ -73,12 +74,12 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
             if (tagentHandler == null) {
                 throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
             } else {
-                tagentHandler.execTagentCmd(message, tagent, runner, request, response);
+                result = tagentHandler.execTagentCmd(message, tagent, runner, request, response);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
             ReturnJson.error(e.getMessage(), response);
         }
-        return null;
+        return JSONObject.toJSON(result);
     }
 }

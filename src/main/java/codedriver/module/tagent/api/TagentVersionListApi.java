@@ -2,6 +2,7 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -13,6 +14,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -41,7 +44,15 @@ public class TagentVersionListApi extends PrivateApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return tagentMapper.searchTagentVersion();
+        List<ValueTextVo> list = new ArrayList<>();
+        List<String> versionList = tagentMapper.searchTagentVersion();
+        for (String list1 : versionList) {
+            ValueTextVo valueTextVo = new ValueTextVo();
+            valueTextVo.setText(list1);
+            valueTextVo.setValue(list1);
+            list.add(valueTextVo);
+        }
+        return list;
     }
 
 

@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -54,7 +55,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 	@Override
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TagentVo tagentVo = JSONObject.toJavaObject(jsonObj,TagentVo.class);
-		int rowNum = tagentMapper.searchTagentCount();
+		int rowNum = tagentMapper.searchTagentCount(tagentVo);
 		tagentVo.setRowNum(rowNum);
 		return TableResultUtil.getResult(tagentMapper.searchTagent(tagentVo),tagentVo);
 	}
