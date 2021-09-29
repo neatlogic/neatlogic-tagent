@@ -47,10 +47,7 @@ public class TagentVersionListApi extends PrivateApiComponentBase {
         List<ValueTextVo> list = new ArrayList<>();
         List<String> versionList = tagentMapper.searchTagentVersion();
         for (String list1 : versionList) {
-            ValueTextVo valueTextVo = new ValueTextVo();
-            valueTextVo.setText(list1);
-            valueTextVo.setValue(list1);
-            list.add(valueTextVo);
+            list.add(new ValueTextVo(list1,list1));
         }
         return list;
     }

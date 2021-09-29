@@ -49,7 +49,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
-        params.put("credential", RC4Util.encrypt(accountVo.getPasswordPlain()));
+        params.put("credential", accountVo.getPasswordCipher());
         url = url + "api/binary/tagent/getlogs";
         try {
             restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
