@@ -7,8 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Constants {
 
-    public static String encryptKey = "#ts=9^0$1";
-
     public static String tagentPkgName = "tagent.tar";
     public static String tagentPkgWin32Name = "tagent_windows_x32.tar";
     public static String tagentPkgWin64Name = "tagent_windows_x64.tar";
