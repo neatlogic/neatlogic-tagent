@@ -31,9 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
+public class TagentConfigGetApi extends PrivateBinaryStreamApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(TagentLogsGetApi.class);
+    private final static Logger logger = LoggerFactory.getLogger(TagentConfigGetApi.class);
 
     @Resource
     TagentMapper tagentMapper;
@@ -41,20 +41,20 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Resource
     RunnerMapper runnerMapper;
 
+
     @Override
     public String getName() {
-        return "Tagent查看日志";
+        return "Tagent配置保存接口";
+    }
+
+    @Override
+    public String getToken() {
+        return "tagent/exec/getConfig";
     }
 
     @Override
     public String getConfig() {
         return null;
-    }
-
-
-    @Override
-    public String getToken() {
-        return "tagent/exec/getLogs";
     }
 
     @Input({
@@ -70,9 +70,9 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
                 throw new TagentIdNotFoundException(tagent.getId());
             }
             RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
+            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETCONFIG.getValue());
             if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
+                throw new TagentActionNotFoundEcexption(TagentAction.GETCONFIG.getValue());
             } else {
                 result = tagentHandler.execTagentCmd(message, tagent, runner, request, response);
             }
@@ -82,4 +82,6 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
         }
         return result;
     }
+
+
 }

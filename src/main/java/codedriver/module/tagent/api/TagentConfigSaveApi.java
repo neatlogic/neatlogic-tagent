@@ -30,10 +30,10 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
+@OperationType(type = OperationTypeEnum.UPDATE)
+public class TagentConfigSaveApi extends PrivateBinaryStreamApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(TagentLogsGetApi.class);
+    private final static Logger logger = LoggerFactory.getLogger(TagentConfigSaveApi.class);
 
     @Resource
     TagentMapper tagentMapper;
@@ -41,20 +41,21 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Resource
     RunnerMapper runnerMapper;
 
-    @Override
-    public String getName() {
-        return "Tagent查看日志";
-    }
 
     @Override
-    public String getConfig() {
-        return null;
+    public String getName() {
+        return "Tagent配置保存接口";
     }
 
 
     @Override
     public String getToken() {
-        return "tagent/exec/getLogs";
+        return "tagent/exec/saveConfig";
+    }
+
+    @Override
+    public String getConfig() {
+        return null;
     }
 
     @Input({
@@ -63,23 +64,24 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONObject result = new JSONObject();
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {
                 throw new TagentIdNotFoundException(tagent.getId());
             }
             RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
+            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.SAVECONFIG.getValue());
             if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
+                throw new TagentActionNotFoundEcexption(TagentAction.SAVECONFIG.getValue());
             } else {
-                result = tagentHandler.execTagentCmd(message, tagent, runner, request, response);
+                tagentHandler.execTagentCmd(message, tagent, runner, request, response);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
             ReturnJson.error(e.getMessage(), response);
         }
-        return result;
+        return null;
     }
+
+
 }

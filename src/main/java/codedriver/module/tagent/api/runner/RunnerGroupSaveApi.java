@@ -2,6 +2,7 @@ package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.common.util.IpUtil;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
@@ -12,10 +13,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
-import codedriver.framework.tagent.exception.RunnerGroupNetworkSameException;
-import codedriver.framework.tagent.exception.RunnerGroupNetworkNameRepeatsException;
+import codedriver.framework.tagent.exception.*;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -68,9 +68,21 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                 throw new RunnerGroupIdNotFoundException(id);
             }
             if (!CollectionUtils.isEmpty(groupNetworkList)) {
-                String checkIpMask = groupNetworkList.get(0).getNetworkIp() + ":" + groupNetworkList.get(0).getMask();
-                for (int i = 1; i < groupNetworkList.size(); i++) {
-                    if (checkIpMask.equals(groupNetworkList.get(i).getNetworkIp() + ":" + groupNetworkList.get(i).getMask())) {
+                String checkIpMask = StringUtils.EMPTY;
+                for (int i = 0; i < groupNetworkList.size(); i++) {
+                    String ip = groupNetworkList.get(i).getNetworkIp();
+                    Integer mask = groupNetworkList.get(i).getMask();
+                    if (!IpUtil.isIp(ip) || StringUtils.isBlank(ip)) {
+                        throw new IPIsIncorrectException(ip);
+                    }
+                    if (mask == null || !IpUtil.isMask(mask)) {
+                        throw new MaskIsIncorrectException(ip);
+                    }
+                    if (i == 0) {
+                        checkIpMask = ip + ":" + mask;
+                        continue;
+                    }
+                    if (checkIpMask.equals(ip + ":" + mask)) {
                         throw new RunnerGroupNetworkSameException(checkIpMask);//TODO 前端提示不准确，192.168.0.0/24和192.168.0.1/24实际上是同一个网段
                     }
                 }
