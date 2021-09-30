@@ -18,8 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +43,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
         Map<String, String> params = new HashMap<>();
         String result = StringUtils.EMPTY;
         RestVo restVo = null;
@@ -57,7 +55,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
             throw new ResourceCenterAccountNotFoundException();
         }
         params.put("credential", accountVo.getPasswordCipher());
-        url = url + "api/rest/tagent/getConfig";
+        url = url + "api/rest/tagent/config/get";
         try {
             restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
             result = RestUtil.sendRequest(restVo);

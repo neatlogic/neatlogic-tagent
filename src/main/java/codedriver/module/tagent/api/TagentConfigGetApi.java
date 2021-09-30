@@ -1,7 +1,6 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.ReturnJson;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -9,7 +8,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
@@ -25,13 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentConfigGetApi extends PrivateBinaryStreamApiComponentBase {
+public class TagentConfigGetApi extends PrivateApiComponentBase {
 
     private final static Logger logger = LoggerFactory.getLogger(TagentConfigGetApi.class);
 
@@ -49,7 +46,7 @@ public class TagentConfigGetApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/getConfig";
+        return "tagent/exec/config/get";
     }
 
     @Override
@@ -61,7 +58,7 @@ public class TagentConfigGetApi extends PrivateBinaryStreamApiComponentBase {
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id")
     })
     @Override
-    public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
         JSONObject result = new JSONObject();
         try {
@@ -74,11 +71,10 @@ public class TagentConfigGetApi extends PrivateBinaryStreamApiComponentBase {
             if (tagentHandler == null) {
                 throw new TagentActionNotFoundEcexption(TagentAction.GETCONFIG.getValue());
             } else {
-                result = tagentHandler.execTagentCmd(message, tagent, runner, request, response);
+                result = tagentHandler.execTagentCmd(message, tagent, runner);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
-            ReturnJson.error(e.getMessage(), response);
         }
         return result;
     }

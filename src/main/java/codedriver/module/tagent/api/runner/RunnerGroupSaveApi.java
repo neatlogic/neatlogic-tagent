@@ -72,10 +72,10 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
                 for (int i = 0; i < groupNetworkList.size(); i++) {
                     String ip = groupNetworkList.get(i).getNetworkIp();
                     Integer mask = groupNetworkList.get(i).getMask();
-                    if (!IpUtil.isIp(ip) || StringUtils.isBlank(ip)) {
+                    if (!IpUtil.checkIp(ip) || StringUtils.isBlank(ip)) {
                         throw new IPIsIncorrectException(ip);
                     }
-                    if (mask == null || !IpUtil.isMask(mask)) {
+                    if (mask == null || !IpUtil.checkMask(mask)) {
                         throw new MaskIsIncorrectException(ip);
                     }
                     if (i == 0) {

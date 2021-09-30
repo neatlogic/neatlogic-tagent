@@ -1,7 +1,6 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.ReturnJson;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -9,7 +8,7 @@ import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
+import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
@@ -25,13 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentConfigSaveApi extends PrivateBinaryStreamApiComponentBase {
+public class TagentConfigSaveApi extends PrivateApiComponentBase {
 
     private final static Logger logger = LoggerFactory.getLogger(TagentConfigSaveApi.class);
 
@@ -50,7 +47,7 @@ public class TagentConfigSaveApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/saveConfig";
+        return "tagent/exec/config/save";
     }
 
     @Override
@@ -59,10 +56,11 @@ public class TagentConfigSaveApi extends PrivateBinaryStreamApiComponentBase {
     }
 
     @Input({
-            @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id")
+            @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
+            @Param(name = "data", type = ApiParamType.JSONARRAY, isRequired = true, desc = "tagent 配置"),
     })
     @Override
-    public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
@@ -74,11 +72,10 @@ public class TagentConfigSaveApi extends PrivateBinaryStreamApiComponentBase {
             if (tagentHandler == null) {
                 throw new TagentActionNotFoundEcexption(TagentAction.SAVECONFIG.getValue());
             } else {
-                tagentHandler.execTagentCmd(message, tagent, runner, request, response);
+                tagentHandler.execTagentCmd(message, tagent, runner);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
-            ReturnJson.error(e.getMessage(), response);
         }
         return null;
     }

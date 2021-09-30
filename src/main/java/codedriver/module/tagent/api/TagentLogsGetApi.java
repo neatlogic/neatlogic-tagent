@@ -1,7 +1,6 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.common.ReturnJson;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -54,7 +53,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/getLogs";
+        return "tagent/exec/log/get";
     }
 
     @Input({
@@ -74,11 +73,10 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
             if (tagentHandler == null) {
                 throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
             } else {
-                result = tagentHandler.execTagentCmd(message, tagent, runner, request, response);
+                result = tagentHandler.execTagentCmd(message, tagent, runner);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
-            ReturnJson.error(e.getMessage(), response);
         }
         return result;
     }
