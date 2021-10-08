@@ -62,7 +62,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONObject result = new JSONObject();
+        JSONObject result = null;
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {

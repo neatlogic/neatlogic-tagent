@@ -60,7 +60,7 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONObject result = new JSONObject();
+        JSONObject result = null;
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {
