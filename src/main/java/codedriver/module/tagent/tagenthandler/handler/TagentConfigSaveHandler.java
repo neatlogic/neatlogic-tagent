@@ -22,45 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class TagentLogsGetHandler extends TagentHandlerBase {
+public class TagentConfigSaveHandler extends TagentHandlerBase {
 
     @Resource
     ResourceCenterMapper resourceCenterMapper;
-
-    @Override
-    public String getName() {
-        return "getlogs";
-    }
-
-    @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        Map<String, String> params = new HashMap<>();
-        String result = StringUtils.EMPTY;
-        JSONObject resultJson = new JSONObject();
-        RestVo restVo = null;
-        params.put("type", TagentAction.GETLOGS.getValue());
-        params.put("ip", tagentVo.getIp());
-        params.put("port", (tagentVo.getPort()).toString());
-        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
-        if (accountVo == null) {
-            throw new ResourceCenterAccountNotFoundException();
-        }
-        params.put("credential", accountVo.getPasswordCipher());
-        url = url + "api/rest/tagent/log/get";
-        try {
-            restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
-            result = RestUtil.sendRequest(restVo);
-             resultJson = JSONObject.parseObject(result);
-            if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
-            }
-        } catch (Exception ex) {
-            assert restVo != null;
-            throw new TagentRunnerConnectRefusedException(restVo.getUrl() + " " + result);
-        }
-        return resultJson.getJSONObject("Return");
-    }
-
 
     @Override
     public String getHandler() {
@@ -70,5 +35,39 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
     @Override
     public String getHandlerName() {
         return null;
+    }
+
+    @Override
+    public String getName() {
+        return "saveConfig";
+    }
+
+    @Override
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
+        Map<String, String> params = new HashMap<>();
+        String result = StringUtils.EMPTY;
+        RestVo restVo = null;
+        params.put("type", TagentAction.SAVECONFIG.getValue());
+        params.put("ip", tagentVo.getIp());
+        params.put("data", message.getData());
+        params.put("port", (tagentVo.getPort()).toString());
+        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
+        if (accountVo == null) {
+            throw new ResourceCenterAccountNotFoundException();
+        }
+        params.put("credential", accountVo.getPasswordCipher());
+        url = url + "api/rest/tagent/config/save";
+        try {
+            restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
+            result = RestUtil.sendRequest(restVo);
+            JSONObject resultJson = JSONObject.parseObject(result);
+            if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
+                throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
+            }
+        } catch (Exception ex) {
+            assert restVo != null;
+            throw new TagentRunnerConnectRefusedException(restVo.getUrl() + " " + result);
+        }
+        return JSONObject.parseObject(result).getJSONObject("Return");
     }
 }
