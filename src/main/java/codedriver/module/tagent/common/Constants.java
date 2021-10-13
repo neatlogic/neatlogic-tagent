@@ -18,34 +18,6 @@ public class Constants {
     public static String tagentWin64Path = "win64";
     public static String tagentLinuxPath = "linux";
 
-    public enum TagentStatus {
-        CONNECTED("connect", "已连接"), DISCONNECTED("disconnect", "未连接");
-        private String name;
-        private String text;
-
-        TagentStatus(String _name, String _text) {
-            this.name = _name;
-            this.text = _text;
-        }
-
-        public String getValue() {
-            return name;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public static String getText(String name) {
-            for (TagentStatus s : TagentStatus.values()) {
-                if (s.getValue().equals(name)) {
-                    return s.getText();
-                }
-            }
-            return "";
-        }
-    }
-
 
     public static Map<Long, TagentVo> agentMap = new ConcurrentHashMap<>();
 }

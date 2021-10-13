@@ -26,7 +26,7 @@ public class TagentRunnerGroupListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "获取所有代理组";
+        return "获取所有runner组";
     }
 
     @Override
@@ -39,14 +39,14 @@ public class TagentRunnerGroupListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取所有tagent代理组")
+    @Description(desc = "获取所有runner组")
     @Input({
             @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
             @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
     @Output({
-            @Param(name = "tbodyList",explode = RunnerGroupVo[].class,desc = "tagent代理组列表")
+            @Param(name = "tbodyList",explode = RunnerGroupVo[].class,desc = "runner 组列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

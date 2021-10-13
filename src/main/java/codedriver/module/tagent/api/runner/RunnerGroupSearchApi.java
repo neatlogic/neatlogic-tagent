@@ -24,7 +24,7 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent代理组查询接口";
+        return "runner组查询接口";
     }
 
     @Override
@@ -37,12 +37,12 @@ public class RunnerGroupSearchApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取tagent代理组信息")
+    @Description(desc = "获取runner组信息")
     @Input({
             @Param(name = "keyword", type = ApiParamType.STRING, desc = "关键词")
     })
     @Output({
-            @Param(name = "tagentRunnerGroupInformation", explode = RunnerGroupVo[].class, desc = "所有tagent代理组")
+            @Param(name = "tagentRunnerGroupInformation", explode = RunnerGroupVo[].class, desc = "所有tagent runner组")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {

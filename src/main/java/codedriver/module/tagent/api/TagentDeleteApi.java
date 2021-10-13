@@ -40,7 +40,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id",isRequired = true,type = ApiParamType.LONG,desc = "Tagent id")
+            @Param(name = "id",isRequired = true,type = ApiParamType.LONG,desc = "tagent id")
     })
     @Output({
     })

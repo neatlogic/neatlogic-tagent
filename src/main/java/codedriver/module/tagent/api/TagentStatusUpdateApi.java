@@ -22,9 +22,9 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentUpdateStatusApi extends PrivateApiComponentBase {
+public class TagentStatusUpdateApi extends PrivateApiComponentBase {
 
-    private final Logger logger = LoggerFactory.getLogger(TagentUpdateStatusApi.class);
+    private final Logger logger = LoggerFactory.getLogger(TagentStatusUpdateApi.class);
 
     @Resource
     TagentMapper tagentMapper;
@@ -36,7 +36,7 @@ public class TagentUpdateStatusApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/updatestatus";
+        return "tagent/status/update";
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TagentUpdateStatusApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "ip", type = ApiParamType.STRING, desc = "tagentIP"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "tagent端口"),
-            @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnect,connect", isRequired = true, desc = "tagent状态"),
+            @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnected,connected", isRequired = true, desc = "tagent状态"),
             @Param(name = "runnerId", type = ApiParamType.STRING, desc = "runner id"),
             @Param(name = "runnerGroupId", type = ApiParamType.LONG, desc = "runner组id"),
             @Param(name = "runnerIp", type = ApiParamType.STRING, desc = "runner ip"),//是否需要
