@@ -81,7 +81,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
     })
     @Output({
-            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "tagent runner 组列表")
+            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "runner组列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
