@@ -32,7 +32,7 @@ public class RunnerGroupSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent代理组保存接口";
+        return "runner组保存接口";
     }
 
     @Override

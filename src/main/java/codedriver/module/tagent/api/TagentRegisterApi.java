@@ -11,7 +11,7 @@ import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.core.ApiRuntimeException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
@@ -19,6 +19,7 @@ import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerGroupIsEmptyException;
 import codedriver.framework.tagent.exception.RunnerNotFoundInGroupException;
+import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -37,9 +38,8 @@ import java.util.Random;
 
 @Transactional
 @Service
-@AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class TagentRegisterApi extends PrivateApiComponentBase {
+public class TagentRegisterApi extends PublicApiComponentBase {
     private final Logger logger = LoggerFactory.getLogger(TagentRegisterApi.class);
     @Resource
     TagentMapper tagentMapper;
@@ -81,7 +81,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
 
     })
     @Output({
-            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "tagent代理组列表")
+            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "tagent runner 组列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
@@ -100,7 +100,6 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 if (tagentOrigin != null && tagentOrigin.getRunnerId() != null) {
                     RunnerVo runner = runnerMapper.getRunnerById(tagentOrigin.getRunnerId());
                     if (runner != null) {
-                        Map<String, String> header = new HashMap<>();
                         Map<String, String> params = new HashMap<>();
                         params.put("ip", tagentOrigin.getIp());
                         params.put("port", tagentOrigin.getPort().toString());
@@ -201,6 +200,10 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                     tagentVo.setCredential(paramObj.getString("credential"));
                 }
                 Long saveTagentId = tagentService.saveTagent(tagentVo);
+
+                //注册后同步信息到资源中心
+                AfterRegisterJobManager.executeAll(tagentVo);
+
                 JSONArray runnerArray = new JSONArray();
                 for (RunnerVo runner : runnerList) {
                     JSONObject runnerData = new JSONObject();

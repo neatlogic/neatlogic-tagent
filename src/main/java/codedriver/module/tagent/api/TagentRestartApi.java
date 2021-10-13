@@ -27,10 +27,10 @@ import javax.annotation.Resource;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
-@OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentConfigGetApi extends PrivateApiComponentBase {
+@OperationType(type = OperationTypeEnum.OPERATE)
+public class TagentRestartApi extends PrivateApiComponentBase {
 
-    private final static Logger logger = LoggerFactory.getLogger(TagentConfigGetApi.class);
+    private final static Logger logger = LoggerFactory.getLogger(TagentRestartApi.class);
 
     @Resource
     TagentMapper tagentMapper;
@@ -38,15 +38,14 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
     @Resource
     RunnerMapper runnerMapper;
 
-
     @Override
     public String getName() {
-        return "Tagent配置获取接口";
+        return "Tagent重启";
     }
 
     @Override
     public String getToken() {
-        return "tagent/exec/config/get";
+        return "tagent/exec/restart";
     }
 
     @Override
@@ -60,23 +59,22 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONObject result = null;
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {
                 throw new TagentIdNotFoundException(tagent.getId());
             }
             RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-                ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETCONFIG.getValue());
+            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESTART.getValue());
             if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.GETCONFIG.getValue());
+                throw new TagentActionNotFoundEcexption(TagentAction.RESTART.getValue());
             } else {
-                result = tagentHandler.execTagentCmd(message, tagent, runner);
+                tagentHandler.execTagentCmd(message, tagent, runner);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
         }
-        return result;
+        return null;
     }
 
 

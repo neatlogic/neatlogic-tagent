@@ -43,7 +43,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 			@Param(name = "osId",type = ApiParamType.LONG,desc = "OS类型id"),
 			@Param(name = "version",type = ApiParamType.STRING,desc = "tagent版本"),
 			@Param(name = "status",type = ApiParamType.STRING,desc = "tagent状态"),
-			@Param(name ="runnerGroupId",type = ApiParamType.LONG,desc = "代理组id"),
+			@Param(name ="runnerGroupId",type = ApiParamType.LONG,desc = "runner组id"),
 			@Param(name = "keyword",type = ApiParamType.STRING,desc = "关键词"),
 			@Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
 			@Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),

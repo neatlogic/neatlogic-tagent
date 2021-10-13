@@ -25,7 +25,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent代理组删除接口";
+        return "runner组删除接口";
     }
 
     @Override
@@ -43,7 +43,7 @@ public class RunnerGroupDeleteApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "Tagent代理组删除接口")
+    @Description(desc = "tagent runner组删除接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");
