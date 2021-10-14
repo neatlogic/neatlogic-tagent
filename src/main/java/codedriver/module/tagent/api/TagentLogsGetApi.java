@@ -6,6 +6,7 @@ import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
+import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -18,7 +19,9 @@ import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,25 +62,32 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Input({
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id")
     })
+    @Output({
+            @Param(name = "tbodyList", desc = "日志列表")
+    })
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONObject result = null;
-        try {
-            TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
-            if (tagent == null) {
-                throw new TagentIdNotFoundException(tagent.getId());
-            }
-            RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
-            if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
-            } else {
-                result = tagentHandler.execTagentCmd(message, tagent, runner);
-            }
-        } catch (Exception e) {
-            logger.error("操作失败", e);
+        JSONArray tbodyList = new JSONArray();
+        JSONArray data = null;
+        TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
+        if (tagent == null) {
+            throw new TagentIdNotFoundException(message.getTagentId());
         }
-        return result;
+        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
+        if (tagentHandler == null) {
+            throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
+        } else {
+            data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
+        }
+        if (data != null) {
+            for (int i = 0; i < data.size(); i++) {
+                JSONObject js = new JSONObject();
+                js.put("log", data.getString(i).replaceAll("\n", StringUtils.EMPTY));
+                tbodyList.add(js);
+            }
+        }
+        return tbodyList;
     }
 }
