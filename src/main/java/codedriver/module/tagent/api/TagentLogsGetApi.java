@@ -15,12 +15,14 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
+import codedriver.framework.tagent.exception.RunnerNotFoundException;
 import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,13 +77,16 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        if (runner == null) {
+            throw new RunnerNotFoundException(tagent.getRunnerId());
+        }
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
         if (tagentHandler == null) {
             throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
         } else {
             data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
         }
-        if (data != null) {
+        if (CollectionUtils.isNotEmpty(data)) {
             for (int i = 0; i < data.size(); i++) {
                 JSONObject js = new JSONObject();
                 js.put("log", data.getString(i).replaceAll("\n", StringUtils.EMPTY));

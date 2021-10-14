@@ -4,7 +4,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerGroupVo;
-import codedriver.framework.integration.dto.PatternVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -53,8 +52,8 @@ public class RunnerListApi extends PrivateApiComponentBase {
             throw new RunnerGroupIdNotFoundException(id);
         }
         RunnerGroupVo runnerGroupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
-        int rowNum = runnerMapper.searchRunnerCountByGroupId(id);
+        int rowNum = runnerMapper.searchRunnerCount(id);
         runnerGroupVo.setRowNum(rowNum);
-        return TableResultUtil.getResult(runnerMapper.getRunnerByRunnerGroup(runnerGroupVo),runnerGroupVo);
+        return TableResultUtil.getResult(runnerMapper.searchRunnerByRunnerGroup(runnerGroupVo),runnerGroupVo);
     }
 }
