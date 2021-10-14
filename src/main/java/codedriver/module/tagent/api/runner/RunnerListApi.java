@@ -30,7 +30,7 @@ public class RunnerListApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "/tagent/runnergroup/runner/list";
+        return "tagent/runnergroup/runner/list";
     }
 
     @Override
