@@ -3,7 +3,6 @@ package codedriver.module.tagent.tagenthandler.handler;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
-import codedriver.framework.tagent.util.TagentObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +28,7 @@ public class TagentDownloadHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        Map<String, String> params = TagentObjectUtil.ConvertObjToMap(message);
+        JSONObject params =  JSONObject.parseObject(JSONObject.toJSONString(message));
         Map<String, String> header = new HashMap<>();
         params.put("type", message.getName());
         params.put("ip", tagentVo.getIp());
