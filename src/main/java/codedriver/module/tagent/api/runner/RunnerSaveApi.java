@@ -1,6 +1,7 @@
 package codedriver.module.tagent.api.runner;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.config.Config;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -27,7 +28,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "runner 保存接口";
+        return "runner保存接口";
     }
 
     @Override
@@ -43,15 +44,14 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "id", type = ApiParamType.LONG, isRequired = false, desc = "runner id"),
             @Param(name = "name", type = ApiParamType.STRING, isRequired = true, desc = "runner 名"),
-            @Param(name = "url", type = ApiParamType.STRING, isRequired = true, desc = "url"),
-            @Param(name = "accessKey", type = ApiParamType.STRING, isRequired = true, desc = "runner 授权key"),
-            @Param(name = "accessSecret", type = ApiParamType.STRING, isRequired = true, desc = "runner 授权key"),
-            @Param(name = "nettyIp", type = ApiParamType.STRING, desc = "NETTY IP"),
+            @Param(name = "protocol", type = ApiParamType.ENUM, isRequired = true, rule = "http,https", desc = "协议"),
+            @Param(name = "accessKey", type = ApiParamType.STRING, desc = "runner 授权key"),
+            @Param(name = "accessSecret", type = ApiParamType.STRING,desc = "runner 授权密码"),
+            @Param(name = "host", type = ApiParamType.STRING, desc = "runner ip"),
             @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
+            @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口"),
             @Param(name = "groupId", type = ApiParamType.LONG, isRequired = true, desc = "runner组id"),
-            @Param(name = "authType", explode = RunnerAuthType[].class, desc = "认证方式"),
-            @Param(name = "publicKey", type = ApiParamType.STRING, desc = "ssh公钥"),
-            @Param(name = "privateKey", type = ApiParamType.STRING, desc = "ssh私钥")
+            @Param(name = "authType", explode = RunnerAuthType[].class, desc = "外部认证"),
     })
     @Output({
     })
@@ -60,6 +60,8 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = runnerVo.getId();
+        runnerVo.setUrl(runnerVo.getProtocol()+"://"+runnerVo.getHost()+":"+runnerVo.getPort()+Config.RUNNER_CONTEXT()+"/");
+
         if (runnerVo.getName() == null) {
             return null;
         }
