@@ -51,7 +51,7 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口"),
             @Param(name = "groupId", type = ApiParamType.LONG, isRequired = true, desc = "runner组id"),
-            @Param(name = "authType", explode = RunnerAuthType[].class, desc = "认证方式"),//待确认
+            @Param(name = "authType", explode = RunnerAuthType[].class, desc = "外部认证"),
     })
     @Output({
     })
