@@ -54,6 +54,6 @@ public class RunnerListApi extends PrivateApiComponentBase {
         RunnerGroupVo runnerGroupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
         int rowNum = runnerMapper.searchRunnerCount(id);
         runnerGroupVo.setRowNum(rowNum);
-        return TableResultUtil.getResult(runnerMapper.searchRunnerByRunnerGroup(runnerGroupVo),runnerGroupVo);
+        return TableResultUtil.getResult(runnerMapper.searchRunner(runnerGroupVo),runnerGroupVo);
     }
 }
