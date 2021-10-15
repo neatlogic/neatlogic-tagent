@@ -208,16 +208,22 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                 runnerArray.add(runnerData);
             }
             data.put("tagentId", saveTagentId);
-            data.put("runnerId", runnerVo.getId());
-            data.put("runnerIp", runnerVo.getHost());
-            data.put("runnerPort", runnerVo.getPort());
-            data.put("runnerGroupId", runnerGroupId);
-            data.put("runnerList", runnerArray);
+            //兼容tagent入参 不能改为runner
+            data.put("proxyId", runnerVo.getId());
+            data.put("proxyIp", runnerVo.getHost());
+            data.put("proxyPort", runnerVo.getPort());
+            data.put("proxyGroupId", runnerGroupId);
+            data.put("proxyList", runnerArray);
         }
 
 
         resultJson.put("Status", status ? "OK" : "ERROR");
         resultJson.put("Data", status ? data : "");
-        return resultJson;
+        return null;
+    }
+
+    @Override
+    public boolean isRaw() {
+        return true;
     }
 }
