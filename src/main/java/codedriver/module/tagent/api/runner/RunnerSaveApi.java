@@ -60,8 +60,6 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = runnerVo.getId();
-        runnerVo.setUrl(runnerVo.getProtocol()+"://"+runnerVo.getHost()+":"+runnerVo.getPort()+Config.RUNNER_CONTEXT()+"/");
-
         if (runnerVo.getName() == null) {
             return null;
         }
