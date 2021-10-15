@@ -203,8 +203,8 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             for (RunnerVo runner : runnerList) {
                 JSONObject runnerData = new JSONObject();
                 runnerData.put("id", runner.getId());
-                runnerData.put("host", runner.getHost());
-                runnerData.put("port", runner.getPort());
+                runnerData.put("ip", runner.getHost());
+                runnerData.put("port", runner.getNettyPort());
                 runnerArray.add(runnerData);
             }
             data.put("tagentId", saveTagentId);
@@ -219,7 +219,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
         resultJson.put("Status", status ? "OK" : "ERROR");
         resultJson.put("Data", status ? data : "");
-        return null;
+        return resultJson;
     }
 
     @Override
