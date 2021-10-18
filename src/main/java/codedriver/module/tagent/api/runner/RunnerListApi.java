@@ -60,6 +60,6 @@ public class RunnerListApi extends PrivateApiComponentBase {
         for (int i = 0; i < runnerVoList.size(); i++) {
             runnerVoList.get(i).setRunnerAuthList(runnerMapper.searchRunnerAuthList(runnerVoList.get(i).getId()));
         }
-        return TableResultUtil.getResult(runnerMapper.searchRunner(runnerGroupVo), runnerGroupVo);
+        return TableResultUtil.getResult(runnerVoList, runnerGroupVo);
     }
 }
