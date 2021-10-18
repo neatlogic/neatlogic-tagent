@@ -1,13 +1,11 @@
 package codedriver.module.tagent.api;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.service.TagentService;
@@ -24,9 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentInfoUpdateApi extends PrivateApiComponentBase {
+public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
 
     private Logger logger = LoggerFactory.getLogger(TagentInfoUpdateApi.class);
@@ -55,12 +52,16 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({@Param(name = "tagentId", type = ApiParamType.LONG, desc = "tagentId"),
+    @Input({@Param(name = "agentId", type = ApiParamType.LONG, desc = "tagentId"),
             @Param(name = "pcpu", type = ApiParamType.STRING, desc = "cpu"),
+            @Param(name = "ip", type = ApiParamType.STRING, desc = "ip"),
             @Param(name = "mem", type = ApiParamType.STRING, desc = "内存"),
             @Param(name = "runnerId", type = ApiParamType.LONG, desc = "runner Id"),
-            @Param(name = "runnerGroupId", type = ApiParamType.LONG, desc = "runner组Id,用于对比组信息是否有更新"),
-            @Param(name = "runnerGroup", type = ApiParamType.STRING, desc = "runner组信息ip:port,多个用逗号隔开，用于对比组信息是否有更新"),
+            @Param(name = "port", type = ApiParamType.INTEGER, desc = "端口"),
+            @Param(name = "status", type = ApiParamType.STRING, desc = "状态"),
+            @Param(name = "version", type = ApiParamType.STRING, desc = "版本"),
+            @Param(name = "proxyGroupId", type = ApiParamType.LONG, desc = "runner组Id,用于对比组信息是否有更新"),
+            @Param(name = "proxyGroup", type = ApiParamType.STRING, desc = "runner组信息ip:port,多个用逗号隔开，用于对比组信息是否有更新"),
             @Param(name = "type", type = ApiParamType.STRING, desc = "消息类型(monitor)")})
     @Output({})
     @Description(desc = "Tagent信息更新接口")
@@ -71,11 +72,11 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
         boolean updateStatus = true;
         boolean needUpdateGroup = true;
         JSONObject result = new JSONObject();
-        long id = paramObj.getLong("tagentId");
+        long id = paramObj.getLong("agentId");
         try {
 
             // 更新 tagent 基础信息
-            TagentVo tagent = JSONObject.toJavaObject(paramObj, TagentVo.class);
+            TagentVo tagent = new TagentVo(paramObj);
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
                 // port允许为空，兼容tagent老版本没有端口信息
                 RunnerVo runnerVo = runnerMapper.getRunnerByIpAndPort(tagent.getRunnerIp(), tagent.getRunnerPort());
@@ -90,8 +91,8 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
             updateTagentIp(paramObj, tagent);
 
             // 当组信息与cache不一致时，更新cache
-            Long runnerGroupId = paramObj.getLong("runnerGroupId");
-            String remoteGroupInfo = paramObj.getString("runnerGroup");
+            Long runnerGroupId = paramObj.getLong("proxyGroupId");
+            String remoteGroupInfo = paramObj.getString("proxyGroup");
 
             // 此语句有L2 cache，5分钟失效
             List<RunnerVo> runnerList = runnerMapper.getRunnerByGroupId(runnerGroupId);
