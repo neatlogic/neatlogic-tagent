@@ -9,6 +9,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerNameRepeatsException;
 import com.alibaba.fastjson.JSONObject;
@@ -58,18 +59,20 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
-        Long id = runnerVo.getId();
-        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
-            throw new RunnerNameRepeatsException(runnerVo.getName());
-        }
-        if (id != null) {
+        if (runnerVo.getId() != null) {
             if (runnerMapper.checkRunnerIdIsExist(runnerVo.getId()) == 0) {
                 throw new RunnerIdNotFoundException(runnerVo.getId());
             }
-            runnerMapper.updateRunner(runnerVo);
-        }else {
             if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
                 throw new RunnerNameRepeatsException(runnerVo.getName());
+            }
+            runnerMapper.updateRunner(runnerVo);
+        }else {
+            if (runnerMapper.checkRunnerNameIsExistByName(runnerVo) > 0) {
+                throw new RunnerNameRepeatsException(runnerVo.getName());
+            }
+            if (runnerMapper.checkRunnerGroupIdIsExist(runnerVo.getGroupId()) == 0) {
+                throw new RunnerGroupIdNotFoundException(runnerVo.getGroupId());
             }
             runnerMapper.insertRunner(runnerVo);
         }
