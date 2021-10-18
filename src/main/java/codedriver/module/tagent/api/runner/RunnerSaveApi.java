@@ -9,11 +9,9 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
-import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerNameRepeatsException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +49,8 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
             @Param(name = "nettyPort", type = ApiParamType.INTEGER, desc = "心跳端口"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "命令端口"),
             @Param(name = "groupId", type = ApiParamType.LONG, isRequired = true, desc = "runner组id"),
-            @Param(name = "runnerAuthList", explode = RunnerAuthVo.class, type = ApiParamType.JSONARRAY,desc = "runner外部认证列表"),
+            @Param(name = "isAuth", type = ApiParamType.INTEGER, desc = "是否认证"),
+            @Param(name = "runnerAuthList", explode = RunnerAuthVo.class, type = ApiParamType.JSONARRAY,desc = "runner外部认证信息"),
     })
     @Output({
     })
@@ -60,32 +59,20 @@ public class RunnerSaveApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         RunnerVo runnerVo = JSONObject.toJavaObject(paramObj, RunnerVo.class);
         Long id = runnerVo.getId();
-        if (runnerVo.getName() == null) {
-            return null;
+        if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
+            throw new RunnerNameRepeatsException(runnerVo.getName());
         }
         if (id != null) {
             if (runnerMapper.checkRunnerIdIsExist(runnerVo.getId()) == 0) {
                 throw new RunnerIdNotFoundException(runnerVo.getId());
             }
+            runnerMapper.updateRunner(runnerVo);
+        }else {
             if (runnerMapper.checkRunnerNameIsExist(runnerVo) > 0) {
                 throw new RunnerNameRepeatsException(runnerVo.getName());
             }
-            runnerMapper.updateRunner(runnerVo);
-        }else {
-            if (runnerMapper.checkRunnerNameIsExistByName(runnerVo) > 0) {
-                throw new RunnerNameRepeatsException(runnerVo.getName());
-            }
-            if (runnerMapper.checkRunnerGroupIdIsExist(runnerVo.getGroupId()) == 0) {
-                throw new RunnerGroupIdNotFoundException(runnerVo.getGroupId());
-            }
             runnerMapper.insertRunner(runnerVo);
-
         }
-        if (CollectionUtils.isNotEmpty(runnerVo.getRunnerAuthList())) {
-            runnerMapper.deleteRunnerAuthListByRunnerId(runnerVo.getId());
-            runnerMapper.insertRunnerAuthList(runnerVo.getRunnerAuthList());
-        }
-
         return null;
     }
 

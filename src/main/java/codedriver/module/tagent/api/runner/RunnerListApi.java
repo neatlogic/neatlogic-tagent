@@ -4,7 +4,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerGroupVo;
-import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -15,7 +14,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -56,10 +54,6 @@ public class RunnerListApi extends PrivateApiComponentBase {
         RunnerGroupVo runnerGroupVo = JSONObject.toJavaObject(paramObj, RunnerGroupVo.class);
         int rowNum = runnerMapper.searchRunnerCount(id);
         runnerGroupVo.setRowNum(rowNum);
-        List<RunnerVo> runnerVoList = runnerMapper.searchRunner(runnerGroupVo);
-        for (int i = 0; i < runnerVoList.size(); i++) {
-            runnerVoList.get(i).setRunnerAuthList(runnerMapper.searchRunnerAuthList(runnerVoList.get(i).getId()));
-        }
-        return TableResultUtil.getResult(runnerVoList, runnerGroupVo);
+        return TableResultUtil.getResult(runnerMapper.searchRunner(runnerGroupVo), runnerGroupVo);
     }
 }
