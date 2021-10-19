@@ -1,16 +1,16 @@
 package codedriver.module.tagent.api;
 
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.TagentCredUpdateFail;
+import codedriver.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +19,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentCredUpdateApi extends PrivateApiComponentBase {
+public class TagentCredUpdateApi extends PublicApiComponentBase {
 
     private final Logger logger = LoggerFactory.getLogger(TagentCredUpdateApi.class);
 
@@ -47,28 +46,31 @@ public class TagentCredUpdateApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "ip", type = ApiParamType.STRING, desc = "tagentIP"),
+            @Param(name = "ip", type = ApiParamType.STRING, desc = "tagent ip"),
             @Param(name = "port", type = ApiParamType.STRING, desc = "tagent端口"),
             @Param(name = "credential", type = ApiParamType.STRING, desc = "tagent密码"),
-            @Param(name = "accountId", type = ApiParamType.LONG, desc = "账号id")
     })
     @Output({})
     @Description(desc = "Tagent密码更新接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         try {
-            TagentVo tagent = JSONObject.toJavaObject(paramObj, TagentVo.class);
-            tagentMapper.updateTagent(tagent);
+            String ip = paramObj.getString("ip");
+            Integer port = Integer.valueOf(paramObj.getString("port"));
+            TagentVo tagent = tagentMapper.getTagentByIpAndPort(ip, port);
+            if (tagent == null) {
+                throw new TagentNotFoundException();
+            }
             if (tagent.getAccountId() == null) {
                 throw new ResourceCenterAccountNotFoundException();
             }
             AccountVo accountVo = resourceCenterMapper.getAccountById(tagent.getAccountId());
             accountVo.setPasswordCipher(null);
-            accountVo.setPasswordPlain(tagent.getCredential());
+            accountVo.setPasswordPlain(paramObj.getString("credential"));
             resourceCenterMapper.updateAccount(accountVo);
         } catch (Exception e) {
             logger.error("tagent credential update failed," + e.getMessage());
-            throw e;
+            throw new TagentCredUpdateFail();
         }
         return null;
 
