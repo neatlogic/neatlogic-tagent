@@ -101,7 +101,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                     if (StringUtils.isNotBlank(localGroupInfo)) {
                         localGroupInfo += ",";
                     }
-                    localGroupInfo += runner.getHost() + ":" + runner.getPort();
+                    localGroupInfo += runner.getHost() + ":" + runner.getNettyPort();
                 }
             }
             if (remoteGroupInfo.equals(localGroupInfo)) {
