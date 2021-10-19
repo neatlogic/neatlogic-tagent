@@ -174,6 +174,10 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                     throw new RunnerNotFoundInGroupException(runnerGroupId);
                 }
             }
+            tagentVo.setRunnerId(runnerVo.getId());
+            tagentVo.setRunnerIp(runnerVo.getHost());
+            tagentVo.setRunnerPort(runnerVo.getPort().toString());
+            tagentVo.setRunnerGroupId(runnerGroupId);
             paramObj.put("runnerGroupId", runnerGroupId);
             if (StringUtils.isNotBlank(paramObj.getString("id"))) {
                 tagentVo.setId(paramObj.getLong("id"));
@@ -194,6 +198,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             if (paramObj.containsKey("credential")) {
                 tagentVo.setCredential(paramObj.getString("credential"));
             }
+
             Long saveTagentId = tagentService.saveTagent(tagentVo);
 
             //注册后同步信息到资源中心
