@@ -1,13 +1,11 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
-import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
@@ -20,9 +18,8 @@ import javax.annotation.Resource;
 
 
 @Service
-@AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentStatusUpdateApi extends PrivateApiComponentBase {
+public class TagentStatusUpdateApi extends PublicApiComponentBase {
 
     private final Logger logger = LoggerFactory.getLogger(TagentStatusUpdateApi.class);
 
@@ -50,8 +47,6 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
             @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnected,connected", isRequired = true, desc = "tagent状态"),
             @Param(name = "runnerId", type = ApiParamType.STRING, desc = "runner id"),
             @Param(name = "runnerGroupId", type = ApiParamType.LONG, desc = "runner组id"),
-            @Param(name = "runnerIp", type = ApiParamType.STRING, desc = "runner ip"),//是否需要
-            @Param(name = "runnerPort", type = ApiParamType.STRING, desc = "runner 端口")//是否需要
     }
     )
     @Output({})
