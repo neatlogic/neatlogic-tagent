@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
@@ -131,7 +132,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     }
 
     private void updateTagentIp(JSONObject jsonObj, TagentVo tagent) {
-        if (jsonObj.getString("needUpdateTagentIp").equals("1")) {
+        if (Objects.equals("needUpdateTagentIp","1")) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());
             String ipString = jsonObj.getString("ipString");
             if (StringUtils.isNotBlank(ipString)) {
