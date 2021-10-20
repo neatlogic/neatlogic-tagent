@@ -59,6 +59,7 @@ public class TagentRestartApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
+        JSONObject result = null;
         try {
             TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
             if (tagent == null) {
@@ -69,12 +70,12 @@ public class TagentRestartApi extends PrivateApiComponentBase {
             if (tagentHandler == null) {
                 throw new TagentActionNotFoundEcexption(TagentAction.RESTART.getValue());
             } else {
-                tagentHandler.execTagentCmd(message, tagent, runner);
+                result=tagentHandler.execTagentCmd(message, tagent, runner);
             }
         } catch (Exception e) {
             logger.error("操作失败", e);
         }
-        return null;
+        return result;
     }
 
 
