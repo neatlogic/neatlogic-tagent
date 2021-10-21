@@ -9,7 +9,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentCredUpdateFail;
+import codedriver.framework.tagent.exception.TagentCredUpdateFailedException;
 import codedriver.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
             resourceCenterMapper.updateAccount(accountVo);
         } catch (Exception e) {
             logger.error("tagent credential update failed," + e.getMessage());
-            throw new TagentCredUpdateFail();
+            throw new TagentCredUpdateFailedException();
         }
         return null;
 

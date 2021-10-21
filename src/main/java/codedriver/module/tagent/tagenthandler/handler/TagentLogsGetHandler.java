@@ -55,8 +55,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
             }
         } catch (Exception ex) {
-            assert restVo != null;
-            throw new TagentRunnerConnectRefusedException(restVo.getUrl(), resultJson.getString("Message"));
+            throw new TagentRunnerConnectRefusedException(url, resultJson.getString("Message"));
         }
         return resultJson.getJSONObject("Return");
     }
