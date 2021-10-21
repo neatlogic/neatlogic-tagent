@@ -60,20 +60,16 @@ public class TagentRestartApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
         JSONObject result = null;
-        try {
-            TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
-            if (tagent == null) {
-                throw new TagentIdNotFoundException(tagent.getId());
-            }
-            RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESTART.getValue());
-            if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.RESTART.getValue());
-            } else {
-                result=tagentHandler.execTagentCmd(message, tagent, runner);
-            }
-        } catch (Exception e) {
-            logger.error("操作失败", e);
+        TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
+        if (tagent == null) {
+            throw new TagentIdNotFoundException(message.getTagentId());
+        }
+        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESTART.getValue());
+        if (tagentHandler == null) {
+            throw new TagentActionNotFoundEcexption(TagentAction.RESTART.getValue());
+        } else {
+            result = tagentHandler.execTagentCmd(message, tagent, runner);
         }
         return result;
     }
