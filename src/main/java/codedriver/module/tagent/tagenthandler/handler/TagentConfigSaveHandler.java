@@ -3,6 +3,7 @@ package codedriver.module.tagent.tagenthandler.handler;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.dto.RestVo;
 import codedriver.framework.integration.authentication.costvalue.AuthenticateType;
 import codedriver.framework.tagent.dto.TagentMessageVo;
@@ -56,7 +57,7 @@ public class TagentConfigSaveHandler extends TagentHandlerBase {
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
-        params.put("credential", accountVo.getPasswordCipher());
+        params.put("credential", RC4Util.encrypt(TagentVo.encryptKey,accountVo.getPasswordPlain()));
         url = url + "api/rest/tagent/config/save";
         try {
             restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
