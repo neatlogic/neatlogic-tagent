@@ -50,13 +50,13 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         try {
             restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
             result = RestUtil.sendRequest(restVo);
-             resultJson = JSONObject.parseObject(result);
+            resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
             }
         } catch (Exception ex) {
             assert restVo != null;
-            throw new TagentRunnerConnectRefusedException(restVo.getUrl() + " " + result);
+            throw new TagentRunnerConnectRefusedException(restVo.getUrl(), resultJson.getString("Message"));
         }
         return resultJson.getJSONObject("Return");
     }

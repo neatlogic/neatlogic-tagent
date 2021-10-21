@@ -66,7 +66,7 @@ public class TagentRestartHandler extends TagentHandlerBase {
             }
         } catch (Exception ex) {
             assert restVo != null;
-            throw new TagentRunnerConnectRefusedException(restVo.getUrl() + " " + result);
+            throw new TagentRunnerConnectRefusedException(restVo.getUrl(), resultJson.getString("Message"));
         }
         return resultJson.getJSONObject("Return");
     }

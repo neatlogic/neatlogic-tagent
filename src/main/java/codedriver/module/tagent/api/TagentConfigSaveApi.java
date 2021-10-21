@@ -62,20 +62,16 @@ public class TagentConfigSaveApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        try {
-            TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
-            if (tagent == null) {
-                throw new TagentIdNotFoundException(tagent.getId());
-            }
-            RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.SAVECONFIG.getValue());
-            if (tagentHandler == null) {
-                throw new TagentActionNotFoundEcexption(TagentAction.SAVECONFIG.getValue());
-            } else {
-                tagentHandler.execTagentCmd(message, tagent, runner);
-            }
-        } catch (Exception e) {
-            logger.error("操作失败", e);
+        TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
+        if (tagent == null) {
+            throw new TagentIdNotFoundException(tagent.getId());
+        }
+        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.SAVECONFIG.getValue());
+        if (tagentHandler == null) {
+            throw new TagentActionNotFoundEcexption(TagentAction.SAVECONFIG.getValue());
+        } else {
+            tagentHandler.execTagentCmd(message, tagent, runner);
         }
         return null;
     }
