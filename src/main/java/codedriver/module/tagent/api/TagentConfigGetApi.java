@@ -63,7 +63,7 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
         JSONObject result = null;
         TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
         if (tagent == null) {
-            throw new TagentIdNotFoundException(tagent.getId());
+            throw new TagentIdNotFoundException(message.getTagentId());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETCONFIG.getValue());

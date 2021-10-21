@@ -64,7 +64,7 @@ public class TagentConfigSaveApi extends PrivateApiComponentBase {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
         TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
         if (tagent == null) {
-            throw new TagentIdNotFoundException(tagent.getId());
+            throw new TagentIdNotFoundException(message.getTagentId());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.SAVECONFIG.getValue());
