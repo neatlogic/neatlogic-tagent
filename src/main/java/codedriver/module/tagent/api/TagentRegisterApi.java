@@ -109,6 +109,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                         }*/
                 }
             }
+        }else{
             tagentVo.setIsFirstCreate(1);
         }
         // http request ip
