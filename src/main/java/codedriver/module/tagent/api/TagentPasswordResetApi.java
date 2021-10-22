@@ -70,9 +70,9 @@ public class TagentPasswordResetApi extends PrivateApiComponentBase {
         if (runner == null) {
             throw new RunnerNotFoundException(tagent.getRunnerId());
         }
-        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESETPASSWORD.getValue());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESET_PASSWORD.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundEcexption(TagentAction.RESETPASSWORD.getValue());
+            throw new TagentActionNotFoundEcexption(TagentAction.RESET_PASSWORD.getValue());
         } else {
             result = tagentHandler.execTagentCmd(message, tagent, runner);
         }

@@ -29,7 +29,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return "getlogs";
+        return TagentAction.GET_LOGS.getValue();
     }
 
     @Override
@@ -37,8 +37,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         Map<String, String> params = new HashMap<>();
         String result = StringUtils.EMPTY;
         JSONObject resultJson = new JSONObject();
-        RestVo restVo = null;
-        params.put("type", TagentAction.GETLOGS.getValue());
+        params.put("type", TagentAction.GET_LOGS.getValue());
         params.put("ip", tagentVo.getIp());
         params.put("port", (tagentVo.getPort()).toString());
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
@@ -48,7 +47,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         params.put("credential", accountVo.getPasswordCipher());
         url = url + "api/rest/tagent/log/get";
         try {
-            restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
+            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
             result = RestUtil.sendRequest(restVo);
             resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {

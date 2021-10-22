@@ -66,9 +66,9 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETCONFIG.getValue());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GET_CONFIG.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundEcexption(TagentAction.GETCONFIG.getValue());
+            throw new TagentActionNotFoundEcexption(TagentAction.GET_CONFIG.getValue());
         } else {
             result = tagentHandler.execTagentCmd(message, tagent, runner);
         }

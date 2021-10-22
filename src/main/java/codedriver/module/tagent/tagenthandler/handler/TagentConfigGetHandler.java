@@ -39,7 +39,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return "getConfig";
+        return TagentAction.GET_CONFIG.getValue();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
         String result = StringUtils.EMPTY;
         RestVo restVo = null;
         JSONObject resultJson = new JSONObject();
-        params.put("type", TagentAction.GETCONFIG.getValue());
+        params.put("type", TagentAction.GET_CONFIG.getValue());
         params.put("ip", tagentVo.getIp());
         params.put("port", (tagentVo.getPort()).toString());
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());

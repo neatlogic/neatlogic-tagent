@@ -80,9 +80,9 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
         if (runner == null) {
             throw new RunnerNotFoundException(tagent.getRunnerId());
         }
-        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GETLOGS.getValue());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GET_LOGS.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundEcexption(TagentAction.GETLOGS.getValue());
+            throw new TagentActionNotFoundEcexption(TagentAction.GET_LOGS.getValue());
         } else {
             data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
         }

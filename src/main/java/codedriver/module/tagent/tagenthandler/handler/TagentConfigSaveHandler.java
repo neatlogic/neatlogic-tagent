@@ -39,7 +39,7 @@ public class TagentConfigSaveHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return "saveConfig";
+        return TagentAction.SAVE_CONFIG.getValue();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TagentConfigSaveHandler extends TagentHandlerBase {
         String result = StringUtils.EMPTY;
         RestVo restVo = null;
         JSONObject resultJson = new JSONObject();
-        params.put("type", TagentAction.SAVECONFIG.getValue());
+        params.put("type", TagentAction.SAVE_CONFIG.getValue());
         params.put("ip", tagentVo.getIp());
         params.put("data", message.getData());
         params.put("port", (tagentVo.getPort()).toString());

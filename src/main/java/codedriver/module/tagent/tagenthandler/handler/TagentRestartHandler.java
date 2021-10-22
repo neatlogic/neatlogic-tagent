@@ -36,7 +36,7 @@ public class TagentRestartHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return "restart";
+        return TagentAction.RESTART.getValue();
     }
 
     @Override
