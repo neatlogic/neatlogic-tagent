@@ -125,7 +125,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         Integer preMatchedMask = 0;
         for (GroupNetworkVo networkRunner : networkList) {
             if (IpUtil.isBelongSegment(agentIp, networkRunner.getNetworkIp(), networkRunner.getMask())) {
-                if (networkRunner.getMask() > preMatchedMask) {
+                if (networkRunner.getMask() >= preMatchedMask) {
                     runnerGroupId = networkRunner.getGroupId();
                     break;
                 }
