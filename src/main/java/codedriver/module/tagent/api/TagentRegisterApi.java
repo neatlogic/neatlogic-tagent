@@ -109,6 +109,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                         }*/
                 }
             }
+            tagentVo.setIsFirstCreate(1);
         }
         // http request ip
         String requestIp = IpUtil.getIpAddr(UserContext.get().getRequest());

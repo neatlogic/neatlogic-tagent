@@ -9,7 +9,6 @@ import codedriver.framework.tagent.enums.TagentStatus;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.tagent.util.TagentHttpUtil;
-import codedriver.module.tagent.common.Constants;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,16 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class TagentRefreshStatusHandler extends TagentHandlerBase {
+public class TagentStatusCheckHandler extends TagentHandlerBase {
 
-    Logger logger = LoggerFactory.getLogger(TagentRefreshStatusHandler.class);
+    Logger logger = LoggerFactory.getLogger(TagentStatusCheckHandler.class);
 
     @Autowired
     private TagentService tagentService;
