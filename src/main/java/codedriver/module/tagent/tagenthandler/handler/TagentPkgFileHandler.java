@@ -68,7 +68,7 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
     }
 
     @Override
-    public boolean myDelete(JSONObject jsonObj) {
+    public boolean afterDelete(JSONObject jsonObj) {
         Long id = jsonObj.getLong("fileId");
         TagentVersionVo versionVo = tagentMapper.getTagentVersionByFileId(id);
         if (versionVo == null) {
