@@ -74,21 +74,19 @@ public class TagentPkgDeleteApi extends PrivateApiComponentBase {
         if (StringUtils.isBlank(tenantUuid)) {
             throw new NoTenantException();
         }
-        if (fileVo != null) {
-            IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
-            if (fileTypeHandler != null) {
-                if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
-                    fileMapper.deleteFile(fileVo.getId());
-                    FileUtil.deleteData(fileVo.getPath());
-                    tagentMapper.deleteTagentVersionByFileId(id);
-                } else {
-                    throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
-                }
-            } else {
-                throw new FileTypeHandlerNotFoundException(fileVo.getType());
-            }
-        } else {
+        if (fileVo == null) {
             throw new TagentPkgVersionIdNotFoundException(versionVo.getFileId());
+        }
+        IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
+        if (fileTypeHandler == null) {
+            throw new FileTypeHandlerNotFoundException(fileVo.getType());
+        }
+        if (fileTypeHandler.valid(UserContext.get().getUserUuid(), fileVo, paramObj)) {
+            fileMapper.deleteFile(fileVo.getId());
+            FileUtil.deleteData(fileVo.getPath());
+            tagentMapper.deleteTagentVersionByFileId(id);
+        } else {
+            throw new FileAccessDeniedException(fileVo.getName(), OperationTypeEnum.DELETE.getText());
         }
         return null;
     }

@@ -9,7 +9,6 @@ import codedriver.framework.exception.file.EmptyFileException;
 import codedriver.framework.exception.file.FileExtNotAllowedException;
 import codedriver.framework.exception.file.FileTooLargeException;
 import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
-import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -84,13 +83,10 @@ public class TagentPkgUploadApi extends PrivateBinaryStreamApiComponentBase {
         String osType = paramObj.getString("osType");
         String osbit = paramObj.getString("osbit");
         TagentVersionVo versionVo = new TagentVersionVo(osType, version, osbit);
-        if (tagentMapper.checkTagentVersion(versionVo) > 0) {
+        if (tagentMapper.checkTagentVersion(version) > 0) {
             throw new TagentPkgVersionIsExists(version);
         }
         String tenantUuid = TenantContext.get().getTenantUuid();
-        if (StringUtils.isBlank(tenantUuid)) {
-            throw new NoTenantException();
-        }
         MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
         String paramName = paramObj.getString("param");
         String type = paramObj.getString("type");

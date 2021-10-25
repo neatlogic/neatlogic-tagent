@@ -46,8 +46,11 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentVersionVo tagentVersion = new TagentVersionVo();
         int rowNum = tagentMapper.searchTagentVersionCount();
-        tagentVersion.setRowNum(rowNum);
-        return TableResultUtil.getResult(tagentMapper.searchTagentPkgList(), tagentVersion);
+        if (rowNum > 0) {
+            tagentVersion.setRowNum(rowNum);
+            return TableResultUtil.getResult(tagentMapper.searchTagentPkgList(), tagentVersion);
+        }
+        return null;
     }
 
 }

@@ -1,6 +1,5 @@
 package codedriver.module.tagent.api;
 
-import codedriver.framework.asynchronization.threadlocal.TenantContext;
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -8,7 +7,6 @@ import codedriver.framework.common.constvalue.CacheControlType;
 import codedriver.framework.common.util.FileUtil;
 import codedriver.framework.exception.file.FileAccessDeniedException;
 import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
-import codedriver.framework.exception.user.NoTenantException;
 import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -28,7 +26,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -62,10 +59,6 @@ public class TagentPkgDownloadApi extends PrivateBinaryStreamApiComponentBase {
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Long id = paramObj.getLong("id");
         FileVo fileVo = fileMapper.getFileById(id);
-        String tenantUuid = TenantContext.get().getTenantUuid();
-        if (StringUtils.isBlank(tenantUuid)) {
-            throw new NoTenantException();
-        }
         if (fileVo != null) {
             IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler(fileVo.getType());
             if (fileTypeHandler != null) {
@@ -113,12 +106,6 @@ public class TagentPkgDownloadApi extends PrivateBinaryStreamApiComponentBase {
         } else {
             throw new TagentPkgVersionIdNotFoundException(id);
         }
-
-
         return null;
-    }
-
-    public static void main(String[] args) throws UnsupportedEncodingException {
-        System.out.println(new String(("双方都是非法的".replace(" ", "").getBytes(StandardCharsets.UTF_8)), "ISO8859-1"));
     }
 }
