@@ -59,7 +59,7 @@ public class TgaentUpgradeHandler extends TagentHandlerBase {
             TagentUtil.buildTar(tagentVo.getOsType().toLowerCase(), tagentVo.getOsbit());
         }
 
-        List<TagentVersionVo> versionList = tagentMapper.getVersionList();
+        List<TagentVersionVo> versionList = tagentMapper.searchVersionList();
         for (TagentVersionVo version : versionList) {
             if (version.getOsType().toLowerCase().equals(osType)) {
                 tagentVersion = version.getVersion();
