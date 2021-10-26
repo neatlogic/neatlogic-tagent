@@ -2,6 +2,7 @@ package codedriver.module.tagent.tagenthandler.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthActionChecker;
+import codedriver.framework.exception.type.ParamNotExistsException;
 import codedriver.framework.file.core.FileTypeHandlerBase;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
@@ -9,7 +10,6 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.exception.TagentPkgVersionIdNotFoundException;
 import codedriver.framework.tagent.exception.TagentPkgVersionIsExists;
-import codedriver.framework.tagent.exception.TagentUploadLessParameterException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +49,19 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
         String version = jsonObj.getString("version");
         String osType = jsonObj.getString("osType");
         String osbit = jsonObj.getString("osbit");
-        if (StringUtils.isNotBlank(version) && StringUtils.isNotBlank(osType) && StringUtils.isNotBlank(osbit)) {
-            TagentVersionVo versionVo = new TagentVersionVo(osType, version, osbit);
-            versionVo.setFileId(fileVo.getId());
-            tagentMapper.insertTagentPkgFile(versionVo);
-        } else {
-            throw new TagentUploadLessParameterException();
+        if (StringUtils.isBlank(version)) {
+            throw new ParamNotExistsException(version);
         }
+        if (StringUtils.isBlank(osType)) {
+            throw new ParamNotExistsException(osType);
+        }
+        if (StringUtils.isBlank(osbit)) {
+            throw new ParamNotExistsException(osbit);
+        }
+        TagentVersionVo versionVo = new TagentVersionVo(osType, version, osbit);
+        versionVo.setFileId(fileVo.getId());
+        tagentMapper.insertTagentPkgFile(versionVo);
+
     }
 
     @Override
