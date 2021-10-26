@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tagent.api;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
@@ -15,10 +20,10 @@ import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
 import codedriver.framework.tagent.exception.RunnerGroupIsEmptyException;
-import codedriver.framework.tagent.exception.RunnerNotFoundInGroupException;
 import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.slf4j.Logger;
@@ -27,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Transactional
 @Service
@@ -109,7 +111,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                         }*/
                 }
             }
-        }else{
+        } else {
             tagentVo.setIsFirstCreate(1);
         }
         // http request ip
@@ -136,13 +138,28 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             throw new RunnerGroupIdNotFoundException(agentIp);
         } else {
             List<RunnerVo> runnerList = runnerMapper.getRunnerByGroupId(runnerGroupId);
-            if (runnerList == null || runnerList.size() == 0) {
+            if (CollectionUtils.isEmpty(runnerList)) {
                 throw new RunnerGroupIsEmptyException(runnerGroupId);
             }
 
-            RunnerVo runnerVo = null;
+            /*
+              1、新注册的tagent随机分配一个runner
+              2、已存在的tagent，如果原runner健康出问题（tagent从另一个runner发注册信息上来），则需要切换tagent的runner信息，优先分配注册的runner信息。
+             */
+            RunnerVo runnerVo = requestRunnerVo;
+            if (requestRunnerVo != null) {
+                Optional<RunnerVo> op = runnerList.stream().filter(d -> d.getHost().equals(requestIp)).findFirst();
+                if (op.isPresent()) {
+                    runnerVo = op.get();
+                }
+            }
+            if (runnerVo == null) {
+                Random random = new Random();
+                runnerVo = runnerList.get(random.nextInt(runnerList.size()));
+            }
 
-            if (requestRunnerVo == null) {
+
+           /* if (requestRunnerVo == null) {
                 if (runnerList.size() == 1)
                     runnerVo = runnerList.get(0);
                 else {
@@ -172,10 +189,9 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
             if (runnerVo == null && requestRunnerVo != null) {
                 runnerVo = requestRunnerVo;// 兼容旧的模式，通过runner ip找
-                if (runnerVo == null) {
-                    throw new RunnerNotFoundInGroupException(runnerGroupId);
-                }
-            }
+            }*/
+
+
             tagentVo.setRunnerId(runnerVo.getId());
             tagentVo.setRunnerIp(runnerVo.getHost());
             tagentVo.setRunnerPort(runnerVo.getPort().toString());
