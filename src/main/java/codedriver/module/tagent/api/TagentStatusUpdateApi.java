@@ -50,7 +50,7 @@ public class TagentStatusUpdateApi extends PublicApiComponentBase {
     }
     )
     @Output({})
-    @Description(desc = "Tagent状态更新接口")
+    @Description(desc = "Tagent状态更新接口,用于tagent<->runner心跳更新tagent状态")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject result = new JSONObject();

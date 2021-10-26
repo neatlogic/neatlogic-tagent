@@ -1,11 +1,13 @@
+/*
+ * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
@@ -22,13 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentLogDownLoadApi extends PrivateBinaryStreamApiComponentBase {
+public class TagentStatusCheckApi extends PrivateBinaryStreamApiComponentBase {
     @Resource
     TagentService tagentService;
 
     @Override
     public String getName() {
-        return "下载Tagent日志";
+        return "tagent状态检查";
     }
 
     @Override
@@ -38,18 +40,22 @@ public class TagentLogDownLoadApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/log/download";
+        return "tagent/exec/status/check";
     }
 
     @Input({
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
-            @Param(name = "path", type = ApiParamType.STRING, isRequired = true, desc = "tagent log path")
+            @Param(name = "ip", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
+            @Param(name = "port", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
+            @Param(name = "type", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
     })
     @Output({
+            @Param(name = "status", type = ApiParamType.STRING, desc = "tagent状态检查")
     })
+    @Description(desc = "tagent状态检查，用于web端主动发起检查agent状态")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        return tagentService.execTagentCmd(message, TagentAction.DOWNLOAD_LOG.getValue());
+        return tagentService.execTagentCmd(message, TagentAction.STATUS_CHECK.getValue());
     }
 }

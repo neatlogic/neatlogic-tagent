@@ -9,7 +9,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentCredUpdateFailedException;
 import codedriver.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -20,9 +19,9 @@ import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentCredUpdateApi extends PublicApiComponentBase {
+public class TagentPasswordUpdateApi extends PublicApiComponentBase {
 
-    private final Logger logger = LoggerFactory.getLogger(TagentCredUpdateApi.class);
+    private final Logger logger = LoggerFactory.getLogger(TagentPasswordUpdateApi.class);
 
     @Resource
     TagentMapper tagentMapper;
@@ -46,32 +45,27 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
     }
 
     @Input({
-            @Param(name = "ip", type = ApiParamType.STRING, desc = "tagent ip"),
-            @Param(name = "port", type = ApiParamType.STRING, desc = "tagent端口"),
-            @Param(name = "credential", type = ApiParamType.STRING, desc = "tagent密码"),
+            @Param(name = "ip", type = ApiParamType.STRING, isRequired = true, desc = "tagent ip"),
+            @Param(name = "port", type = ApiParamType.INTEGER, isRequired = true, desc = "tagent端口"),
+            @Param(name = "credential", type = ApiParamType.STRING, isRequired = true, desc = "tagent明文密码"),
     })
     @Output({})
-    @Description(desc = "Tagent密码更新接口")
+    @Description(desc = "tagent密码更新接口，用于tagent重置密码成功后，runner端更新tagent密码")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        try {
-            String ip = paramObj.getString("ip");
-            Integer port = Integer.valueOf(paramObj.getString("port"));
-            TagentVo tagent = tagentMapper.getTagentByIpAndPort(ip, port);
-            if (tagent == null) {
-                throw new TagentNotFoundException();
-            }
-            if (tagent.getAccountId() == null) {
-                throw new ResourceCenterAccountNotFoundException();
-            }
-            AccountVo accountVo = resourceCenterMapper.getAccountById(tagent.getAccountId());
-            accountVo.setPasswordCipher(null);
-            accountVo.setPasswordPlain(paramObj.getString("credential"));
-            resourceCenterMapper.updateAccount(accountVo);
-        } catch (Exception e) {
-            logger.error("tagent credential update failed," + e.getMessage());
-            throw new TagentCredUpdateFailedException();
+        String ip = paramObj.getString("ip");
+        Integer port = Integer.valueOf(paramObj.getString("port"));
+        TagentVo tagent = tagentMapper.getTagentByIpAndPort(ip, port);
+        if (tagent == null) {
+            throw new TagentNotFoundException();
         }
+        if (tagent.getAccountId() == null) {
+            throw new ResourceCenterAccountNotFoundException();
+        }
+        AccountVo accountVo = resourceCenterMapper.getAccountById(tagent.getAccountId());
+        accountVo.setPasswordCipher(null);
+        accountVo.setPasswordPlain(paramObj.getString("credential"));
+        resourceCenterMapper.updateAccount(accountVo);
         return null;
 
     }

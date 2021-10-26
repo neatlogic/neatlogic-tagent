@@ -17,14 +17,10 @@ import codedriver.framework.tagent.exception.TagentActionFailedEcexption;
 import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class TagentLogsGetHandler extends TagentHandlerBase {
@@ -39,31 +35,29 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        Map<String, String> params = new HashMap<>();
-        String result = StringUtils.EMPTY;
-        JSONObject resultJson = new JSONObject();
-        params.put("type", TagentAction.GET_LOGS.getValue());
-        params.put("ip", tagentVo.getIp());
-        params.put("port", (tagentVo.getPort()).toString());
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
-        params.put("credential", accountVo.getPasswordCipher());
+        JSONObject paramJson = new JSONObject();
+        paramJson.put("type", TagentAction.GET_LOGS.getValue());
+        paramJson.put("ip", tagentVo.getIp());
+        paramJson.put("port", (tagentVo.getPort()).toString());
+        paramJson.put("credential", accountVo.getPasswordCipher());
         url = url + "api/rest/tagent/log/get";
+        String result = null;
         try {
-            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
+            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), paramJson);
             result = RestUtil.sendRequest(restVo);
-            resultJson = JSONObject.parseObject(result);
+            JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
             }
+            return resultJson.getJSONObject("Return");
         } catch (Exception ex) {
-            throw new TagentRunnerConnectRefusedException(url, resultJson.getString("Message"));
+            throw new TagentRunnerConnectRefusedException(url, result);
         }
-        return resultJson.getJSONObject("Return");
     }
-
 
     @Override
     public String getHandler() {

@@ -19,7 +19,6 @@ import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
 import codedriver.module.tagent.api.TagentLogDownLoadApi;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -28,11 +27,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URLEncoder;
 
 @Component
 public class TagentLogDownloadHandler extends TagentHandlerBase {
@@ -68,27 +67,33 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
         }
         params.put("credential", accountVo.getPasswordCipher());
         String result = null;
+        ServletOutputStream outputStream = null;
+        InputStream inputStream = null;
         url = url + "/api/binary/tagent/log/download";
         try {
-            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), JSONObject.parseObject(JSON.toJSONString(params)));
+            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), params);
             result = RestUtil.sendRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Data")) {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
             }
             String dataStr = resultJson.getString("Data");
-            InputStream inputStream = new ByteArrayInputStream(dataStr.getBytes());
+            inputStream = new ByteArrayInputStream(dataStr.getBytes());
             HttpServletResponse response = UserContext.get().getResponse();
-            response.reset();
-            response.setHeader("Content-Disposition", " attachment; filename=\"" + message.getPath() + "\"");
+            response.setHeader("Content-Disposition", " attachment; filename=\"" + URLEncoder.encode(message.getPath(), "UTF-8") + "\"");
             response.setContentType("application/octet-stream");
-            OutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
-            IOUtils.copy(inputStream, outputStream);
+            outputStream = response.getOutputStream();
+            IOUtils.copyLarge(inputStream, outputStream);
             outputStream.flush();
-            outputStream.close();
-            inputStream.close();
         } catch (JSONException ex) {
             throw new TagentRunnerConnectRefusedException(url, result);
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
         }
         return null;
     }

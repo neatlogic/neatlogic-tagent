@@ -15,7 +15,6 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
-import codedriver.framework.tagent.exception.RunnerNotFoundException;
 import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
@@ -70,22 +69,17 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        JSONArray tbodyList = new JSONArray();
-        JSONArray data = null;
         TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
         if (tagent == null) {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
-        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-        if (runner == null) {
-            throw new RunnerNotFoundException(tagent.getRunnerId());
-        }
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GET_LOGS.getValue());
         if (tagentHandler == null) {
             throw new TagentActionNotFoundEcexption(TagentAction.GET_LOGS.getValue());
-        } else {
-            data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
         }
+        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        JSONArray tbodyList = new JSONArray();
+        JSONArray data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
         if (CollectionUtils.isNotEmpty(data)) {
             for (int i = 0; i < data.size(); i++) {
                 JSONObject js = new JSONObject();

@@ -46,28 +46,28 @@ public class TagentRestartHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String runnerUrl) throws Exception {
-        JSONObject paramJson = new JSONObject();
         //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
+        JSONObject paramJson = new JSONObject();
         paramJson.put("credential", accountVo.getPasswordCipher());
         paramJson.put("type", TagentAction.RESTART.getValue());
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", tagentVo.getPort());
-
         String result = null;
+        String url = runnerUrl + "api/rest/tagent/restart";
         try {
-            RestVo restVo = new RestVo(runnerUrl + "api/rest/tagent/restart", AuthenticateType.BUILDIN.getValue(), paramJson);
+            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), paramJson);
             result = RestUtil.sendRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
+                throw new TagentActionFailedEcexption(url + ":" + resultJson.getString("Message"));
             }
             return resultJson.getJSONObject("Return");
         } catch (JSONException ex) {
-            throw new TagentRunnerConnectRefusedException(runnerUrl, result);
+            throw new TagentRunnerConnectRefusedException(url, result);
         }
     }
 }

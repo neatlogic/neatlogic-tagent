@@ -50,8 +50,8 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        JSONObject paramJson = new JSONObject();
         String tagentStatus = TagentStatus.DISCONNECTED.getValue();
+        JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
         paramJson.put("type", message.getName());
@@ -61,10 +61,9 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
             List<RunnerVo> runnerVoList = groupVo.getRunnerList();
             if (CollectionUtils.isNotEmpty(runnerVoList)) {
                 for (RunnerVo runnerItem : runnerVoList) {
-                    String result = null;
                     try {
-                        RestVo restVo = new RestVo(runnerItem.getUrl() + "api/rest/tagent/restart", AuthenticateType.BUILDIN.getValue(), paramJson);
-                        result = RestUtil.sendRequest(restVo);
+                        RestVo restVo = new RestVo(runnerItem.getUrl() + "api/rest/tagent/status/check", AuthenticateType.BUILDIN.getValue(), paramJson);
+                        String result = RestUtil.sendRequest(restVo);
                         JSONObject resultJson = JSONObject.parseObject(result);
                         if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
                             tagentStatus = TagentStatus.CONNECTED.getValue();

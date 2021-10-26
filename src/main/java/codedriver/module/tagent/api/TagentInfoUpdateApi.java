@@ -53,6 +53,13 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         return null;
     }
 
+
+    /**
+     * 1、根据tagent ip和port 绑定runner id
+     * 2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
+     * 3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip
+     * 4、当组信息与cache不一致时，更新cache
+     */
     @Input({@Param(name = "agentId", type = ApiParamType.LONG, desc = "tagentId"),
             @Param(name = "pcpu", type = ApiParamType.STRING, desc = "cpu"),
             @Param(name = "ip", type = ApiParamType.STRING, desc = "ip"),
@@ -65,7 +72,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             @Param(name = "proxyGroup", type = ApiParamType.STRING, desc = "runner组信息ip:port,多个用逗号隔开，用于对比组信息是否有更新"),
             @Param(name = "type", type = ApiParamType.STRING, desc = "消息类型(monitor)")})
     @Output({})
-    @Description(desc = "Tagent信息更新接口")
+    @Description(desc = "tagent信息更新接口,用于tagent<->runner心跳更新tagent信息")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         String message = "";
@@ -75,9 +82,8 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         JSONObject result = new JSONObject();
         long id = paramObj.getLong("agentId");
         try {
-
-            // 更新 tagent 基础信息
             TagentVo tagent = new TagentVo(paramObj);
+            // 1、根据tagent ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
                 // port允许为空，兼容tagent老版本没有端口信息
                 RunnerVo runnerVo = runnerMapper.getRunnerByIpAndPort(tagent.getRunnerIp(), tagent.getRunnerPort());
@@ -85,18 +91,16 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                     tagent.setRunnerId(runnerVo.getId());
                 }
             }
-
+            //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
             tagentService.updateTagentById(tagent);
 
-            // 当 tagent ip 地址变化(切换网卡)时， 更新 agent ip
+            //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip
             updateTagentIp(paramObj, tagent);
 
-            // 当组信息与cache不一致时，更新cache
+            //4、 当组信息与cache不一致时，更新cache
             Long runnerGroupId = paramObj.getLong("proxyGroupId");
             String remoteGroupInfo = paramObj.getString("proxyGroup");
-
-            // 此语句有L2 cache，5分钟失效
-            List<RunnerVo> runnerList = runnerMapper.getRunnerByGroupId(runnerGroupId);
+            List<RunnerVo> runnerList = runnerMapper.getRunnerListByGroupId(runnerGroupId);// 此语句有L2 cache，5分钟失效
             if (runnerList != null && runnerList.size() > 0) {
                 for (RunnerVo runner : runnerList) {
                     if (StringUtils.isNotBlank(localGroupInfo)) {
@@ -108,13 +112,11 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             if (remoteGroupInfo.equals(localGroupInfo)) {
                 needUpdateGroup = false;
             }
-
         } catch (Exception e) {
             updateStatus = false;
             message = e.getMessage();
             logger.error("update tagent " + id + " failed. ", e);
         }
-
         // update runner group info
         if (needUpdateGroup) {
             JSONObject groupData = new JSONObject();
@@ -125,7 +127,6 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         } else {
             result.put("Data", "");
         }
-
         result.put("Status", updateStatus ? "OK" : "ERROR");
         result.put("Message", updateStatus ? "tagent cpu and memeory update succeed" : message);
         return result;

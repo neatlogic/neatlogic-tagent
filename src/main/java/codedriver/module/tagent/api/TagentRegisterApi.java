@@ -12,19 +12,20 @@ import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.exception.runner.RunnerGroupIdNotFoundException;
+import codedriver.framework.exception.runner.RunnerGroupIsEmptyException;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.RunnerGroupIdNotFoundException;
-import codedriver.framework.tagent.exception.RunnerGroupIsEmptyException;
 import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 @Transactional
 @Service
@@ -84,79 +87,84 @@ public class TagentRegisterApi extends PublicApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultJson = new JSONObject();
-        boolean status = true;
         JSONObject data = new JSONObject();
         Long tagentId = paramObj.getLong("tagentId");
         paramObj.put("id", tagentId);
         paramObj.remove("tagentId");
-        TagentVo tagentVo = JSONObject.toJavaObject(paramObj, TagentVo.class);
-        // !!! 规避直接复制tagent目录的导致id相同的情况，只重新注册断开连接的tagent
-        // 如果有id,则根据id更新其他信息，如果没有id,则根据ip + port 确定唯一性后保存
-        if (tagentId != null) {
-            TagentVo tagentOrigin = tagentMapper.getTagentById(tagentId);
+        try {
+            TagentVo tagentVo = JSONObject.toJavaObject(paramObj, TagentVo.class);
+            // !!! 规避直接复制tagent目录的导致id相同的情况，只重新注册断开连接的tagent
+            // 如果有id,则根据id更新其他信息，如果没有id,则根据ip + port 确定唯一性后保存
+            if (tagentId != null) {
+            /*TagentVo tagentOrigin = tagentMapper.getTagentById(tagentId);
             if (tagentOrigin != null && tagentOrigin.getRunnerId() != null) {
                 RunnerVo runner = runnerMapper.getRunnerById(tagentOrigin.getRunnerId());
                 if (runner != null) {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("ip", tagentOrigin.getIp());
-                    params.put("port", tagentOrigin.getPort().toString());
-                    params.put("type", "tagentStatusCheck");
-     /*                   String checkResult = TagentHttpUtil.post(runner.getUrl() + "/tagent/in/exec", params, header, true);
-                        if (StringUtils.isNotBlank(checkResult)) {
-                            JSONObject checkObj = JSONObject.parseObject(checkResult);
-                            if ("OK".equals(checkObj.getString("Status"))) {
-                                //throw new RuntimeException("this tagent is connected，please check id is reduplicated or start later");
-                                paramObj.put("id", "");
-                            }
-                        }*/
+                    JSONObject paramJson = new JSONObject();
+                    paramJson.put("ip", tagentOrigin.getIp());
+                    paramJson.put("port", tagentOrigin.getPort().toString());
+                    paramJson.put("type", TagentAction.STATUS_CHECK.getValue());
+                    String url = runner.getUrl() + "api/rest/tagent/status/check";
+                    String result = null;
+                    try {
+                        RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), paramJson);
+                        result = RestUtil.sendRequest(restVo);
+                        JSONObject resultStatusJson = JSONObject.parseObject(result);
+                        if (resultStatusJson.containsKey("Status") && "OK".equals(resultStatusJson.getString("Status"))) {
+                            paramObj.put("tagentId", "");
+                        }
+                    } catch (JSONException ignored) {
+                        throw new TagentRunnerConnectRefusedException(url, result);
+                    }
+                }
+            }*/
+            } else {
+                tagentVo.setIsFirstCreate(1);
+            }
+            // http request ip
+            String requestIp = IpUtil.getIpAddr(UserContext.get().getRequest());
+
+            String agentIp = paramObj.getString("ip");
+
+            List<GroupNetworkVo> networkList = tagentMapper.getGroupNetworkList();
+
+            RunnerVo requestRunnerVo = runnerMapper.getRunnerByIp(requestIp);
+
+            Long runnerGroupId = null;
+            Integer preMatchedMask = 0;
+            //找到符合网端的runnerGroup,以及改group的所有runner
+            for (GroupNetworkVo networkRunner : networkList) {
+                if (IpUtil.isBelongSegment(agentIp, networkRunner.getNetworkIp(), networkRunner.getMask())) {
+                    if (networkRunner.getMask() >= preMatchedMask) {
+                        runnerGroupId = networkRunner.getGroupId();
+                        break;
+                    }
+
                 }
             }
-        } else {
-            tagentVo.setIsFirstCreate(1);
-        }
-        // http request ip
-        String requestIp = IpUtil.getIpAddr(UserContext.get().getRequest());
-
-        String agentIp = paramObj.getString("ip");
-
-        List<GroupNetworkVo> networkList = tagentMapper.getGroupNetworkList();
-
-        RunnerVo requestRunnerVo = runnerMapper.getRunnerByIp(requestIp);
-
-        Long runnerGroupId = null;
-        Integer preMatchedMask = 0;
-        for (GroupNetworkVo networkRunner : networkList) {
-            if (IpUtil.isBelongSegment(agentIp, networkRunner.getNetworkIp(), networkRunner.getMask())) {
-                if (networkRunner.getMask() >= preMatchedMask) {
-                    runnerGroupId = networkRunner.getGroupId();
-                    break;
+            if (runnerGroupId == null) {
+                throw new RunnerGroupIdNotFoundException(agentIp);
+            } else {
+                List<RunnerVo> runnerList = runnerMapper.getRunnerListByGroupId(runnerGroupId);
+                if (CollectionUtils.isEmpty(runnerList)) {
+                    throw new RunnerGroupIsEmptyException(runnerGroupId);
                 }
-
-            }
-        }
-        if (runnerGroupId == null) {
-            throw new RunnerGroupIdNotFoundException(agentIp);
-        } else {
-            List<RunnerVo> runnerList = runnerMapper.getRunnerByGroupId(runnerGroupId);
-            if (CollectionUtils.isEmpty(runnerList)) {
-                throw new RunnerGroupIsEmptyException(runnerGroupId);
-            }
 
             /*
               1、新注册的tagent随机分配一个runner
               2、已存在的tagent，如果原runner健康出问题（tagent从另一个runner发注册信息上来），则需要切换tagent的runner信息，优先分配注册的runner信息。
              */
-            RunnerVo runnerVo = requestRunnerVo;
-            if (requestRunnerVo != null) {
-                Optional<RunnerVo> op = runnerList.stream().filter(d -> d.getHost().equals(requestIp)).findFirst();
-                if (op.isPresent()) {
-                    runnerVo = op.get();
+                RunnerVo runnerVo = requestRunnerVo;
+                if (requestRunnerVo != null) {
+                    Optional<RunnerVo> op = runnerList.stream().filter(d -> d.getHost().equals(requestIp)).findFirst();
+                    if (op.isPresent()) {
+                        runnerVo = op.get();
+                    }
                 }
-            }
-            if (runnerVo == null) {
-                Random random = new Random();
-                runnerVo = runnerList.get(random.nextInt(runnerList.size()));
-            }
+                if (runnerVo == null) {
+                    Random random = new Random();
+                    runnerVo = runnerList.get(random.nextInt(runnerList.size()));
+                }
 
 
            /* if (requestRunnerVo == null) {
@@ -192,58 +200,68 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             }*/
 
 
-            tagentVo.setRunnerId(runnerVo.getId());
-            tagentVo.setRunnerIp(runnerVo.getHost());
-            tagentVo.setRunnerPort(runnerVo.getPort().toString());
-            tagentVo.setRunnerGroupId(runnerGroupId);
-            paramObj.put("runnerGroupId", runnerGroupId);
-            if (StringUtils.isNotBlank(paramObj.getString("id"))) {
+                tagentVo.setRunnerId(runnerVo.getId());
+                tagentVo.setRunnerIp(runnerVo.getHost());
+                tagentVo.setRunnerPort(runnerVo.getPort().toString());
+                tagentVo.setRunnerGroupId(runnerGroupId);
+                paramObj.put("runnerGroupId", runnerGroupId);
+            /*if (StringUtils.isNotBlank(paramObj.getString("id"))) {
                 tagentVo.setId(paramObj.getLong("id"));
-            }
-
-            if (StringUtils.isNotBlank(tagentVo.getOsType())) {
-                String ostype = tagentVo.getOsType();
-                TagentOSVo os = tagentMapper.getOsByName(ostype.toLowerCase());
-                if (os != null) {
-                    tagentVo.setOsId(os.getId());
-                } else {
-                    TagentOSVo newOS = new TagentOSVo();
-                    newOS.setName(ostype);
-                    tagentMapper.insertOs(newOS);
-                    tagentVo.setOsId(newOS.getId());
+            }*/
+                //保存tagent os
+                if (StringUtils.isNotBlank(tagentVo.getOsType())) {
+                    String ostype = tagentVo.getOsType();
+                    TagentOSVo os = tagentMapper.getOsByName(ostype.toLowerCase());
+                    if (os != null) {
+                        tagentVo.setOsId(os.getId());
+                    } else {
+                        TagentOSVo newOS = new TagentOSVo();
+                        newOS.setName(ostype);
+                        tagentMapper.insertOs(newOS);
+                        tagentVo.setOsId(newOS.getId());
+                    }
                 }
-            }
-            if (paramObj.containsKey("credential")) {
-                tagentVo.setCredential(paramObj.getString("credential"));
-            }
 
-            Long saveTagentId = tagentService.saveTagent(tagentVo);
+                Long saveTagentId = tagentService.saveTagent(tagentVo);
 
-            //注册后同步信息到资源中心
-            AfterRegisterJobManager.executeAll(tagentVo);
+                //注册后同步信息到资源中心
+                AfterRegisterJobManager.executeAll(tagentVo);
 
-            JSONArray runnerArray = new JSONArray();
-            for (RunnerVo runner : runnerList) {
-                JSONObject runnerData = new JSONObject();
-                runnerData.put("id", runner.getId());
-                runnerData.put("ip", runner.getHost());
-                runnerData.put("port", runner.getNettyPort());
-                runnerArray.add(runnerData);
+                returnData(data, runnerList, saveTagentId, runnerVo, runnerGroupId);
             }
-            data.put("tagentId", saveTagentId);
-            //兼容tagent入参 不能改为runner
-            data.put("proxyId", runnerVo.getId());
-            data.put("proxyIp", runnerVo.getHost());
-            data.put("proxyPort", runnerVo.getPort());
-            data.put("proxyGroupId", runnerGroupId);
-            data.put("proxyList", runnerArray);
+            resultJson.put("Status", "OK");
+            resultJson.put("Data", data);
+        } catch (Exception ex) {
+            logger.error("tagent:" + paramObj.toString() + " register failed." + ExceptionUtils.getStackTrace(ex), ex);
+            resultJson.put("Message", ex.getMessage());
+            resultJson.put("Status", "ERROR");
         }
 
 
-        resultJson.put("Status", status ? "OK" : "ERROR");
-        resultJson.put("Data", status ? data : "");
         return resultJson;
     }
+
+    /**
+     * 兼容现有tagent，组装response数据
+     */
+    private void returnData(JSONObject data, List<RunnerVo> groupRunnerList, Long saveTagentId, RunnerVo tagentRunnerVo, Long runnerGroupId) {
+        JSONArray runnerArray = new JSONArray();
+        for (RunnerVo runner : groupRunnerList) {
+            JSONObject runnerData = new JSONObject();
+            runnerData.put("id", runner.getId());
+            runnerData.put("ip", runner.getHost());
+            runnerData.put("port", runner.getNettyPort());
+            runnerArray.add(runnerData);
+        }
+        data.put("tagentId", saveTagentId);
+        //兼容tagent入参 不能改为runner
+        data.put("proxyId", tagentRunnerVo.getId());
+        data.put("proxyIp", tagentRunnerVo.getHost());
+        data.put("proxyPort", tagentRunnerVo.getPort());
+        data.put("proxyGroupId", runnerGroupId);
+        data.put("proxyList", runnerArray);
+    }
+
 
     @Override
     public boolean isRaw() {
