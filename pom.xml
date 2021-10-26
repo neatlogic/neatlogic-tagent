@@ -44,5 +44,5 @@
             <artifactId>codedriver-tagent-base</artifactId>
             <version>0.1.0.0-SNAPSHOT</version>
         </dependency>
-    </dependencies>
+    </dependencies> 
 </project>
