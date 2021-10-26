@@ -19,9 +19,9 @@ import javax.annotation.Resource;
 
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
-public class TagentPasswordUpdateApi extends PublicApiComponentBase {
+public class TagentCredUpdateApi extends PublicApiComponentBase {
 
-    private final Logger logger = LoggerFactory.getLogger(TagentPasswordUpdateApi.class);
+    private final Logger logger = LoggerFactory.getLogger(TagentCredUpdateApi.class);
 
     @Resource
     TagentMapper tagentMapper;
