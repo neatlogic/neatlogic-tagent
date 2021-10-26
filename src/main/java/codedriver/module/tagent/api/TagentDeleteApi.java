@@ -8,6 +8,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.enums.TagentStatus;
 import codedriver.framework.tagent.exception.TagentHasBeenConnectedException;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
@@ -53,7 +54,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
             if (tagent == null) {
                 throw new TagentIdNotFoundException(id);
             }
-            if ( !StringUtils.equals(tagent.getStatus(), "connect")) {
+            if ( !StringUtils.equals(tagent.getStatus(), TagentStatus.CONNECTED.getValue())) {
                 tagentMapper.deleteTagentById(id);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
