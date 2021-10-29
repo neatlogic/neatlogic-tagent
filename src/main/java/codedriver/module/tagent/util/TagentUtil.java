@@ -32,7 +32,7 @@ public class TagentUtil {
                 osType = TagentVersionVo.TagentOsType.WINDOWS64.getType();
             }
         } else {
-            osType = TagentVersionVo.TagentOsType.WINDOWS64.getType();
+            osType = TagentVersionVo.TagentOsType.LINUX.getType();
         }
         return osType;
     }

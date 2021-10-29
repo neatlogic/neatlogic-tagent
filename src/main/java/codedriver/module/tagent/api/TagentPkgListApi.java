@@ -8,6 +8,8 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVersionVo;
+import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -37,18 +39,29 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Input({})
+    @Input({
+            @Param(name = "tagentId", type = ApiParamType.LONG, desc = "tagent id")
+    })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "安装包列表")
     })
     @Description(desc = "tagent安装包列表查询接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentVersionVo tagentVersion = new TagentVersionVo();
+        Long tagentId = paramObj.getLong("tagentId");
+        TagentVersionVo tagentVersion = JSONObject.toJavaObject(paramObj, TagentVersionVo.class);
+        if (tagentId != null) {
+            TagentVo tagentVo = tagentMapper.getTagentById(tagentId);
+            if (tagentVo == null) {
+                throw new TagentIdNotFoundException(tagentId);
+            }
+            tagentVersion.setOsType(tagentVo.getOsType());
+            tagentVersion.setOsbit(tagentVo.getOsbit());
+        }
         int rowNum = tagentMapper.searchTagentVersionCount();
         if (rowNum > 0) {
             tagentVersion.setRowNum(rowNum);
-            return TableResultUtil.getResult(tagentMapper.searchTagentPkgList(), tagentVersion);
+            return TableResultUtil.getResult(tagentMapper.searchTagentPkgList(tagentVersion), tagentVersion);
         }
         return null;
     }
