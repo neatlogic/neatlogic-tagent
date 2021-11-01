@@ -15,7 +15,6 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -30,7 +29,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 
 	@Override
 	public String getName() {
-		return "tagent查询接口";
+		return "查询tagent列表";
 	}
 
 	@Override
@@ -38,7 +37,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 		return null;
 	}
 
-	@Description(desc = "tagent查询接口")
+	@Description(desc = "查询tagent列表接口")
 	@Input({
 			@Param(name = "osId",type = ApiParamType.LONG,desc = "OS类型id"),
 			@Param(name = "version",type = ApiParamType.STRING,desc = "tagent版本"),

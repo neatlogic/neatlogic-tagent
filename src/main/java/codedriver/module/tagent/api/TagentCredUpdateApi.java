@@ -31,7 +31,7 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent密码更新接口";
+        return "更新tagent密码";
     }
 
     @Override

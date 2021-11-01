@@ -4,10 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
-import codedriver.framework.restful.annotation.Input;
-import codedriver.framework.restful.annotation.OperationType;
-import codedriver.framework.restful.annotation.Output;
-import codedriver.framework.restful.annotation.Param;
+import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
@@ -46,7 +43,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent查看日志";
+        return "查看Tagent日志";
     }
 
     @Override
@@ -66,6 +63,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Output({
             @Param(name = "tbodyList", desc = "日志列表")
     })
+    @Description(desc = "查看Tagent日志接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);

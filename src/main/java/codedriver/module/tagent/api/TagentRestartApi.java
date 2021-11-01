@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
@@ -40,7 +41,7 @@ public class TagentRestartApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent重启";
+        return "重启Tagent";
     }
 
     @Override
@@ -56,6 +57,7 @@ public class TagentRestartApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id")
     })
+    @Description(desc = "重启Tagent接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
