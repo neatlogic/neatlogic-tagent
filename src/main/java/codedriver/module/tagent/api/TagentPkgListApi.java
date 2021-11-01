@@ -10,7 +10,6 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
-import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +25,7 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent安装包列表查询接口";
+        return "查询tagent安装包列表";
     }
 
     @Override
@@ -40,16 +39,20 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "tagentId", type = ApiParamType.LONG, desc = "tagent id")
+            @Param(name = "tagentId", type = ApiParamType.LONG, desc = "tagent id"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
     @Output({
             @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "安装包列表")
     })
-    @Description(desc = "tagent安装包列表查询接口")
+    @Description(desc = "查询tagent安装包列表接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long tagentId = paramObj.getLong("tagentId");
         TagentVersionVo tagentVersion = JSONObject.toJavaObject(paramObj, TagentVersionVo.class);
+        JSONObject result = new JSONObject();
         if (tagentId != null) {
             TagentVo tagentVo = tagentMapper.getTagentById(tagentId);
             if (tagentVo == null) {
@@ -61,9 +64,9 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
         int rowNum = tagentMapper.searchTagentVersionCount();
         if (rowNum > 0) {
             tagentVersion.setRowNum(rowNum);
-            return TableResultUtil.getResult(tagentMapper.searchTagentPkgList(tagentVersion), tagentVersion);
+            result.put("tbodyList", tagentMapper.searchTagentPkgList(tagentVersion));
         }
-        return null;
+        return result;
     }
 
 }

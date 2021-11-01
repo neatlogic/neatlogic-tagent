@@ -2,6 +2,7 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
@@ -25,7 +26,7 @@ public class TagentConfigSaveApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "Tagent配置保存接口";
+        return "保存Tagent配置";
     }
 
     @Override
@@ -42,6 +43,7 @@ public class TagentConfigSaveApi extends PrivateApiComponentBase {
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id"),
             @Param(name = "data", type = ApiParamType.JSONARRAY, isRequired = true, desc = "tagent 配置"),
     })
+    @Description(desc = "保存Tagent配置接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);

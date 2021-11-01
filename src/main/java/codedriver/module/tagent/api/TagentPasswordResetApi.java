@@ -3,6 +3,7 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Param;
@@ -26,7 +27,7 @@ public class TagentPasswordResetApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent密码重置接口";
+        return "重置tagent密码";
     }
 
     @Override
@@ -42,6 +43,7 @@ public class TagentPasswordResetApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "tagentId", type = ApiParamType.LONG, isRequired = true, desc = "tagent id")
     })
+    @Description(desc = "重置tagent密码")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);

@@ -3,6 +3,7 @@ package codedriver.module.tagent.api;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.ValueTextVo;
+import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
 import codedriver.framework.restful.annotation.Param;
@@ -42,6 +43,7 @@ public class TagentVersionListApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "tagentVersion",type = ApiParamType.JSONARRAY,desc = "所有tagent版本")
     })
+    @Description(desc = "获取所有的Tagent版本接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<ValueTextVo> list = new ArrayList<>();

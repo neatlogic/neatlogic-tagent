@@ -37,7 +37,7 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "获取所有tagentOS类型")
+    @Description(desc = "获取TagentOS类型接口")
     @Output({
             @Param(name = "tbodyList",explode = TagentOSVo[].class,desc = "tagentOS类型列表")
     })

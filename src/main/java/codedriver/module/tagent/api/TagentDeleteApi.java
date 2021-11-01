@@ -27,7 +27,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent 删除接口";
+        return "删除tagent";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
     })
     @Output({
     })
-    @Description(desc = "tagent 删除接口")
+    @Description(desc = "删除tagent接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         Long id = paramObj.getLong("id");

@@ -40,7 +40,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent心跳信息";
+        return "更新tagent信息";
     }
 
     @Override

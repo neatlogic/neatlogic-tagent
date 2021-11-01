@@ -28,7 +28,7 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent状态检查";
+        return "检查tagent状态";
     }
 
     @Override

@@ -3,7 +3,9 @@ package codedriver.module.tagent.tagenthandler.handler;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
+import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
@@ -56,14 +58,12 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String runnerUrl) throws Exception {
 
         String osType = this.getOsType(tagentVo.getOsType().toLowerCase(), tagentVo.getOsbit());
         String result = StringUtils.EMPTY;
-        JSONObject resultJson = new JSONObject();
-
         //使用版本号、os类型、CPU架构确定安装包文件
-        TagentVersionVo versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(message.getPkgVersion(),osType,tagentVo.getOsbit());
+        TagentVersionVo versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(message.getPkgVersion(), osType, tagentVo.getOsbit());
         if (versionVo == null) {
             throw new TagentPkgVersionNotFoundException(message.getPkgVersion());
         }
@@ -76,25 +76,29 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
             throw new TagentVersionIsHigHestException(tagentVo.getVersion());
         }
         String prefix = fileVo.getPath().split(":")[0];
-        FileStorageMediumFactory.getHandler(prefix.toUpperCase()).isExit(fileVo.getPath());
-
-        if (FileStorageMediumFactory.getHandler(prefix.toUpperCase()).isExit(fileVo.getPath())) {
-            List<FileVo> fileVoList = new ArrayList<>();
-            fileVoList.add(fileVo);
-            Map<String, String> params = new HashMap<>();
-            params.put("type",TagentAction.UPGRADE.getValue());
-            params.put("ip", tagentVo.getIp());
-            params.put("data", message.getData());//暂时发现无用data
-            params.put("port", (tagentVo.getPort()).toString());
-            params.put("user", tagentVo.getUser());
-            params.put("fileName", fileVo.getName());
-            params.put("ignoreFile",  versionVo.getIgnoreFile());
-            AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
-            if (accountVo == null) {
-                throw new ResourceCenterAccountNotFoundException();
-            }
-            params.put("credential", accountVo.getPasswordCipher());
-            url = url + "public/api/binary/tagent/upgrade";
+        IFileStorageHandler fileStorageHandler = FileStorageMediumFactory.getHandler(prefix.toUpperCase());
+        if (fileStorageHandler == null) {
+            throw new FileStorageMediumHandlerNotFoundException(prefix);
+        }
+        if (!fileStorageHandler.isExit(fileVo.getPath())) {
+            throw new TagentPkgNotFoundException();
+        }
+        List<FileVo> fileVoList = new ArrayList<>();
+        fileVoList.add(fileVo);
+        Map<String, String> params = new HashMap<>();
+        params.put("type", TagentAction.UPGRADE.getValue());
+        params.put("ip", tagentVo.getIp());
+        params.put("data", message.getData());//暂时发现无用data
+        params.put("port", (tagentVo.getPort()).toString());
+        params.put("user", tagentVo.getUser());
+        params.put("fileName", fileVo.getName());
+        params.put("ignoreFile", versionVo.getIgnoreFile());
+        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
+        if (accountVo == null) {
+            throw new ResourceCenterAccountNotFoundException();
+        }
+        params.put("credential", accountVo.getPasswordCipher());
+        runnerUrl = runnerUrl + "public/api/binary/tagent/upgrade";
 
      /*       try {
                 RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), params);
@@ -107,21 +111,19 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
                 throw new TagentRunnerConnectRefusedException(url, resultJson.getString("Message"));
             }*/
 
-            byte[] upgradeRes = TagentHttpUtil.postFileWithParam(url, params, fileVoList);
-            result = new String(upgradeRes);
-        } else {
-            throw new TagentPkgNotFoundException();//待确定
-        }
+        byte[] upgradeRes = TagentHttpUtil.postFileWithParam(runnerUrl, params, fileVoList);
+        result = new String(upgradeRes);
         return JSON.parseObject(result);
     }
 
     /**
      * 根据os类型和CPU架构
+     *
      * @param type
      * @param cpuBit
      * @return
      */
-    private  String getOsType(String type, String cpuBit){
+    private String getOsType(String type, String cpuBit) {
         String osType;
         if (type.equals("windows")) {
             if (cpuBit.contains("64")) {

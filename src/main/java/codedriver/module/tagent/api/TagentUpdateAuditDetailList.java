@@ -8,7 +8,6 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
-import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class TagentUpdateAuditDetailList extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "tagent升级记录详情查询接口";
+        return "查询tagent升级记录详情";
     }
 
     @Override
@@ -38,23 +37,27 @@ public class TagentUpdateAuditDetailList extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "auditId", type = ApiParamType.LONG,isRequired = true,desc = "记录id"),
+            @Param(name = "auditId", type = ApiParamType.LONG, isRequired = true, desc = "记录id"),
             @Param(name = "status", type = ApiParamType.STRING, desc = "升级状态"),
             @Param(name = "ip", type = ApiParamType.STRING, desc = "ip")
     })
     @Output({
-            @Param(name = "tbodyList", explode = TagentUpgradeAuditVo[].class, desc = "tagent升级记录详情列表")
+            @Param(name = "tbodyList", explode = TagentUpgradeAuditVo[].class, desc = "tagent升级记录详情列表"),
+            @Param(name = "currentPage", type = ApiParamType.INTEGER, desc = "当前页"),
+            @Param(name = "pageSize", type = ApiParamType.INTEGER, desc = "每页数据条目"),
+            @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
-    @Description(desc = "tagent升级记录查询接口")
+    @Description(desc = "查询tagent升级记录接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentUpgradeAuditVo auditVo = JSONObject.toJavaObject(paramObj,TagentUpgradeAuditVo.class);
-        int rowNum = tagentMapper.searchTagentUpgradeAuditCountByAuditIdAndStatusAndIp(auditVo);
+        TagentUpgradeAuditVo auditVo = JSONObject.toJavaObject(paramObj, TagentUpgradeAuditVo.class);
+        JSONObject result = new JSONObject();
+        int rowNum = tagentMapper.searchTagentUpgradeAuditDetailCountByAuditIdAndStatusAndIp(auditVo.getAuditId(), auditVo.getStatus(), auditVo.getIp());
         if (rowNum > 0) {
             auditVo.setRowNum(rowNum);
-            return TableResultUtil.getResult(tagentMapper.searchTagenUpgradeAuditListByAuditIdAndStatusAndIp(auditVo), auditVo);
+            result.put("tbodyList", tagentMapper.searchTagenUpgradeAuditDetailList(auditVo));
         }
-        return null;
+        return result;
     }
 
 }
