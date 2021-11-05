@@ -14,6 +14,7 @@ import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,7 +49,7 @@ public class TagentVersionSaveApi extends PrivateApiComponentBase {
             @Param(name = "version", type = ApiParamType.STRING, isRequired = true, desc = "tagent 版本"),
             @Param(name = "osType", type = ApiParamType.STRING, isRequired = true, desc = "os类型"),
             @Param(name = "osbit", type = ApiParamType.STRING, isRequired = true, desc = "cpu架构"),
-            @Param(name = "fileId", type = ApiParamType.LONG, desc = "文件id"),
+            @Param(name = "fileId", type = ApiParamType.LONG, isRequired = true, desc = "文件id"),
     })
     @Description(desc = "添加tagent版本接口")
     @Override
@@ -62,6 +63,13 @@ public class TagentVersionSaveApi extends PrivateApiComponentBase {
             throw new FileNotFoundException(fileId);
         }
         versionVo.setFileId(fileId);
+        if (StringUtils.equals(osType, "linux")) {
+            versionVo.setIgnoreFile("lib/perl-lib/lib/perl5/JSON.pm");
+        } else if (StringUtils.equals(osType, "win32")) {
+            versionVo.setIgnoreFile("mod/7-Zip lib/perl-lib/lib/perl5/JSON.pm");
+        } else if (StringUtils.equals(osType, "win64")) {
+            versionVo.setIgnoreFile("mod/7-Zip lib/perl-lib/lib/perl5/JSON.pm");
+        }
         tagentMapper.insertTagentPkgFile(versionVo);
         return null;
     }
