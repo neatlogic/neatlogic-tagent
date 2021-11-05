@@ -48,7 +48,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "tagentIpAndPort", type = ApiParamType.STRING, desc = "ip:port,多个tagent使用”，“分隔"),
+            @Param(name = "tagentIpAndPort", type = ApiParamType.STRING, desc = "ip:port,多个tagent使用英文”，“分隔"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段")
     })
     @Description(desc = "批量升级前筛选出对应的tagent信息")
