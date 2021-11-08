@@ -79,7 +79,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
             throw new TagentPkgNotFoundException();
         }
         //判断当前版本高低
-        if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) > 0) {
+        if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) >= 0) {
             throw new TagentVersionIsHigHestException(tagentVo.getVersion());
         }
         List<FileVo> fileVoList = new ArrayList<>();

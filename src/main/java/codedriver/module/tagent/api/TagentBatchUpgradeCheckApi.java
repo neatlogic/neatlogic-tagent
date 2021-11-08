@@ -51,7 +51,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             @Param(name = "tagentIpAndPort", type = ApiParamType.STRING, desc = "ip:port,多个tagent使用英文”，“分隔"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段")
     })
-    @Description(desc = "批量升级前筛选出对应的tagent信息")
+    @Description(desc = "批量升级前筛选出对应的tagent信息,来源于ip：port和网段掩码两个地方")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
 
@@ -68,6 +68,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
         List<TagentVo> tagentVoList = new ArrayList<>();
         List<Long> tagentIdList = new ArrayList<>();
 
+        //ip：port
         if (StringUtils.isNotBlank(tagentIpAndPort)) {
             List<String> ipList = new ArrayList<>();
             List<String> portList = new ArrayList<>();
@@ -92,14 +93,14 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             }
         }
 
+        //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
             List<TagentVo> searchTagentList = tagentMapper.searchTagent(new TagentVo());
-            for (int i = 0; i < searchTagentList.size(); i++) {
-                for (int j = 0; j < networkVoList.size(); j++) {
-                    TagentVo tagentVo = searchTagentList.get(i);
-                    if (IpUtil.isBelongSegment(tagentVo.getIp(), networkVoList.get(j).getNetworkIp(), networkVoList.get(j).getMask()) && !tagentIdList.contains(tagentVo.getId())) {
-                        tagentVoList.add(tagentVo);
-                        tagentIdList.add(tagentVo.getId());
+            for (TagentVo tagent : searchTagentList) {
+                for (NetworkVo networkVo : networkVoList) {
+                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask() )&& !tagentIdList.contains(tagent.getId())) {
+                        tagentVoList.add(tagent);
+                        tagentIdList.add(tagent.getId());
                     }
                 }
             }
