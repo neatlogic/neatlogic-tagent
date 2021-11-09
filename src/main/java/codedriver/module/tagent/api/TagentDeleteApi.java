@@ -1,7 +1,11 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.cmdb.crossover.ResourceCenterAccountCrossoverService;
+import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountHasBeenReferredException;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -14,16 +18,20 @@ import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 @Service
+@Transactional
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class TagentDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
+    @Resource
+    ResourceCenterMapper resourceCenterMapper;
 
     @Override
     public String getName() {
@@ -41,7 +49,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "id",isRequired = true,type = ApiParamType.LONG,desc = "tagent id")
+            @Param(name = "id", isRequired = true, type = ApiParamType.LONG, desc = "tagent id")
     })
     @Output({
     })
@@ -54,8 +62,16 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
             if (tagent == null) {
                 throw new TagentIdNotFoundException(id);
             }
-            if ( !StringUtils.equals(tagent.getStatus(), TagentStatus.CONNECTED.getValue())) {
+            if (!StringUtils.equals(tagent.getStatus(), TagentStatus.CONNECTED.getValue())) {
                 tagentMapper.deleteTagentById(id);
+                tagentMapper.deleteAllIpByTagentId(id);
+                //删掉该tagent account
+                try {
+                    ResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(ResourceCenterAccountCrossoverService.class);
+                    accountService.deleteAccount(tagent.getAccountId(), true);
+                } catch (ResourceCenterAccountHasBeenReferredException ex) {
+                    //如果资源中心
+                }
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }
