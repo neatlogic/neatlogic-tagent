@@ -104,8 +104,8 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
                 protected void execute() {
                     try {
                         //获取对应的安装包版本
-                        TagentVersionVo versionVo = tagentService.findTagentPkgVersion(tagentVo, pkgVersion, true);
-                        tagentService.batchUpdradeTagent(tagentVo, versionVo, auditId);
+                        TagentVersionVo versionVo = tagentService.findTagentPkgVersion(tagentVo, pkgVersion);
+                        tagentService.batchUpdradeTagent(tagentVo, versionVo, pkgVersion, auditId);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     } finally {

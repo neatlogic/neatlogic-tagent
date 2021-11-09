@@ -14,11 +14,10 @@ import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.exception.TagentPkgNotFoundException;
-import codedriver.framework.tagent.exception.TagentVersionIsHigHestException;
+import codedriver.framework.tagent.exception.TagentPkgVersionAndDefaultVersionAreNotfoundException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.tagent.util.TagentHttpUtil;
-import codedriver.framework.tagent.util.TagentVersionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +64,10 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         String result = StringUtils.EMPTY;
         String pkgVersion = message.getPkgVersion();
         //获取对应的安装包版本
-        TagentVersionVo versionVo = tagentService.findTagentPkgVersion(tagentVo, pkgVersion, false);
+        TagentVersionVo versionVo = tagentService.findTagentPkgVersion(tagentVo, pkgVersion);
+        if (versionVo == null) {
+            throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(pkgVersion);
+        }
         FileVo fileVo = fileMapper.getFileById(versionVo.getFileId());
         if (fileVo == null) {
             throw new TagentPkgNotFoundException(versionVo.getFileId());
@@ -78,10 +80,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         if (!fileStorageHandler.isExit(fileVo.getPath())) {
             throw new TagentPkgNotFoundException();
         }
-        //判断当前版本高低
-        if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) >= 0) {
-            throw new TagentVersionIsHigHestException(tagentVo.getVersion());
-        }
+
         List<FileVo> fileVoList = new ArrayList<>();
         fileVoList.add(fileVo);
         Map<String, String> params = new HashMap<>();
@@ -98,16 +97,18 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         params.put("credential", accountVo.getPasswordCipher());
         runnerUrl = runnerUrl + "public/api/binary/tagent/upgrade";
 
-     /*       try {
-                RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), params);
-                result = RestUtil.sendRequest(restVo);
-                resultJson = JSONObject.parseObject(result);
-                if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                    throw new TagentActionFailedEcexption(url + ":" + resultJson.getString("Message"));
-                }
-            } catch (Exception ex) {
-                throw new TagentRunnerConnectRefusedException(url, resultJson.getString("Message"));
-            }*/
+/*        JSONObject resultJson = new JSONObject();
+        try {
+            RestVo restVo = new RestVo(runnerUrl, AuthenticateType.BASIC.getValue(), (JSONObject) JSON.toJSON(params));
+
+            result = RestUtil.postFileWithParam(restVo,fileVoList);
+            resultJson = JSONObject.parseObject(result);
+            if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
+                throw new TagentActionFailedEcexption(runnerUrl + ":" + resultJson.getString("Message"));
+            }
+        } catch (Exception ex) {
+            throw new TagentRunnerConnectRefusedException(runnerUrl, resultJson.getString("Message"));
+        }*/
 
         byte[] upgradeRes = TagentHttpUtil.postFileWithParam(runnerUrl, params, fileVoList);
         result = new String(upgradeRes);
