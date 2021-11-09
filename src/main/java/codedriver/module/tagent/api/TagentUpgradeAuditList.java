@@ -8,6 +8,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
+import codedriver.framework.util.TableResultUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -49,13 +50,12 @@ public class TagentUpgradeAuditList extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentUpgradeAuditVo auditVo = JSONObject.toJavaObject(paramObj, TagentUpgradeAuditVo.class);
-        JSONObject result = new JSONObject();
-        int rowNum = tagentMapper.searchTagentUpgradeAuditCountByUser(auditVo.getFcuName());
+        int rowNum = tagentMapper.searchTagentUpgradeAuditCountByUserName(auditVo.getFcuName());
         if (rowNum > 0) {
             auditVo.setRowNum(rowNum);
-            result.put("tbodyList", tagentMapper.searchTagenUpgradeAuditList(auditVo));
+            return TableResultUtil.getResult(tagentMapper.searchTagenUpgradeAuditList(auditVo), auditVo);
         }
-        return result;
+        return new JSONObject();
     }
 
 }

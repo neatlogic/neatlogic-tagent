@@ -30,7 +30,7 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
             throw new TagentPkgVersionIdNotFoundException(pkgVersionId);
         }
         tagentMapper.deleteTagentVersionById(pkgVersionId);
-        return tagentMapper.getTagentPkgFileIdUsedCount(fileId) <= 1;
+        return tagentMapper.getTagentPkgFileIdUsedCount(fileId) <= 0;
     }
 
     @Override
