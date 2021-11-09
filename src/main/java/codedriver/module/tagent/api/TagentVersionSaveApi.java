@@ -63,7 +63,7 @@ public class TagentVersionSaveApi extends PrivateApiComponentBase {
             throw new FileNotFoundException(fileId);
         }
         versionVo.setFileId(fileId);
-        if (StringUtils.equals(osType, "linux")) {
+        if (StringUtils.equals(osType, "linux")) {//以osType确定升级时的忽略目录或文件  -by波哥
             versionVo.setIgnoreFile("lib/perl-lib/lib/perl5/JSON.pm");
         } else if (StringUtils.equals(osType, "win32")) {
             versionVo.setIgnoreFile("mod/7-Zip lib/perl-lib/lib/perl5/JSON.pm");

@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class TagentBatchInputCmdbApi extends PrivateApiComponentBase {
+public class TagentBatchRegisterToCmdbApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
