@@ -4,7 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
-import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
+import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class TagentBatchInputCmdbApi extends PrivateApiComponentBase {
+public class TagentBatchRegisterToCmdbApi extends PublicApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
@@ -48,8 +48,8 @@ public class TagentBatchInputCmdbApi extends PrivateApiComponentBase {
         tagentVo.setStatus("connected");
         List<TagentVo> tagentVoList = tagentMapper.searchTagent(tagentVo);
         if (CollectionUtils.isNotEmpty(tagentVoList)) {
-            for (TagentVo tagentVo1 : tagentVoList) {
-                AfterRegisterJobManager.executeAll(tagentVo1);
+            for (TagentVo tagentVoTmp : tagentVoList) {
+                AfterRegisterJobManager.executeAll(tagentVoTmp);
             }
         }
         return null;
