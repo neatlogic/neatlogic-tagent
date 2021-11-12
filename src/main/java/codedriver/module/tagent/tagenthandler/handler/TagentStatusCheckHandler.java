@@ -65,26 +65,6 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         } catch (JSONException ex) {
             throw new TagentRunnerConnectRefusedException(url, result);
         }
-        /*
-        Long groupId = tagentVo.getRunnerGroupId();
-        RunnerGroupVo groupVo = runnerMapper.getRunnerGroupById(groupId);
-        if (groupVo != null) {
-            List<RunnerVo> runnerVoList = groupVo.getRunnerList();
-            if (CollectionUtils.isNotEmpty(runnerVoList)) {
-                for (RunnerVo runnerItem : runnerVoList) {
-                    try {
-                        RestVo restVo = new RestVo(runnerItem.getUrl() + "api/rest/tagent/status/check", AuthenticateType.BUILDIN.getValue(), paramJson);
-                        String result = RestUtil.sendRequest(restVo);
-                        JSONObject resultJson = JSONObject.parseObject(result);
-                        if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
-                            tagentStatus = TagentStatus.CONNECTED.getValue();
-                        }
-                    } catch (JSONException ignored) {
-                    }
-                }
-            }
-        }
-         */
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
         tagent.setId(tagentVo.getId());
