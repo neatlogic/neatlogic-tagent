@@ -67,7 +67,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
     @Description(desc = "注册tagent接口")
     @Input({
-            @Param(name = "tagentId", type = ApiParamType.LONG, desc = "tagentId,非必填"),
+            @Param(name = "tagentId", type = ApiParamType.NOAUTH, desc = "tagentId,非必填"),
             @Param(name = "name", type = ApiParamType.STRING, desc = "tagent名称"),
             @Param(name = "ip", type = ApiParamType.STRING, desc = "tagentIP"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "tagent端口"),
