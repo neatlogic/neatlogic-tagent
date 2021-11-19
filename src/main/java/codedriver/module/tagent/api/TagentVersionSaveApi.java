@@ -50,6 +50,7 @@ public class TagentVersionSaveApi extends PrivateApiComponentBase {
             @Param(name = "osType", type = ApiParamType.STRING, isRequired = true, desc = "os类型"),
             @Param(name = "osbit", type = ApiParamType.STRING, isRequired = true, desc = "cpu架构"),
             @Param(name = "fileId", type = ApiParamType.LONG, isRequired = true, desc = "文件id"),
+            @Param(name = "isOverWrite", type = ApiParamType.INTEGER, isRequired = true, desc = "是否覆盖(0不覆盖，1覆盖)（用于在版本、OS类型、cpu架构的情况下，是否覆盖原有文件）"),
     })
     @Description(desc = "添加tagent版本接口")
     @Override
@@ -62,15 +63,22 @@ public class TagentVersionSaveApi extends PrivateApiComponentBase {
         if (fileMapper.getFileById(fileId) == null) {
             throw new FileNotFoundException(fileId);
         }
+        TagentVersionVo tagentVersionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(version, osType, osbit);
+        //查看是否有相同版本、OS类型、cpu架构的安装包，若相同则返回1，前端则会提示对应的安装包已存在，是否选择覆盖，当客户选择覆盖时，则可以传送isOverWrite=1进行覆盖
+        if (tagentVersionVo != null) {
+            if (paramObj.getInteger("isOverWrite") == 0) {
+                return 1;
+            }
+
+            versionVo.setId(tagentVersionVo.getId());
+        }
         versionVo.setFileId(fileId);
         if (StringUtils.equals(osType, "linux")) {//以osType确定升级时的忽略目录或文件  -by波哥
             versionVo.setIgnoreFile("lib/perl-lib/lib/perl5/JSON.pm");
-        } else if (StringUtils.equals(osType, "win32")) {
-            versionVo.setIgnoreFile("mod/7-Zip lib/perl-lib/lib/perl5/JSON.pm");
-        } else if (StringUtils.equals(osType, "win64")) {
+        } else if (StringUtils.equals(osType, "windows")) {
             versionVo.setIgnoreFile("mod/7-Zip lib/perl-lib/lib/perl5/JSON.pm");
         }
-        tagentMapper.insertTagentPkgFile(versionVo);
+        tagentMapper.replaceTagentPkgFile(versionVo);
         return null;
     }
 
