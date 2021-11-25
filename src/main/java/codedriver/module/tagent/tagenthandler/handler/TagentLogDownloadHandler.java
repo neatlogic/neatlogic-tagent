@@ -71,8 +71,8 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
         InputStream inputStream = null;
         url = url + "/api/binary/tagent/log/download";
         try {
-            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), params);
-            result = RestUtil.sendRequest(restVo);
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(params).build();
+            result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Data")) {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
