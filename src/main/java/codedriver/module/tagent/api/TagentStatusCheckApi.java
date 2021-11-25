@@ -11,10 +11,15 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
+import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
+import codedriver.framework.tagent.enums.TagentStatus;
+import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -25,6 +30,9 @@ import javax.annotation.Resource;
 public class TagentStatusCheckApi extends PrivateApiComponentBase {
     @Resource
     TagentService tagentService;
+
+    @Autowired
+    TagentMapper tagentMapper;
 
     @Override
     public String getName() {
@@ -51,6 +59,15 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
+        TagentVo tagentVo = tagentMapper.getTagentById(message.getTagentId());
+        if (tagentVo == null) {
+            throw new TagentIdNotFoundException(message.getTagentId());
+        }
+        if (tagentVo.getRunnerId()==null) {
+            tagentVo.setDieconnectCause("runner 不存在");
+            tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
+            tagentMapper.updateTagent(tagentVo);
+        }
         return tagentService.execTagentCmd(message, TagentAction.STATUS_CHECK.getValue());
     }
 }

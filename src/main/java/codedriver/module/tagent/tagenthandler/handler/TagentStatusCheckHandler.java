@@ -58,12 +58,12 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
             RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), paramJson);
             result = RestUtil.sendRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
-            if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                tagentVo.setDieconnectCause(result);
+            if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
+                tagentStatus = TagentStatus.CONNECTED.getValue();
+            } else {
+                tagentVo.setDieconnectCause("心跳不通");
                 tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
                 tagentMapper.updateTagent(tagentVo);
-            } else {
-                tagentStatus = TagentStatus.CONNECTED.getValue();
             }
         } catch (JSONException ex) {
             throw new TagentRunnerConnectRefusedException(url, result);
