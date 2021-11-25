@@ -7,12 +7,12 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.enums.TagentStatus;
+import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +59,14 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
             result = RestUtil.sendRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-//                throw new TagentRunnerConnectRefusedException(url, result);
-            }
-            tagentStatus = TagentStatus.CONNECTED.getValue();
-        } catch (JSONException ex) {
-            if (StringUtils.equals( tagentStatus,TagentStatus.DISCONNECTED.getValue())) {
                 tagentVo.setDieconnectCause(result);
+                tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
                 tagentMapper.updateTagent(tagentVo);
+            } else {
+                tagentStatus = TagentStatus.CONNECTED.getValue();
             }
-//            throw new TagentRunnerConnectRefusedException(url, result);
+        } catch (JSONException ex) {
+            throw new TagentRunnerConnectRefusedException(url, result);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
