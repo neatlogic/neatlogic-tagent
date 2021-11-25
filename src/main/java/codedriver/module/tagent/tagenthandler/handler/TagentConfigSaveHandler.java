@@ -59,8 +59,8 @@ public class TagentConfigSaveHandler extends TagentHandlerBase {
         url = url + "api/rest/tagent/config/save";
         String result = null;
         try {
-            RestVo restVo = new RestVo(url, AuthenticateType.BUILDIN.getValue(), paramJson);
-            result = RestUtil.sendRequest(restVo);
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
+            result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));

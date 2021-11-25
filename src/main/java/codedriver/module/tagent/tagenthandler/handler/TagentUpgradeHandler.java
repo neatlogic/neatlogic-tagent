@@ -3,31 +3,33 @@ package codedriver.module.tagent.tagenthandler.handler;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.dto.RestVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
+import codedriver.framework.tagent.exception.TagentActionFailedEcexption;
 import codedriver.framework.tagent.exception.TagentPkgNotFoundException;
 import codedriver.framework.tagent.exception.TagentPkgVersionAndDefaultVersionAreNotfoundException;
+import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
-import codedriver.framework.tagent.util.TagentHttpUtil;
-import com.alibaba.fastjson.JSON;
+import codedriver.framework.util.RestUtil;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class TagentUpgradeHandler extends TagentHandlerBase {
@@ -83,7 +85,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
 
         List<FileVo> fileVoList = new ArrayList<>();
         fileVoList.add(fileVo);
-        Map<String, String> params = new HashMap<>();
+        JSONObject params = new JSONObject();
         params.put("type", TagentAction.UPGRADE.getValue());
         params.put("ip", tagentVo.getIp());
         params.put("port", (tagentVo.getPort()).toString());
@@ -96,23 +98,18 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         }
         params.put("credential", accountVo.getPasswordCipher());
         runnerUrl = runnerUrl + "public/api/binary/tagent/upgrade";
-
-/*        JSONObject resultJson = new JSONObject();
+        JSONObject resultJson = new JSONObject();
         try {
-            RestVo restVo = new RestVo(runnerUrl, AuthenticateType.BASIC.getValue(), (JSONObject) JSON.toJSON(params));
-
-            result = RestUtil.postFileWithParam(restVo,fileVoList);
+            RestVo restVo = new RestVo.Builder(runnerUrl, AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).setContentType(RestUtil.MULTI_FORM_DATA).build();
+            result = RestUtil.sendPostRequest(restVo);
             resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedEcexption(runnerUrl + ":" + resultJson.getString("Message"));
             }
-        } catch (Exception ex) {
-            throw new TagentRunnerConnectRefusedException(runnerUrl, resultJson.getString("Message"));
-        }*/
-
-        byte[] upgradeRes = TagentHttpUtil.postFileWithParam(runnerUrl, params, fileVoList);
-        result = new String(upgradeRes);
-        return JSON.parseObject(result);
+            return resultJson;
+        } catch (JSONException ex) {
+            throw new TagentRunnerConnectRefusedException(runnerUrl, result);
+        }
     }
 
 }
