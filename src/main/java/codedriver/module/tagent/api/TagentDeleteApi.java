@@ -1,7 +1,12 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.cmdb.crossover.ResourceCenterAccountCrossoverService;
+import codedriver.framework.cmdb.crossover.IResourceCenterAccountCrossoverService;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountHasBeenReferredException;
 import codedriver.framework.common.constvalue.ApiParamType;
@@ -67,7 +72,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 tagentMapper.deleteAllIpByTagentId(id);
                 //删掉该tagent account
                 try {
-                    ResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(ResourceCenterAccountCrossoverService.class);
+                    IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
                     accountService.deleteAccount(tagent.getAccountId(), true);
                 } catch (ResourceCenterAccountHasBeenReferredException ex) {
                     //如果资源中心
