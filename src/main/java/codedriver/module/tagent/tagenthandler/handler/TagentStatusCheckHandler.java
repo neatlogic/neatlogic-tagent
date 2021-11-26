@@ -54,15 +54,11 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         url += "api/rest/tagent/status/check";
         String result = null;
         try {
-            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();;
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
                 tagentStatus = TagentStatus.CONNECTED.getValue();
-            } else {
-                tagentVo.setDieconnectCause("心跳不通");
-                tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-                tagentMapper.updateTagent(tagentVo);
             }
         } catch (JSONException ex) {
             tagentVo.setDieconnectCause("心跳不通");
