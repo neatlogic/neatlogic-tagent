@@ -83,7 +83,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
         //插入此次升级记录
         TagentUpgradeAuditVo audit = new TagentUpgradeAuditVo();
         audit.setCount(tagentVoList.size());
-        audit.setUuid(UserContext.get().getUserUuid());
+        audit.setFcu(UserContext.get().getUserUuid());
         StringBuilder stringBuilder = new StringBuilder();
         if (CollectionUtils.isNotEmpty(networkVoList)) {
             for (int i = 0; i < networkVoList.size(); i++) {
