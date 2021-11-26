@@ -64,7 +64,7 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
         if (tagentVo.getRunnerId()==null) {
-            tagentVo.setDieconnectCause("runner 不存在");
+            tagentVo.setDisConnectReasion("runner 不存在");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
             tagentMapper.updateTagent(tagentVo);
         }

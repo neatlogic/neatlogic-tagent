@@ -1,6 +1,7 @@
 package codedriver.module.tagent.tagenthandler.handler;
 
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
@@ -12,6 +13,7 @@ import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,25 +47,25 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        String tagentStatus = TagentStatus.DISCONNECTED.getValue();
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
+        String tagentStatus = TagentStatus.CONNECTED.getValue();
         JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
         paramJson.put("type", message.getName());
-        url += "api/rest/tagent/status/check";
+        String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
         String result = null;
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
-            if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
-                tagentStatus = TagentStatus.CONNECTED.getValue();
+            if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
+                tagentStatus = TagentStatus.DISCONNECTED.getValue();
+            } else {
+                tagentStatus = StringUtils.EMPTY;
             }
         } catch (JSONException ex) {
-            tagentVo.setDieconnectCause("心跳不通");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-            tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();

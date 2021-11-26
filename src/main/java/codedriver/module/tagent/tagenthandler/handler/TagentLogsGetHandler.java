@@ -9,6 +9,7 @@ import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -34,7 +35,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
@@ -44,14 +45,14 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
         paramJson.put("credential", accountVo.getPasswordCipher());
-        url = url + "api/rest/tagent/log/get";
+        String url = runnerVo.getUrl() + "api/rest/tagent/log/get";
         String result = null;
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
+                throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
             }
             return resultJson.getJSONObject("Return");
         } catch (Exception ex) {
