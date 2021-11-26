@@ -67,6 +67,7 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
             tagentVo.setDisConnectReasion("runner 不存在");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
             tagentMapper.updateTagent(tagentVo);
+            return null;
         }
         return tagentService.execTagentCmd(message, TagentAction.STATUS_CHECK.getValue());
     }

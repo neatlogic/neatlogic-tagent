@@ -47,33 +47,35 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-        String tagentStatus = TagentStatus.DISCONNECTED.getValue();
+        String tagentStatus = TagentStatus.CONNECTED.getValue();
         JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
         paramJson.put("type", message.getName());
         String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
         String result = null;
+        String disConnectReason = "";
+        JSONObject resultJson = null;
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
-            JSONObject resultJson = JSONObject.parseObject(result);
+            resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 tagentStatus = TagentStatus.DISCONNECTED.getValue();
-                tagentVo.setDisConnectReasion("心跳不通");
-            } else {
-                tagentVo.setDisConnectReasion("");
+                disConnectReason = resultJson.getString("Message");
             }
         } catch (JSONException ex) {
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-            tagentVo.setDisConnectReasion("心跳不通");
-        }finally {
+            if (resultJson.containsKey("Message")) {
+                disConnectReason = resultJson.getString("Message");
+            }
+        } finally {
+            tagentVo.setDisConnectReasion(disConnectReason);
             tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
         tagent.setId(tagentVo.getId());
-        tagent.setStatus(tagentStatus);
         tagentService.updateTagentById(tagent);
         return paramJson;
     }

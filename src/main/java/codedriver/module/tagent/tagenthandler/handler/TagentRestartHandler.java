@@ -61,7 +61,6 @@ public class TagentRestartHandler extends TagentHandlerBase {
         String url = runnerVo.getUrl() + "api/rest/tagent/restart";
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
-            ;
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {

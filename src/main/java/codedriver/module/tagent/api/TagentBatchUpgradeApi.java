@@ -1,7 +1,6 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
-import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.runner.NetworkVo;
@@ -83,7 +82,6 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
         //插入此次升级记录
         TagentUpgradeAuditVo audit = new TagentUpgradeAuditVo();
         audit.setCount(tagentVoList.size());
-        audit.setFcu(UserContext.get().getUserUuid());
         StringBuilder stringBuilder = new StringBuilder();
         if (CollectionUtils.isNotEmpty(networkVoList)) {
             for (int i = 0; i < networkVoList.size(); i++) {
