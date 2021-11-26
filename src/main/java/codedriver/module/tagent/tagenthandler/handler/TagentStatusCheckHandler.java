@@ -13,7 +13,6 @@ import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-        String tagentStatus = TagentStatus.CONNECTED.getValue();
+        String tagentStatus = TagentStatus.DISCONNECTED.getValue();
         JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
@@ -61,11 +60,15 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 tagentStatus = TagentStatus.DISCONNECTED.getValue();
+                tagentVo.setDisConnectReasion("心跳不通");
             } else {
-                tagentStatus = StringUtils.EMPTY;
+                tagentVo.setDisConnectReasion("");
             }
         } catch (JSONException ex) {
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
+            tagentVo.setDisConnectReasion("心跳不通");
+        }finally {
+            tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
