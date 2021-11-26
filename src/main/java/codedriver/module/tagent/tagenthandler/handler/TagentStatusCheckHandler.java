@@ -7,7 +7,6 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.enums.TagentStatus;
-import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
@@ -66,7 +65,9 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
                 tagentMapper.updateTagent(tagentVo);
             }
         } catch (JSONException ex) {
-            throw new TagentRunnerConnectRefusedException(url, result);
+            tagentVo.setDieconnectCause("心跳不通");
+            tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
+            tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
