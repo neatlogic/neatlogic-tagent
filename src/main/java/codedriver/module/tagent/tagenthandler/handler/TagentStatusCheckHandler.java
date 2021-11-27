@@ -65,11 +65,11 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
                 disConnectReason = resultJson.getString("Message");
             }
         } catch (JSONException ex) {
-            tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-            if (resultJson.containsKey("Message")) {
-                disConnectReason = resultJson.getString("Message");
-            }
+            logger.error( ex.getMessage(), ex );
+            tagentStatus = TagentStatus.DISCONNECTED.getValue();
+            disConnectReason = "runner返回："+result;
         } finally {
+            tagentVo.setStatus(tagentStatus);
             tagentVo.setDisConnectReasion(disConnectReason);
             tagentMapper.updateTagent(tagentVo);
         }
