@@ -70,7 +70,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
             disConnectReason = "runner返回："+result;
         } finally {
             tagentVo.setStatus(tagentStatus);
-            tagentVo.setDisConnectReasion(disConnectReason);
+            tagentVo.setDisConnectReason(disConnectReason);
             tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
