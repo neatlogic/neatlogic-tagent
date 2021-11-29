@@ -1,13 +1,13 @@
 package codedriver.module.tagent.tagenthandler.handler;
 
-import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
+import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.enums.TagentStatus;
-import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
@@ -27,7 +27,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
     private TagentService tagentService;
 
     @Autowired
-    private RunnerMapper runnerMapper;
+    private TagentMapper tagentMapper;
 
 
     @Override
@@ -46,29 +46,36 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
-        String tagentStatus = TagentStatus.DISCONNECTED.getValue();
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
+        String tagentStatus = TagentStatus.CONNECTED.getValue();
         JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
         paramJson.put("type", message.getName());
-        url += "api/rest/tagent/status/check";
+        String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
         String result = null;
+        String disConnectReason = "";
+        JSONObject resultJson = null;
         try {
-            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();;
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
-            JSONObject resultJson = JSONObject.parseObject(result);
+            resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentRunnerConnectRefusedException(url, result);
+                tagentStatus = TagentStatus.DISCONNECTED.getValue();
+                disConnectReason = resultJson.getString("Message");
             }
-            tagentStatus = TagentStatus.CONNECTED.getValue();
         } catch (JSONException ex) {
-            throw new TagentRunnerConnectRefusedException(url, result);
+            logger.error( ex.getMessage(), ex );
+            tagentStatus = TagentStatus.DISCONNECTED.getValue();
+            disConnectReason = "runner返回："+result;
+        } finally {
+            tagentVo.setStatus(tagentStatus);
+            tagentVo.setDisConnectReason(disConnectReason);
+            tagentMapper.updateTagent(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         TagentVo tagent = new TagentVo();
         tagent.setId(tagentVo.getId());
-        tagent.setStatus(tagentStatus);
         tagentService.updateTagentById(tagent);
         return paramJson;
     }

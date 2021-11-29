@@ -9,6 +9,7 @@ import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -45,7 +46,7 @@ public class TagentRestartHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String runnerUrl) throws Exception {
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
         //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
@@ -57,13 +58,13 @@ public class TagentRestartHandler extends TagentHandlerBase {
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", tagentVo.getPort());
         String result = null;
-        String url = runnerUrl + "api/rest/tagent/restart";
+        String url = runnerVo.getUrl() + "api/rest/tagent/restart";
         try {
-            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();;
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedEcexption(url + ":" + resultJson.getString("Message"));
+                throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
             }
             return resultJson.getJSONObject("Return");
         } catch (JSONException ex) {

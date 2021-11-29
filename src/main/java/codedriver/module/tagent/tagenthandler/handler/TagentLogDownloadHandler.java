@@ -10,6 +10,7 @@ import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -55,7 +56,7 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
     }
 
     @Override
-    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception {
+    public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
         JSONObject params = JSONObject.parseObject(JSONObject.toJSONString(message));
         params.put("type", message.getName());
         params.put("ip", tagentVo.getIp());
@@ -69,13 +70,13 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
         String result = null;
         ServletOutputStream outputStream = null;
         InputStream inputStream = null;
-        url = url + "/api/binary/tagent/log/download";
+        String url = runnerVo.getUrl() + "/api/binary/tagent/log/download";
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(params).build();
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Data")) {
-                throw new TagentActionFailedEcexption(restVo.getUrl() + ":" + resultJson.getString("Message"));
+                throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
             }
             String dataStr = resultJson.getString("Data");
             inputStream = new ByteArrayInputStream(dataStr.getBytes());
