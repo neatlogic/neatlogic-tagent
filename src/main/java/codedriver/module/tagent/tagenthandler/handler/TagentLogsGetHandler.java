@@ -18,6 +18,7 @@ import codedriver.framework.tagent.exception.TagentActionFailedEcexption;
 import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -55,7 +56,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
                 throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
             }
             return resultJson.getJSONObject("Return");
-        } catch (Exception ex) {
+        } catch (JSONException ex) {
             throw new TagentRunnerConnectRefusedException(url, result);
         }
     }
