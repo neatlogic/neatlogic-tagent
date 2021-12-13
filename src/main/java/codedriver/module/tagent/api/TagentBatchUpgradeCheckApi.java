@@ -22,7 +22,12 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -70,7 +75,6 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
         }
 
         List<TagentVo> tagentVoList = new ArrayList<>();
-        List<Long> tagentIdList = new ArrayList<>();
 
         //ip：port
         if (CollectionUtils.isNotEmpty(ipPortList)) {
@@ -79,10 +83,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
                 if (tagentVo == null) {
                     continue;
                 }
-                if (!tagentIdList.contains(tagentVo.getId())) {
-                    tagentVoList.add(tagentVo);
-                    tagentIdList.add(tagentVo.getId());
-                }
+                tagentVoList.add(tagentVo);
             }
         }
 
@@ -91,19 +92,18 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             List<TagentVo> searchTagentList = tagentMapper.searchTagent(new TagentVo());
             for (TagentVo tagent : searchTagentList) {
                 for (NetworkVo networkVo : networkVoList) {
-                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdList.contains(tagent.getId())) {
+                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())) {
                         tagentVoList.add(tagent);
-                        tagentIdList.add(tagent.getId());
                     }
                 }
             }
         }
+        List<TagentVo> returnList = tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(p -> p.getIp())))), ArrayList::new));
 
-
-        if (CollectionUtils.isEmpty(tagentVoList)) {
+        if (CollectionUtils.isEmpty(returnList)) {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
-        return tagentVoList;
+        return returnList;
     }
 
 }
