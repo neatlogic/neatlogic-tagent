@@ -1,6 +1,7 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
 import codedriver.framework.dto.runner.NetworkVo;
@@ -17,7 +18,6 @@ import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIp
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,20 +48,24 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "tagentIpAndPort", type = ApiParamType.STRING, desc = "ip:port,多个tagent使用英文”，“分隔"),
+            @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段")
     })
     @Description(desc = "批量升级前筛选出对应的tagent信息,来源于ip：port和网段掩码两个地方")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
 
-        String tagentIpAndPort = paramObj.getString("tagentIpAndPort");
+        JSONArray ipPortArray = paramObj.getJSONArray("ipPortList");
         JSONArray networkVoArray = paramObj.getJSONArray("networkVoList");
         List<NetworkVo> networkVoList = null;
+        List<IpVo> ipPortList = null;
         if (CollectionUtils.isNotEmpty(networkVoArray)) {
             networkVoList = networkVoArray.toJavaList(NetworkVo.class);
         }
-        if (StringUtils.isBlank(tagentIpAndPort) && CollectionUtils.isEmpty(networkVoList)) {
+        if (CollectionUtils.isNotEmpty(ipPortArray)) {
+            ipPortList = ipPortArray.toJavaList(IpVo.class);
+        }
+        if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
 
@@ -69,26 +73,15 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
         List<Long> tagentIdList = new ArrayList<>();
 
         //ip：port
-        if (StringUtils.isNotBlank(tagentIpAndPort)) {
-            List<String> ipList = new ArrayList<>();
-            List<String> portList = new ArrayList<>();
-            String[] tagentArray = tagentIpAndPort.split(",");
-
-            for (String ipAndPortString : tagentArray) {
-                String ipAndPort[] = ipAndPortString.split(":");
-                if (ipAndPort.length == 2) {
-                    ipList.add(ipAndPort[0]);
-                    portList.add(ipAndPort[1]);
+        if (CollectionUtils.isNotEmpty(ipPortList)) {
+            for (IpVo ipVo : ipPortList) {
+                TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipVo.getIp(), ipVo.getPort());
+                if (tagentVo == null) {
+                    continue;
                 }
-            }
-            if (CollectionUtils.isNotEmpty(ipList) && CollectionUtils.isNotEmpty(portList) && ipList.size() == portList.size()) {
-                for (int i = 0; i < ipList.size(); i++) {
-                    TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipList.get(i), Integer.valueOf(portList.get(i)));
-                    if (tagentVo != null) {
-                        tagentVoList.add(tagentVo);
-                        tagentIdList.add(tagentVo.getId());
-
-                    }
+                if (!tagentIdList.contains(tagentVo.getId())) {
+                    tagentVoList.add(tagentVo);
+                    tagentIdList.add(tagentVo.getId());
                 }
             }
         }
@@ -98,7 +91,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             List<TagentVo> searchTagentList = tagentMapper.searchTagent(new TagentVo());
             for (TagentVo tagent : searchTagentList) {
                 for (NetworkVo networkVo : networkVoList) {
-                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask() )&& !tagentIdList.contains(tagent.getId())) {
+                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdList.contains(tagent.getId())) {
                         tagentVoList.add(tagent);
                         tagentIdList.add(tagent.getId());
                     }
