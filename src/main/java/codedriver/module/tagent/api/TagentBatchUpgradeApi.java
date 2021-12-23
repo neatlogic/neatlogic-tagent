@@ -31,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 @Service
 @Transactional
@@ -99,6 +101,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
                     continue;
                 }
                 tagentVoList.add(tagentVo);
+                tagentVoList= tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(TagentVo::getIp)))), ArrayList::new));
                 tagentIdSet.add(tagentVo.getId());
             }
             this.batchUpgradeTagent(tagentVoList, pkgVersion, auditId);
@@ -106,7 +109,6 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
 
         //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
-            Map<String, Integer> networkVoMap = networkVoList.stream().collect(Collectors.toMap(NetworkVo::getNetworkIp, NetworkVo::getMask));
             TagentVo tagentVo = new TagentVo();
             int tagentCount = tagentMapper.searchTagentCount(tagentVo);
             tagentVo.setPageSize(100);
@@ -117,12 +119,12 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
                 tagentVo.setCurrentPage(i);
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
-                    networkVoMap.forEach((k, v) -> {
-                        if (IpUtil.isBelongSegment(tagent.getIp(), k, v) && !tagentIdSet.contains(tagent.getId())) {
+                    for (NetworkVo networkVo : networkVoList) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdSet.contains(tagent.getId())) {
                             tagentVoList.add(tagent);
                             tagentIdSet.add(tagent.getId());
                         }
-                    });
+                    }
                 }
                 this.batchUpgradeTagent(tagentVoList, pkgVersion, auditId);
             }

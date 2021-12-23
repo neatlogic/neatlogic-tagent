@@ -22,11 +22,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -73,7 +72,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
 
-        List<TagentVo> tagentVoList = new ArrayList<>();
+        Set<Long> idSet = new HashSet<>();
 
         //ip：port
         if (CollectionUtils.isNotEmpty(ipPortList)) {
@@ -82,13 +81,12 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
                 if (tagentVo == null) {
                     continue;
                 }
-                tagentVoList.add(tagentVo);
+                idSet.add(tagentVo.getId());
             }
         }
 
         //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
-            Map<String, Integer> networkVoMap = networkVoList.stream().collect(Collectors.toMap(NetworkVo::getNetworkIp, NetworkVo::getMask));
             TagentVo tagentVo = new TagentVo();
             int tagentCount = tagentMapper.searchTagentCount(tagentVo);
             tagentVo.setPageSize(100);
@@ -98,20 +96,19 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
                 tagentVo.setCurrentPage(i);
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
-                    networkVoMap.forEach((k, v) -> {
-                        if (IpUtil.isBelongSegment(tagent.getIp(), k, v)) {
-                            tagentVoList.add(tagent);
+                    for (NetworkVo networkVo : networkVoList) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())&&!idSet.contains(tagent.getId())) {
+                            idSet.add(tagent.getId());
                         }
-                    });
+                    }
                 }
             }
         }
-        List<TagentVo> returnList = tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(p -> p.getIp())))), ArrayList::new));
 
-        if (CollectionUtils.isEmpty(returnList)) {
+        if (CollectionUtils.isEmpty(idSet)) {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
-        return returnList.size();
+        return idSet.size();
     }
 
 }
