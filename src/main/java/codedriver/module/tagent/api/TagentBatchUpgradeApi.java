@@ -106,7 +106,6 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
 
         //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
-            List<TagentVo> tagentVoList = new ArrayList<>();
             Map<String, Integer> networkVoMap = networkVoList.stream().collect(Collectors.toMap(NetworkVo::getNetworkIp, NetworkVo::getMask));
             TagentVo tagentVo = new TagentVo();
             int tagentCount = tagentMapper.searchTagentCount(tagentVo);
@@ -114,6 +113,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
             List<TagentVo> searchTagentList = new ArrayList<>();
             int pageCount = PageUtil.getPageCount(tagentCount, 100);
             for (int i = 1; i <= pageCount; i++) {
+                List<TagentVo> tagentVoList = new ArrayList<>();
                 tagentVo.setCurrentPage(i);
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
