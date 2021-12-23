@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -89,7 +90,19 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
 
         //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
-            List<TagentVo> searchTagentList = tagentMapper.searchTagent(new TagentVo());
+            List<TagentVo> searchTagentList = new ArrayList<>();
+            TagentVo tagentVo = new TagentVo();
+            int tagentCount = tagentMapper.searchTagentCount(tagentVo);
+            tagentVo.setPageSize(100);
+            if (tagentCount > 100) {
+                int pageCount = PageUtil.getPageCount(tagentCount, 100);
+                for (int i = 1; i <= pageCount; i++) {
+                    tagentVo.setCurrentPage(i);
+                    searchTagentList.addAll(tagentMapper.searchTagent(tagentVo));
+                }
+            } else {
+                searchTagentList = tagentMapper.searchTagent(tagentVo);
+            }
             for (TagentVo tagent : searchTagentList) {
                 for (NetworkVo networkVo : networkVoList) {
                     if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())) {
