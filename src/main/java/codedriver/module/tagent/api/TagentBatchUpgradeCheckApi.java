@@ -4,6 +4,7 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.util.IpUtil;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -22,12 +23,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
+import java.util.Set;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -74,7 +72,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
 
-        List<TagentVo> tagentVoList = new ArrayList<>();
+        Set<Long> idSet = new HashSet<>();
 
         //ip：port
         if (CollectionUtils.isNotEmpty(ipPortList)) {
@@ -83,27 +81,34 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
                 if (tagentVo == null) {
                     continue;
                 }
-                tagentVoList.add(tagentVo);
+                idSet.add(tagentVo.getId());
             }
         }
 
         //网段掩码
         if (CollectionUtils.isNotEmpty(networkVoList)) {
-            List<TagentVo> searchTagentList = tagentMapper.searchTagent(new TagentVo());
-            for (TagentVo tagent : searchTagentList) {
-                for (NetworkVo networkVo : networkVoList) {
-                    if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())) {
-                        tagentVoList.add(tagent);
+            TagentVo tagentVo = new TagentVo();
+            int tagentCount = tagentMapper.searchTagentCount(tagentVo);
+            tagentVo.setPageSize(100);
+            List<TagentVo> searchTagentList = new ArrayList<>();
+            int pageCount = PageUtil.getPageCount(tagentCount, 100);
+            for (int i = 1; i <= pageCount; i++) {
+                tagentVo.setCurrentPage(i);
+                searchTagentList = tagentMapper.searchTagent(tagentVo);
+                for (TagentVo tagent : searchTagentList) {
+                    for (NetworkVo networkVo : networkVoList) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())&&!idSet.contains(tagent.getId())) {
+                            idSet.add(tagent.getId());
+                        }
                     }
                 }
             }
         }
-        List<TagentVo> returnList = tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(p -> p.getIp())))), ArrayList::new));
 
-        if (CollectionUtils.isEmpty(returnList)) {
+        if (CollectionUtils.isEmpty(idSet)) {
             throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
-        return returnList;
+        return idSet.size();
     }
 
 }
