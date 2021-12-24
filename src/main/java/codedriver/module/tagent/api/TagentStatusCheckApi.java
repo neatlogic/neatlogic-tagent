@@ -7,6 +7,7 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -33,6 +34,9 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
 
     @Autowired
     TagentMapper tagentMapper;
+
+    @Autowired
+    RunnerMapper runnerMapper;
 
     @Override
     public String getName() {
@@ -63,7 +67,7 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
         if (tagentVo == null) {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
-        if (tagentVo.getRunnerId()==null) {
+        if (tagentVo.getRunnerId() == null || runnerMapper.getRunnerById(tagentVo.getRunnerId()) == null) {
             tagentVo.setDisConnectReason("runner 不存在");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
             tagentMapper.updateTagent(tagentVo);
