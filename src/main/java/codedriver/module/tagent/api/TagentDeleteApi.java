@@ -9,7 +9,6 @@ import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.crossover.IResourceCenterAccountCrossoverService;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
-import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountHasBeenReferredException;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.restful.annotation.*;
@@ -87,12 +86,8 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 tagentMapper.deleteTagentById(id);
                 tagentMapper.deleteAllIpByTagentId(id);
                 //删掉该tagent account
-                try {
                     IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
                     accountService.deleteAccount(deleteAccountIdList, true);
-                } catch (ResourceCenterAccountHasBeenReferredException ex) {
-                    //如果资源中心
-                }
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }
