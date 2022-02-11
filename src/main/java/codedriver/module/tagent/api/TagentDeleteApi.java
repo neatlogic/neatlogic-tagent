@@ -8,7 +8,7 @@ package codedriver.module.tagent.api;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.crossover.IResourceCenterAccountCrossoverService;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
-import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountHasBeenReferredException;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.restful.annotation.*;
@@ -21,11 +21,14 @@ import codedriver.framework.tagent.enums.TagentStatus;
 import codedriver.framework.tagent.exception.TagentHasBeenConnectedException;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -68,15 +71,23 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 throw new TagentIdNotFoundException(id);
             }
             if (!StringUtils.equals(tagent.getStatus(), TagentStatus.CONNECTED.getValue())) {
+                List<Long> deleteAccountIdList = new ArrayList<>();
+                deleteAccountIdList.add(tagent.getAccountId());
+                List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+                if (CollectionUtils.isNotEmpty(oldIpList)) {
+                    for (String ip : oldIpList) {
+                        AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
+                        if (oldAccountVo!= null) {
+                            deleteAccountIdList.add(oldAccountVo.getId());
+                        }
+                    }
+                }
+                //删除tagent
                 tagentMapper.deleteTagentById(id);
                 tagentMapper.deleteAllIpByTagentId(id);
                 //删掉该tagent account
-                try {
                     IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
-                    accountService.deleteAccount(tagent.getAccountId(), true);
-                } catch (ResourceCenterAccountHasBeenReferredException ex) {
-                    //如果资源中心
-                }
+                    accountService.deleteAccount(deleteAccountIdList, true);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }
