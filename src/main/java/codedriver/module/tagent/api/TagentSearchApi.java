@@ -55,7 +55,9 @@ public class TagentSearchApi extends PrivateApiComponentBase {
 	public Object myDoService(JSONObject jsonObj) throws Exception {
 		TagentVo tagentVo = JSONObject.toJavaObject(jsonObj,TagentVo.class);
 		int rowNum = tagentMapper.searchTagentCount(tagentVo);
-		tagentVo.setRowNum(rowNum);
+		if (rowNum > 0) {
+			tagentVo.setRowNum(rowNum);
+		}
 		return TableResultUtil.getResult(tagentMapper.searchTagent(tagentVo),tagentVo);
 	}
 

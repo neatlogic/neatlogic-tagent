@@ -12,7 +12,7 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
-import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
+import codedriver.framework.tagent.exception.TagentActionNotFoundException;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
@@ -73,7 +73,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
         }
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.GET_LOGS.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundEcexption(TagentAction.GET_LOGS.getValue());
+            throw new TagentActionNotFoundException(TagentAction.GET_LOGS.getValue());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
         JSONArray tbodyList = new JSONArray();
