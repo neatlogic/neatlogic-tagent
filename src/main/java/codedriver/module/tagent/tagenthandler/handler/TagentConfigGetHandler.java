@@ -14,7 +14,7 @@ import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
-import codedriver.framework.tagent.exception.TagentActionFailedEcexption;
+import codedriver.framework.tagent.exception.TagentActionFailedException;
 import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
@@ -63,7 +63,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
             result = RestUtil.sendPostRequest(restVo);
             JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
+                throw new TagentActionFailedException(runnerVo, resultJson.getString("Message"));
             }
             return resultJson.getJSONObject("Return");
         } catch (JSONException ex) {

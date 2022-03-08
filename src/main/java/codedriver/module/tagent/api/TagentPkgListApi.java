@@ -45,7 +45,7 @@ public class TagentPkgListApi extends PrivateApiComponentBase {
             @Param(name = "needPage", type = ApiParamType.BOOLEAN, desc = "是否需要分页，默认true")
     })
     @Output({
-            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "安装包列表")
+            @Param(name = "tbodyList", explode = TagentVersionVo[].class, desc = "安装包列表")
     })
     @Description(desc = "查询tagent安装包列表接口")
     @Override
