@@ -16,7 +16,7 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
-import codedriver.framework.tagent.exception.TagentActionFailedException;
+import codedriver.framework.tagent.exception.TagentActionFailedEcexption;
 import codedriver.framework.tagent.exception.TagentPkgNotFoundException;
 import codedriver.framework.tagent.exception.TagentPkgVersionAndDefaultVersionAreNotfoundException;
 import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
@@ -105,7 +105,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
             result = RestUtil.sendPostRequest(restVo);
             resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
-                throw new TagentActionFailedException(runnerVo, resultJson.getString("Message"));
+                throw new TagentActionFailedEcexption(runnerVo, resultJson.getString("Message"));
             }
             return resultJson;
         } catch (JSONException ex) {

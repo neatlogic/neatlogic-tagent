@@ -15,7 +15,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPortException;
+import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPort;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -69,7 +69,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             ipPortList = ipPortArray.toJavaList(IpVo.class);
         }
         if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
+            throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
 
         Set<Long> idSet = new HashSet<>();
@@ -106,7 +106,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
         }
 
         if (CollectionUtils.isEmpty(idSet)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
+            throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
         }
         return idSet.size();
     }
