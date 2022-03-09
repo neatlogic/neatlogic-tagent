@@ -15,7 +15,7 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
-import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
+import codedriver.framework.tagent.exception.TagentActionNotFoundException;
 import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
@@ -69,7 +69,7 @@ public class TagentRestartApi extends PrivateApiComponentBase {
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESTART.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundEcexption(TagentAction.RESTART.getValue());
+            throw new TagentActionNotFoundException(TagentAction.RESTART.getValue());
         } else {
             result = tagentHandler.execTagentCmd(message, tagent, runner);
         }

@@ -18,7 +18,7 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPort;
+import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPortException;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -85,7 +85,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
             ipPortList = ipPortArray.toJavaList(IpVo.class);
         }
         if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
+            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
         }
 
         Set<Long> tagentIdSet = new HashSet<>();
