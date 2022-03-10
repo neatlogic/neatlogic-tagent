@@ -1,3 +1,8 @@
+/*
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
@@ -15,7 +20,7 @@ import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPort;
+import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPortException;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
@@ -69,7 +74,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
             ipPortList = ipPortArray.toJavaList(IpVo.class);
         }
         if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
+            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
         }
 
         Set<Long> idSet = new HashSet<>();
@@ -97,7 +102,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
                     for (NetworkVo networkVo : networkVoList) {
-                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())&&!idSet.contains(tagent.getId())) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !idSet.contains(tagent.getId())) {
                             idSet.add(tagent.getId());
                         }
                     }
@@ -106,7 +111,7 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
         }
 
         if (CollectionUtils.isEmpty(idSet)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPort();
+            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
         }
         return idSet.size();
     }
