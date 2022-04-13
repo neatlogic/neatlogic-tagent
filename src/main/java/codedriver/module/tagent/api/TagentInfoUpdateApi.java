@@ -133,6 +133,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     }
 
     private void updateTagentIp(JSONObject jsonObj, TagentVo tagent) {
+       //TODO 检查 少补多删
         if (Objects.equals("needUpdateTagentIp","1")) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());
             String ipString = jsonObj.getString("ipString");
