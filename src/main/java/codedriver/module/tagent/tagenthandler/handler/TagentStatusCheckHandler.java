@@ -71,13 +71,10 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         } finally {
             tagentVo.setStatus(tagentStatus);
             tagentVo.setDisConnectReason(disConnectReason);
-            tagentMapper.updateTagent(tagentVo);
+            tagentMapper.updateTagentStatus(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         paramJson.put("disConnectReason", disConnectReason);
-        TagentVo tagent = new TagentVo();
-        tagent.setId(tagentVo.getId());
-        tagentService.updateTagentById(tagent);
         return paramJson;
     }
 }

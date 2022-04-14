@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
@@ -133,8 +135,8 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     }
 
     private void updateTagentIp(JSONObject jsonObj, TagentVo tagent) {
-       //TODO 检查 少补多删
-        if (Objects.equals("needUpdateTagentIp","1")) {
+        //TODO 检查 少补多删
+        if (Objects.equals("needUpdateTagentIp", "1")) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());
             String ipString = jsonObj.getString("ipString");
             if (StringUtils.isNotBlank(ipString)) {
