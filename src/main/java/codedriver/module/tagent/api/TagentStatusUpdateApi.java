@@ -10,7 +10,6 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,9 +65,9 @@ public class TagentStatusUpdateApi extends PublicApiComponentBase {
             }
             tagent.setId(tagentId);
             tagentMapper.updateTagentStatusAndDisConnectReasonById(tagent.getStatus(),tagent.getDisConnectReason(),tagent.getId());
-        } catch (TagentNotFoundException e) {
+        } catch (Exception e) {
             status = false;
-            logger.error("tagent status update failed, " + ExceptionUtils.getStackTrace(e));
+            logger.error(e.getMessage(), e);
             returnData = e.getMessage();
         }
         result.put("Status", status ? "OK" : "ERROR");
