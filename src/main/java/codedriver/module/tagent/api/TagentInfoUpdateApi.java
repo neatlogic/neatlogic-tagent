@@ -136,7 +136,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
     private void updateTagentIp(JSONObject jsonObj, TagentVo tagent) {
         //TODO 现tagent的ipList也会有对应的账号，如果ipList增减，也应该删除和新增账号
-        if (Objects.equals("needUpdateTagentIp", "1")) {
+        if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());
             String ipString = jsonObj.getString("ipString");
             if (StringUtils.isNotBlank(ipString)) {
