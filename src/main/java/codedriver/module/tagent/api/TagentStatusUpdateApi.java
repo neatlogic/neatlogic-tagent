@@ -65,7 +65,7 @@ public class TagentStatusUpdateApi extends PublicApiComponentBase {
                 throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
             }
             tagent.setId(tagentId);
-            tagentMapper.updateTagentStatus(tagent);
+            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagent.getStatus(),tagent.getDisConnectReason(),tagent.getId());
         } catch (TagentNotFoundException e) {
             status = false;
             logger.error("tagent status update failed, " + ExceptionUtils.getStackTrace(e));
