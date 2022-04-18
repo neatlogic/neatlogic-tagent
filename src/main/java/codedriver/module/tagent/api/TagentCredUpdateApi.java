@@ -57,7 +57,7 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
         Integer port = Integer.valueOf(paramObj.getString("port"));
         TagentVo tagent = tagentMapper.getTagentByIpAndPort(ip, port);
         if (tagent == null) {
-            throw new TagentNotFoundException();
+            throw new TagentNotFoundException(ip, port);
         }
         if (tagent.getAccountId() == null) {
             throw new ResourceCenterAccountNotFoundException();
