@@ -164,15 +164,10 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             tagentService.deleteTagentIpList(deleteTagentIpList, tagent);
             //新增tagent ip和账号
             if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+                tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
                 for (String ip : insertTagentIpList) {
-                    AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordCipher());
-                    AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, protocolVo.getPort());
-                    if (oldAccountVo != null) {
-                        newAccountVo.setId(oldAccountVo.getId());
-                        resourceCenterMapper.updateAccount(newAccountVo);
-                    } else {
-                        resourceCenterMapper.insertAccount(newAccountVo);
-                    }
+                    AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                    resourceCenterMapper.insertAccount(newAccountVo);
                     resourceCenterMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
                 }
             }
