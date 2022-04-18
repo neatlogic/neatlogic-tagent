@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -152,22 +153,25 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
 
             List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-            List<String> newIpStringList = null;
+            List<String> newIpStringList = new ArrayList<>();
             if (!Objects.isNull(jsonObj.getString("ipString"))) {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
             }
             List<String> newIpList = newIpStringList;
-            List<String> insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
 
             //删除多余的tagent ip和账号
             tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
-            //新增tagent ip和账号
-            if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
-                tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-                for (String ip : insertTagentIpList) {
-                    AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                    resourceCenterMapper.insertAccount(newAccountVo);
-                    resourceCenterMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
+
+            if (CollectionUtils.isNotEmpty(newIpList)) {
+                List<String> insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+                //新增tagent ip和账号
+                if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+                    tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+                    for (String ip : insertTagentIpList) {
+                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                        resourceCenterMapper.insertAccount(newAccountVo);
+                        resourceCenterMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
+                    }
                 }
             }
         }
