@@ -157,11 +157,10 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
             }
             List<String> newIpList = newIpStringList;
-            List<String> deleteTagentIpList = oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList());
             List<String> insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
 
             //删除多余的tagent ip和账号
-            tagentService.deleteTagentIpList(deleteTagentIpList, tagent);
+            tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
             //新增tagent ip和账号
             if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                 tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
