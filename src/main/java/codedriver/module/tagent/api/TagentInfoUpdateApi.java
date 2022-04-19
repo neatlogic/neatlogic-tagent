@@ -1,5 +1,9 @@
 package codedriver.module.tagent.api;
 
+import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
@@ -10,7 +14,7 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -36,6 +43,9 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
     @Resource
     private TagentMapper tagentMapper;
+
+    @Resource
+    private ResourceCenterMapper resourceCenterMapper;
 
     @Autowired
     private RunnerMapper runnerMapper;
@@ -72,7 +82,10 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             @Param(name = "version", type = ApiParamType.STRING, desc = "版本"),
             @Param(name = "proxyGroupId", type = ApiParamType.LONG, desc = "runner组Id,用于对比组信息是否有更新"),
             @Param(name = "proxyGroup", type = ApiParamType.STRING, desc = "runner组信息ip:port,多个用逗号隔开，用于对比组信息是否有更新"),
-            @Param(name = "type", type = ApiParamType.STRING, desc = "消息类型(monitor)")})
+            @Param(name = "type", type = ApiParamType.STRING, desc = "消息类型(monitor)"),
+            @Param(name = "needUpdateTagentIp", type = ApiParamType.STRING, desc = "是否需要更新tagent的 包含ip（ipString）"),
+            @Param(name = "ipString", type = ApiParamType.STRING, desc = "包含ip"),
+    })
     @Output({})
     @Description(desc = "tagent信息更新接口,用于tagent<->runner心跳更新tagent信息")
     @Override
@@ -96,8 +109,8 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
             tagentService.updateTagentById(tagent);
 
-            //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip
-            updateTagentIp(paramObj, tagent);
+            //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
+            updateTagentIpAndAccount(paramObj, tagent);
 
             //4、 当组信息与cache不一致时，更新cache
             Long runnerGroupId = paramObj.getLong("proxyGroupId");
@@ -130,23 +143,37 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             result.put("Data", "");
         }
         result.put("Status", updateStatus ? "OK" : "ERROR");
-        result.put("Message", updateStatus ? "tagent cpu and memeory update succeed" : message);
+        result.put("Message", updateStatus ? "tagent cpu and memory update succeed" : message);
         return result;
     }
 
-    private void updateTagentIp(JSONObject jsonObj, TagentVo tagent) {
-        //TODO 现tagent的ipList也会有对应的账号，如果ipList增减，也应该删除和新增账号
+    private void updateTagentIpAndAccount(JSONObject jsonObj, TagentVo tagent) {
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
-            tagentMapper.deleteAllIpByTagentId(tagent.getId());
-            String ipString = jsonObj.getString("ipString");
-            if (StringUtils.isNotBlank(ipString)) {
-                String[] ipArray = ipString.split(",");
-                if (CollectionUtils.isNotEmpty(Arrays.asList(ipArray))) {
-                    tagentMapper.insertTagentIp(tagent.getId(), Arrays.asList(ipArray));
+            AccountVo tagentAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+            AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
+
+            List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+            List<String> newIpStringList = new ArrayList<>();
+            if (!Objects.isNull(jsonObj.getString("ipString"))) {
+                newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
+            }
+            List<String> newIpList = newIpStringList;
+
+            //删除多余的tagent ip和账号
+            tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
+
+            if (CollectionUtils.isNotEmpty(newIpList)) {
+                List<String> insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+                //新增tagent ip和账号
+                if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+                    tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+                    for (String ip : insertTagentIpList) {
+                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                        resourceCenterMapper.insertAccount(newAccountVo);
+                        resourceCenterMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
+                    }
                 }
             }
-
         }
     }
-
 }
