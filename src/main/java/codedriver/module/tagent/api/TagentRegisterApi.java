@@ -19,12 +19,12 @@ import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.TagentIdIsRepeatException;
 import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -90,8 +91,14 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         //agent ip
         String tagentIp = paramObj.getString("ip");
         try {
+            if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
+                TagentVo oldTagent = tagentMapper.getTagentById(Long.valueOf(paramObj.getString("tagentId")));
+                if (oldTagent != null && Objects.equals(oldTagent.getId(), Long.valueOf(paramObj.getString("tagentId")))) {
+                    throw new TagentIdIsRepeatException(oldTagent.getId(), oldTagent.getIp(), oldTagent.getPort());
+                }
+            }
             RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(tagentIp);
-            TagentVo tagentVo = saveTagent(paramObj,runnerGroupVo);
+            TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
             //注册后同步信息到资源中心
             AfterRegisterJobManager.executeAll(tagentVo);
             //排序保证tagent获取的runner顺序不变
@@ -100,7 +107,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             resultJson.put("Status", "OK");
             resultJson.put("Data", data);
         } catch (Exception ex) {
-            logger.error("tagent:" + paramObj.toString() + " register failed." + ExceptionUtils.getStackTrace(ex), ex);
+            logger.error(ex.getMessage(), ex);
             resultJson.put("Message", ex.getMessage());
             resultJson.put("Status", "ERROR");
         }
@@ -111,11 +118,12 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
     /**
      * 保存tagent
-     * @param paramObj 入参
+     *
+     * @param paramObj      入参
      * @param runnerGroupVo runner组
      * @return tagent
      */
-    private TagentVo saveTagent(JSONObject paramObj,RunnerGroupVo runnerGroupVo){
+    private TagentVo saveTagent(JSONObject paramObj, RunnerGroupVo runnerGroupVo) {
         Long tagentId = paramObj.getLong("tagentId");
         paramObj.put("id", tagentId);
         paramObj.remove("tagentId");
@@ -146,9 +154,10 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
     /**
      * 根据tagentIp 匹配runnerGroup
+     *
      * @param agentIp agentIp
      */
-    private RunnerGroupVo getRunnerGroupByAgentIp(String agentIp){
+    private RunnerGroupVo getRunnerGroupByAgentIp(String agentIp) {
         RunnerGroupVo runnerGroupVo = null;
         List<GroupNetworkVo> networkList = tagentMapper.getGroupNetworkList();
         //找到agent ip符合网端的runnerGroup,如果存在多个group,则只需要第一个group
@@ -183,7 +192,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
     /**
      * 兼容现有tagent，组装response数据
      */
-    private void returnData(JSONObject data, List<RunnerVo> groupRunnerList, Long saveTagentId,  Long runnerGroupId) {
+    private void returnData(JSONObject data, List<RunnerVo> groupRunnerList, Long saveTagentId, Long runnerGroupId) {
         JSONArray runnerArray = new JSONArray();
         for (RunnerVo runner : groupRunnerList) {
             JSONObject runnerData = new JSONObject();
