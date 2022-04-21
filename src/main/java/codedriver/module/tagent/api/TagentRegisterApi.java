@@ -91,6 +91,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         //agent ip
         String tagentIp = paramObj.getString("ip");
         try {
+            //避免tagent注册时 id重复
             if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
                 TagentVo oldTagent = tagentMapper.getTagentById(Long.valueOf(paramObj.getString("tagentId")));
                 if (oldTagent != null && Objects.equals(oldTagent.getId(), Long.valueOf(paramObj.getString("tagentId")))) {
