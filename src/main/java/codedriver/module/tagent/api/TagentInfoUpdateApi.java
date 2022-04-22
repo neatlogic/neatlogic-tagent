@@ -12,7 +12,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentIdNotFoundException;
+import codedriver.framework.tagent.exception.TagentNotFoundException;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,10 +98,11 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         JSONObject result = new JSONObject();
         long id = paramObj.getLong("agentId");
         try {
-            if (tagentMapper.getTagentById(id) == null) {
-                throw new TagentIdNotFoundException(id);
-            }
             TagentVo tagent = new TagentVo(paramObj);
+            Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+            if (tagentId == null) {
+                throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
+            }
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
                 // port允许为空，兼容tagent老版本没有端口信息

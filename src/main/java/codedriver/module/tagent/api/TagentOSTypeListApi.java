@@ -40,12 +40,10 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
 
     @Description(desc = "查询TagentOS类型接口")
     @Output({
-            @Param(name = "tbodyList", explode = TagentOSVo[].class, desc = "tagentOS类型列表")
+            @Param(explode = TagentOSVo[].class, desc = "tagentOS类型列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        JSONObject tbodyList = new JSONObject();
-        tbodyList.put("tbodyList", tagentMapper.searchTagentOSType());
-        return tbodyList;
+        return tagentMapper.searchTagentOSType();
     }
 }

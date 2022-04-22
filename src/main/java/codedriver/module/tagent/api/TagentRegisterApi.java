@@ -141,7 +141,6 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                 tagentVo.setOsId(os.getId());
             } else {
                 TagentOSVo newOS = new TagentOSVo(osType);
-                newOS.setName(osType);
                 tagentMapper.insertOs(newOS);
                 tagentVo.setOsId(newOS.getId());
             }
