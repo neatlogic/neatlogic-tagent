@@ -94,7 +94,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             //避免tagent注册时 id重复
             if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
                 TagentVo oldTagent = tagentMapper.getTagentById(Long.valueOf(paramObj.getString("tagentId")));
-                if (oldTagent != null && Objects.equals(oldTagent.getId(), Long.valueOf(paramObj.getString("tagentId")))) {
+                if (oldTagent != null && (!StringUtils.equals(oldTagent.getIp(), tagentIp) || !Objects.equals(oldTagent.getPort(), Integer.valueOf(paramObj.getString("port"))))) {
                     throw new TagentIdIsRepeatException(oldTagent.getId(), oldTagent.getIp(), oldTagent.getPort());
                 }
             }
@@ -112,8 +112,6 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             resultJson.put("Message", ex.getMessage());
             resultJson.put("Status", "ERROR");
         }
-
-
         return resultJson;
     }
 
