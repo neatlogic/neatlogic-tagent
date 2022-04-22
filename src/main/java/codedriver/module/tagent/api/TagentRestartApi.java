@@ -20,8 +20,6 @@ import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,8 +28,6 @@ import javax.annotation.Resource;
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class TagentRestartApi extends PrivateApiComponentBase {
-
-    private final static Logger logger = LoggerFactory.getLogger(TagentRestartApi.class);
 
     @Resource
     TagentMapper tagentMapper;

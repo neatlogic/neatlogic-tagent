@@ -101,7 +101,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
                     continue;
                 }
                 tagentVoList.add(tagentVo);
-                tagentVoList= tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(TagentVo::getIp)))), ArrayList::new));
+                tagentVoList = tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(TagentVo::getIp)))), ArrayList::new));
                 tagentIdSet.add(tagentVo.getId());
             }
             this.batchUpgradeTagent(tagentVoList, pkgVersion, auditId);
@@ -171,6 +171,4 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
         logger.info("===============主线程：" + Thread.currentThread().getName() + "的全部tagent升级子线程执行完毕===============");
 //        System.out.println("===============主线程：" + Thread.currentThread().getName() + "的全部tagent升级子线程执行完毕===============");
     }
-
-
 }

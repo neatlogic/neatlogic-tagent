@@ -41,17 +41,17 @@ public class TagentVersionListApi extends PrivateApiComponentBase {
     }
 
     @Output({
-            @Param(name = "tagentVersion",type = ApiParamType.JSONARRAY,desc = "所有tagent版本")
+            @Param(name = "tbodyList", type = ApiParamType.JSONARRAY, desc = "所有tagent版本")
     })
     @Description(desc = "获取所有的Tagent版本接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        List<ValueTextVo> list = new ArrayList<>();
-        List<String> versionList = tagentMapper.searchTagentVersion();
-        for (String list1 : versionList) {
-            list.add(new ValueTextVo(list1,list1));
+        List<ValueTextVo> returnVersionList = new ArrayList<>();
+        List<String> allVersionList = tagentMapper.getAllTagentVersion();
+        for (String version : allVersionList) {
+            returnVersionList.add(new ValueTextVo(version, version));
         }
-        return list;
+        return returnVersionList;
     }
 
 

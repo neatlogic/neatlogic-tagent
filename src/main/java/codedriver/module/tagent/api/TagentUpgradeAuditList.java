@@ -53,7 +53,7 @@ public class TagentUpgradeAuditList extends PrivateApiComponentBase {
         int rowNum = tagentMapper.searchTagentUpgradeAuditCountByUserName(auditVo.getFcuName());
         if (rowNum > 0) {
             auditVo.setRowNum(rowNum);
-            return TableResultUtil.getResult(tagentMapper.searchTagenUpgradeAuditList(auditVo), auditVo);
+            return TableResultUtil.getResult(tagentMapper.searchTagentUpgradeAuditList(auditVo), auditVo);
         }
         return new JSONObject();
     }
