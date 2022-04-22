@@ -44,12 +44,12 @@ public class TagentBatchRegisterToCmdbApi extends PrivateApiComponentBase {
     @Description(desc = "批量同步已注册的tagent信息到CMDB接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentVo tagentVo = new TagentVo();
-        tagentVo.setStatus("connected");
-        List<TagentVo> tagentVoList = tagentMapper.searchTagent(tagentVo);
+        TagentVo paramTagentVo = new TagentVo();
+        paramTagentVo.setStatus("connected");
+        List<TagentVo> tagentVoList = tagentMapper.searchTagent(paramTagentVo);
         if (CollectionUtils.isNotEmpty(tagentVoList)) {
-            for (TagentVo tagentVo1 : tagentVoList) {
-                AfterRegisterJobManager.executeAll(tagentVo1);
+            for (TagentVo tagentVo : tagentVoList) {
+                AfterRegisterJobManager.executeAll(tagentVo);
             }
         }
         return null;

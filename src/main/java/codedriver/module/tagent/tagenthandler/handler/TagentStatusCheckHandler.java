@@ -8,7 +8,6 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.enums.TagentStatus;
-import codedriver.framework.tagent.service.TagentService;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONException;
@@ -24,11 +23,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
     Logger logger = LoggerFactory.getLogger(TagentStatusCheckHandler.class);
 
     @Autowired
-    private TagentService tagentService;
-
-    @Autowired
     private TagentMapper tagentMapper;
-
 
     @Override
     public String getHandler() {
@@ -55,23 +50,22 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
         String result = null;
         String disConnectReason = "";
-        JSONObject resultJson = null;
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
-            resultJson = JSONObject.parseObject(result);
+            JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 tagentStatus = TagentStatus.DISCONNECTED.getValue();
                 disConnectReason = resultJson.getString("Message");
             }
         } catch (JSONException ex) {
-            logger.error( ex.getMessage(), ex );
+            logger.error(ex.getMessage(), ex);
             tagentStatus = TagentStatus.DISCONNECTED.getValue();
-            disConnectReason = "runner返回："+result;
+            disConnectReason = "runner返回：" + result;
         } finally {
             tagentVo.setStatus(tagentStatus);
             tagentVo.setDisConnectReason(disConnectReason);
-            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagentVo.getStatus(),tagentVo.getDisConnectReason(),tagentVo.getId());
+            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagentVo.getStatus(), tagentVo.getDisConnectReason(), tagentVo.getId());
         }
         paramJson.put("status", tagentStatus);
         paramJson.put("disConnectReason", disConnectReason);

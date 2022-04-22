@@ -12,6 +12,7 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -65,7 +67,6 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         return null;
     }
 
-
     /**
      * 1、根据tagent ip和port 绑定runner id
      * 2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
@@ -97,6 +98,9 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         JSONObject result = new JSONObject();
         long id = paramObj.getLong("agentId");
         try {
+            if (tagentMapper.getTagentById(id) == null) {
+                throw new TagentIdNotFoundException(id);
+            }
             TagentVo tagent = new TagentVo(paramObj);
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
@@ -117,12 +121,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             String remoteGroupInfo = paramObj.getString("proxyGroup");
             List<RunnerVo> runnerList = runnerMapper.getRunnerListByGroupId(runnerGroupId);// 此语句有L2 cache，5分钟失效
             if (runnerList != null && runnerList.size() > 0) {
-                for (RunnerVo runner : runnerList) {
-                    if (StringUtils.isNotBlank(localGroupInfo)) {
-                        localGroupInfo += ",";
-                    }
-                    localGroupInfo += runner.getHost() + ":" + runner.getNettyPort();
-                }
+                localGroupInfo = runnerList.stream().map(e -> e.getHost() + ":" + e.getNettyPort()).collect(Collectors.joining(","));
             }
             if (remoteGroupInfo.equals(localGroupInfo)) {
                 needUpdateGroup = false;
@@ -130,7 +129,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         } catch (Exception e) {
             updateStatus = false;
             message = e.getMessage();
-            logger.error("update tagent " + id + " failed. ", e);
+            logger.error(e.getMessage(), e);
         }
         // update runner group info
         if (needUpdateGroup) {

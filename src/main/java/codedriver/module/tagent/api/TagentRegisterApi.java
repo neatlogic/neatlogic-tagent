@@ -82,7 +82,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
 
     })
     @Output({
-            @Param(name = "tbodyList", explode = RunnerGroupVo[].class, desc = "runner组列表")
+            @Param(name = "Data", type = ApiParamType.JSONOBJECT, desc = "tagent注册结果信息（包括tagentId、runner组id、组内runner id列表）")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
@@ -140,14 +140,14 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             if (os != null) {
                 tagentVo.setOsId(os.getId());
             } else {
-                TagentOSVo newOS = new TagentOSVo();
+                TagentOSVo newOS = new TagentOSVo(osType);
                 newOS.setName(osType);
                 tagentMapper.insertOs(newOS);
                 tagentVo.setOsId(newOS.getId());
             }
         }
 
-        tagentService.saveTagent(tagentVo);
+        tagentService.saveTagentAndAccount(tagentVo);
         return tagentVo;
     }
 

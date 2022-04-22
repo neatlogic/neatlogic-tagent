@@ -25,20 +25,16 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
     @Override
     protected boolean myDeleteFile(FileVo fileVo, JSONObject paramObj) {
         Long pkgVersionId = paramObj.getLong("pkgVersionId");
-        Long fileId = fileVo.getId();
         if (tagentMapper.getTagentVersionById(pkgVersionId) == null) {
             throw new TagentPkgVersionIdNotFoundException(pkgVersionId);
         }
         tagentMapper.deleteTagentVersionById(pkgVersionId);
-        return tagentMapper.getTagentPkgFileIdUsedCount(fileId) <= 0;
+        return tagentMapper.getTagentPkgFileIdUsedCount(fileVo.getId()) <= 0;
     }
 
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
-        if (AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName())) {
-            return true;
-        }
-        return false;
+        return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
     }
 
     @Override
