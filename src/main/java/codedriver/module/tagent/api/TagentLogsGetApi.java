@@ -20,8 +20,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -32,8 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
-
-    private final static Logger logger = LoggerFactory.getLogger(TagentLogsGetApi.class);
 
     @Resource
     TagentMapper tagentMapper;

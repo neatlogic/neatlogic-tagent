@@ -11,8 +11,6 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,8 +18,6 @@ import javax.annotation.Resource;
 @Service
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TagentCredUpdateApi extends PublicApiComponentBase {
-
-    private final Logger logger = LoggerFactory.getLogger(TagentCredUpdateApi.class);
 
     @Resource
     TagentMapper tagentMapper;

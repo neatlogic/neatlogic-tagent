@@ -11,7 +11,6 @@ import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
-import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -39,9 +38,6 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
     FileMapper fileMapper;
 
     @Resource
-    TagentMapper tagentMapper;
-
-    @Resource
     TagentService tagentService;
     @Resource
     ResourceCenterMapper resourceCenterMapper;
@@ -63,7 +59,11 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-
+        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
+        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
+        if (accountVo == null) {
+            throw new ResourceCenterAccountNotFoundException();
+        }
         String result = StringUtils.EMPTY;
         String pkgVersion = message.getPkgVersion();
         //获取对应的安装包版本
@@ -93,17 +93,12 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         params.put("user", tagentVo.getUser());
         params.put("fileName", fileVo.getName());
         params.put("ignoreFile", versionVo.getIgnoreFile());
-        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
-        if (accountVo == null) {
-            throw new ResourceCenterAccountNotFoundException();
-        }
         params.put("credential", accountVo.getPasswordCipher());
         String runnerUrl = runnerVo.getUrl() + "public/api/binary/tagent/upgrade";
-        JSONObject resultJson = new JSONObject();
         try {
             RestVo restVo = new RestVo.Builder(runnerUrl, AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).setContentType(RestUtil.MULTI_FORM_DATA).build();
             result = RestUtil.sendPostRequest(restVo);
-            resultJson = JSONObject.parseObject(result);
+            JSONObject resultJson = JSONObject.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedException(runnerVo, resultJson.getString("Message"));
             }
@@ -112,6 +107,5 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
             throw new TagentRunnerConnectRefusedException(runnerUrl, result);
         }
     }
-
 }
 

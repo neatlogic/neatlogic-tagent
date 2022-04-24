@@ -57,15 +57,15 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-        JSONObject params = JSONObject.parseObject(JSONObject.toJSONString(message));
-        params.put("type", message.getName());
-        params.put("ip", tagentVo.getIp());
-        params.put("port", (tagentVo.getPort()).toString());
-        params.put("credential", tagentVo.getCredential());
+        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
         AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
+        JSONObject params = JSONObject.parseObject(JSONObject.toJSONString(message));
+        params.put("type", message.getName());
+        params.put("ip", tagentVo.getIp());
+        params.put("port", (tagentVo.getPort()).toString());
         params.put("credential", accountVo.getPasswordCipher());
         String result = null;
         ServletOutputStream outputStream = null;
