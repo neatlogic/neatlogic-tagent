@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * Copyright(c) 2022 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -22,10 +22,10 @@ import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentIdIsRepeatException;
 import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
