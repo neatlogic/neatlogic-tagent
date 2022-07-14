@@ -20,6 +20,8 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentIdIsRepeatException;
+import codedriver.framework.tagent.exception.TagentIpIsEmptyException;
+import codedriver.framework.tagent.exception.TagentPortIsEmptyException;
 import codedriver.framework.tagent.register.core.AfterRegisterJobManager;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONArray;
@@ -90,7 +92,14 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         JSONObject data = new JSONObject();
         //agent ip
         String tagentIp = paramObj.getString("ip");
+        Integer tagentPort = paramObj.getInteger("port");
         try {
+            if (StringUtils.isBlank(tagentIp)) {
+                throw new TagentIpIsEmptyException(paramObj);
+            }
+            if (Objects.isNull(tagentPort)) {
+                throw new TagentPortIsEmptyException(paramObj);
+            }
             //避免tagent注册时 id重复
             if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
                 TagentVo oldTagent = tagentMapper.getTagentById(Long.valueOf(paramObj.getString("tagentId")));
