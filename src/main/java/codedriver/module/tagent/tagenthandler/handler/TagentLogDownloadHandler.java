@@ -6,9 +6,10 @@
 package codedriver.module.tagent.tagenthandler.handler;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
-import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
@@ -27,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -37,8 +37,6 @@ import java.net.URLEncoder;
 @Component
 public class TagentLogDownloadHandler extends TagentHandlerBase {
     private final static Logger logger = LoggerFactory.getLogger(TagentLogDownLoadApi.class);
-    @Resource
-    ResourceCenterMapper resourceCenterMapper;
 
     @Override
     public String getHandler() {
@@ -57,8 +55,9 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
+        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
-        AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
+        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
