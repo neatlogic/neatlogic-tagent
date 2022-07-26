@@ -1,9 +1,10 @@
 package codedriver.module.tagent.api;
 
-import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
@@ -21,9 +22,6 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
-
-    @Resource
-    ResourceCenterMapper resourceCenterMapper;
 
     @Override
     public String getName() {
@@ -58,10 +56,11 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
         if (tagent.getAccountId() == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
-        AccountVo accountVo = resourceCenterMapper.getAccountById(tagent.getAccountId());
+        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagent.getAccountId());
         accountVo.setPasswordCipher(null);
         accountVo.setPasswordPlain(paramObj.getString("credential"));
-        resourceCenterMapper.updateAccount(accountVo);
+        resourceAccountCrossoverMapper.updateAccount(accountVo);
         return null;
 
     }
