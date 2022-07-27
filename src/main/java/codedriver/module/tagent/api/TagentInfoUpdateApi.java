@@ -1,10 +1,11 @@
 package codedriver.module.tagent.api;
 
-import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.common.constvalue.ApiParamType;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.restful.annotation.*;
@@ -45,9 +46,6 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
     @Resource
     private TagentMapper tagentMapper;
-
-    @Resource
-    private ResourceCenterMapper resourceCenterMapper;
 
     @Autowired
     private RunnerMapper runnerMapper;
@@ -149,8 +147,9 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
     private void updateTagentIpAndAccount(JSONObject jsonObj, TagentVo tagent) {
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
-            AccountVo tagentAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
-            AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
+            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+            AccountVo tagentAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+            AccountProtocolVo protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByProtocolName("tagent");
 
             List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             List<String> newIpStringList = new ArrayList<>();
@@ -169,8 +168,8 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
                     for (String ip : insertTagentIpList) {
                         AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                        resourceCenterMapper.insertAccount(newAccountVo);
-                        resourceCenterMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
+                        resourceAccountCrossoverMapper.insertAccount(newAccountVo);
+                        resourceAccountCrossoverMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
                     }
                 }
             }

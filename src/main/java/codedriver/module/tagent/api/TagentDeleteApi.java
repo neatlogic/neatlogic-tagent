@@ -6,8 +6,8 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.crossover.IResourceCenterAccountCrossoverService;
-import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.crossover.CrossoverServiceFactory;
@@ -38,8 +38,6 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
-    @Resource
-    ResourceCenterMapper resourceCenterMapper;
 
     @Override
     public String getName() {
@@ -74,9 +72,10 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 List<Long> deleteAccountIdList = new ArrayList<>();
                 deleteAccountIdList.add(tagent.getAccountId());
                 List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+                IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
                 if (CollectionUtils.isNotEmpty(oldIpList)) {
                     for (String ip : oldIpList) {
-                        AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
+                        AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
                         if (oldAccountVo!= null) {
                             deleteAccountIdList.add(oldAccountVo.getId());
                         }
