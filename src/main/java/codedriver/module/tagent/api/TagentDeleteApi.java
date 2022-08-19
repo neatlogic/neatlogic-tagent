@@ -76,7 +76,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 if (CollectionUtils.isNotEmpty(oldIpList)) {
                     for (String ip : oldIpList) {
                         AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
-                        if (oldAccountVo!= null) {
+                        if (oldAccountVo != null) {
                             deleteAccountIdList.add(oldAccountVo.getId());
                         }
                     }
@@ -85,8 +85,8 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 tagentMapper.deleteTagentById(id);
                 tagentMapper.deleteAllIpByTagentId(id);
                 //删掉该tagent account
-                    IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
-                    accountService.deleteAccount(deleteAccountIdList, true);
+                IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
+                accountService.deleteAccount(deleteAccountIdList);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }
