@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class TagentRestartHandler extends TagentHandlerBase {
+public class TagentReLoadHandler extends TagentHandlerBase {
 
     @Override
     public String getHandler() {
@@ -39,7 +39,7 @@ public class TagentRestartHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return TagentAction.RESTART.getValue();
+        return TagentAction.RELOAD.getValue();
     }
 
     @Override
@@ -52,11 +52,11 @@ public class TagentRestartHandler extends TagentHandlerBase {
         }
         JSONObject paramJson = new JSONObject();
         paramJson.put("credential", accountVo.getPasswordCipher());
-        paramJson.put("type", TagentAction.RESTART.getValue());
+        paramJson.put("type", TagentAction.RELOAD.getValue());
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", tagentVo.getPort());
         String result = null;
-        String url = runnerVo.getUrl() + "api/rest/tagent/restart";
+        String url = runnerVo.getUrl() + "api/rest/tagent/reload";
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
