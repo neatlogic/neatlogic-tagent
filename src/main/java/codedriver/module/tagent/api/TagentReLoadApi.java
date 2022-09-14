@@ -27,7 +27,7 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class TagentRestartApi extends PrivateApiComponentBase {
+public class TagentReLoadApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
@@ -42,7 +42,7 @@ public class TagentRestartApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/exec/restart";
+        return "tagent/exec/reload";
     }
 
     @Override
@@ -63,9 +63,9 @@ public class TagentRestartApi extends PrivateApiComponentBase {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
-        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RESTART.getValue());
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RELOAD.getValue());
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundException(TagentAction.RESTART.getValue());
+            throw new TagentActionNotFoundException(TagentAction.RELOAD.getValue());
         } else {
             result = tagentHandler.execTagentCmd(message, tagent, runner);
         }
