@@ -47,7 +47,7 @@ public class TagentPasswordResetApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        return tagentService.execTagentCmd(message, TagentAction.RESET_PASSWORD.getValue());
+        return tagentService.execTagentCmd(message, TagentAction.RESET_CREDENTIAL.getValue());
     }
 }
 
