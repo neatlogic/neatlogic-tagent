@@ -5,10 +5,6 @@
 
 package codedriver.module.tagent.tagenthandler.handler;
 
-import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
-import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
-import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
-import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
@@ -22,8 +18,6 @@ import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 @Component
 public class TagentPasswordResetHandler extends TagentHandlerBase {
@@ -40,23 +34,16 @@ public class TagentPasswordResetHandler extends TagentHandlerBase {
 
     @Override
     public String getName() {
-        return TagentAction.RESET_PASSWORD.getValue();
+        return TagentAction.RESET_CREDENTIAL.getValue();
     }
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
-        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagentVo.getAccountId());
-        if (accountVo == null) {
-            throw new ResourceCenterAccountNotFoundException();
-        }
         JSONObject paramJson = new JSONObject();
-        paramJson.put("type", TagentAction.RESET_PASSWORD.getValue());
+        paramJson.put("type", TagentAction.RESET_CREDENTIAL.getValue());
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
-        paramJson.put("credential", accountVo.getPasswordCipher());
-        String url = runnerVo.getUrl() + "api/rest/tagent/password/reset";
+        String url = runnerVo.getUrl() + "api/rest/tagent/credential/reset";
         String result = null;
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
