@@ -61,7 +61,7 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
             @Param(name = "pkgVersion", type = ApiParamType.STRING, isRequired = true, desc = "安装包版本"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段"),
-            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "代理组id")
+            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
     })
     @Description(desc = "批量升级tagent接口")
     @Override

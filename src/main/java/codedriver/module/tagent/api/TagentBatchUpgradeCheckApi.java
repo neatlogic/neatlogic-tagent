@@ -48,11 +48,11 @@ public class TagentBatchUpgradeCheckApi extends PrivateApiComponentBase {
 
     @Input({
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
-            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段"),
-            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "代理组id")
+            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
+            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
 
     })
-    @Description(desc = "批量升级前筛选出对应的tagent信息,来源于ip：port、网段掩码、代理组三个地方")
+    @Description(desc = "批量升级前筛选出对应的tagent信息,来源于ip：port、网段掩码、执行器组三个地方")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<TagentVo> tagentList = tagentService.getTagentList(paramObj.toJavaObject(TagentSearchVo.class));
