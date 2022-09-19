@@ -52,8 +52,7 @@ public class BatchTagentActionApi extends PrivateApiComponentBase {
     @Description(desc = "批量操作tagent")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentSearchVo tagentSearchVo = paramObj.toJavaObject(TagentSearchVo.class);
-        return tagentService.batchExecTagentChannelAction(paramObj.getString("action"), tagentSearchVo.getIpPortList(), tagentSearchVo.getNetworkVoList(), tagentSearchVo.getRunnerGroupIdList());
+        return tagentService.batchExecTagentChannelAction(paramObj.getString("action"), paramObj.toJavaObject(TagentSearchVo.class));
     }
 
     @Override

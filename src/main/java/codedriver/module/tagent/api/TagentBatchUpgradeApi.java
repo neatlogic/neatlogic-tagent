@@ -2,7 +2,6 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.auth.core.AuthAction;
-import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.restful.annotation.Description;
@@ -13,12 +12,11 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
+import codedriver.framework.tagent.dto.TagentSearchVo;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentBatchActionCheckLessTagentIpAndPortException;
 import codedriver.framework.tagent.service.TagentService;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -70,36 +68,19 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
 
         String pkgVersion = paramObj.getString("pkgVersion");
-        JSONArray ipPortArray = paramObj.getJSONArray("ipPortList");
-        JSONArray networkVoArray = paramObj.getJSONArray("networkVoList");
-        JSONArray runnerGroupIdArray = paramObj.getJSONArray("runnerGroupIdList");
-        List<NetworkVo> networkVoList = null;
-        List<IpVo> ipPortList = null;
-        List<Long> runnerGroupIdList = null;
-        if (CollectionUtils.isNotEmpty(networkVoArray)) {
-            networkVoList = networkVoArray.toJavaList(NetworkVo.class);
-        }
-        if (CollectionUtils.isNotEmpty(ipPortArray)) {
-            ipPortList = ipPortArray.toJavaList(IpVo.class);
-        }
-        if (CollectionUtils.isNotEmpty(runnerGroupIdArray)) {
-            runnerGroupIdList = runnerGroupIdArray.toJavaList(Long.class);
-        }
-        if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
-            throw new TagentBatchActionCheckLessTagentIpAndPortException();
-        }
+        TagentSearchVo tagentSearchVo = paramObj.toJavaObject(TagentSearchVo.class);
+        List<TagentVo> tagentList = tagentService.getTagentList(tagentSearchVo);
 
         TagentUpgradeAuditVo audit = new TagentUpgradeAuditVo();
         Long auditId = audit.getId();
 
-        List<TagentVo> tagentList = tagentService.getTagentList(ipPortList, networkVoList, runnerGroupIdList);
-
-        batchUpgradeTagent(tagentList,pkgVersion,auditId);
+        //升级
+        batchUpgradeTagent(tagentList, pkgVersion, auditId);
         //插入此次升级记录
         audit.setCount(tagentList.size());
         StringBuilder stringBuilder = new StringBuilder();
-        if (CollectionUtils.isNotEmpty(networkVoList)) {
-            for (NetworkVo networkVo : networkVoList) {
+        if (CollectionUtils.isNotEmpty(tagentSearchVo.getNetworkVoList())) {
+            for (NetworkVo networkVo : tagentSearchVo.getNetworkVoList()) {
                 stringBuilder.append(networkVo.getNetworkIp()).append(" / ").append(networkVo.getMask()).append("<br>");
             }
             audit.setNetwork(String.valueOf(stringBuilder));
