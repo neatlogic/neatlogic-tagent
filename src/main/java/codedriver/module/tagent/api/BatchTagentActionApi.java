@@ -46,7 +46,7 @@ public class BatchTagentActionApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "action", type = ApiParamType.STRING, desc = "tagent动作（reload(重启)、resetcred(重置密码)）"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
-            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段"),
+            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
             @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
     })
     @Description(desc = "批量操作tagent")
