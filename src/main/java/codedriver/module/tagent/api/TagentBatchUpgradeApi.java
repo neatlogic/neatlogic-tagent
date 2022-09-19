@@ -4,8 +4,6 @@ import codedriver.framework.asynchronization.thread.CodeDriverThread;
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.util.IpUtil;
-import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
@@ -18,7 +16,7 @@ import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentBatchUpgradeCheckLessTagentIpAndPortException;
+import codedriver.framework.tagent.exception.TagentBatchActionCheckLessTagentIpAndPortException;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -29,11 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
 
 @Service
 @Transactional
@@ -67,7 +62,9 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "pkgVersion", type = ApiParamType.STRING, isRequired = true, desc = "安装包版本"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
-            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段")
+            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段"),
+            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "代理组id")
+
     })
     @Description(desc = "批量升级tagent接口")
     @Override
@@ -76,62 +73,31 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
         String pkgVersion = paramObj.getString("pkgVersion");
         JSONArray ipPortArray = paramObj.getJSONArray("ipPortList");
         JSONArray networkVoArray = paramObj.getJSONArray("networkVoList");
+        JSONArray runnerGroupIdArray = paramObj.getJSONArray("runnerGroupIdList");
         List<NetworkVo> networkVoList = null;
         List<IpVo> ipPortList = null;
+        List<Long> runnerGroupIdList = null;
         if (CollectionUtils.isNotEmpty(networkVoArray)) {
             networkVoList = networkVoArray.toJavaList(NetworkVo.class);
         }
         if (CollectionUtils.isNotEmpty(ipPortArray)) {
             ipPortList = ipPortArray.toJavaList(IpVo.class);
         }
+        if (CollectionUtils.isNotEmpty(runnerGroupIdArray)) {
+            runnerGroupIdList = runnerGroupIdArray.toJavaList(Long.class);
+        }
         if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList)) {
-            throw new TagentBatchUpgradeCheckLessTagentIpAndPortException();
+            throw new TagentBatchActionCheckLessTagentIpAndPortException();
         }
 
-        Set<Long> tagentIdSet = new HashSet<>();
         TagentUpgradeAuditVo audit = new TagentUpgradeAuditVo();
         Long auditId = audit.getId();
 
-        //ip：port
-        if (CollectionUtils.isNotEmpty(ipPortList)) {
-            List<TagentVo> tagentVoList = new ArrayList<>();
-            for (IpVo ipVo : ipPortList) {
-                TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipVo.getIp(), ipVo.getPort());
-                if (tagentVo == null) {
-                    continue;
-                }
-                tagentVoList.add(tagentVo);
-                tagentVoList = tagentVoList.stream().collect(collectingAndThen((toCollection(() -> new TreeSet<>(Comparator.comparing(TagentVo::getIp)))), ArrayList::new));
-                tagentIdSet.add(tagentVo.getId());
-            }
-            this.batchUpgradeTagent(tagentVoList, pkgVersion, auditId);
-        }
+        List<TagentVo> tagentList = tagentService.getTagentList(ipPortList, networkVoList, runnerGroupIdList);
 
-        //网段掩码
-        if (CollectionUtils.isNotEmpty(networkVoList)) {
-            TagentVo tagentVo = new TagentVo();
-            int tagentCount = tagentMapper.searchTagentCount(tagentVo);
-            tagentVo.setPageSize(100);
-            List<TagentVo> searchTagentList = new ArrayList<>();
-            int pageCount = PageUtil.getPageCount(tagentCount, 100);
-            for (int i = 1; i <= pageCount; i++) {
-                List<TagentVo> tagentVoList = new ArrayList<>();
-                tagentVo.setCurrentPage(i);
-                searchTagentList = tagentMapper.searchTagent(tagentVo);
-                for (TagentVo tagent : searchTagentList) {
-                    for (NetworkVo networkVo : networkVoList) {
-                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdSet.contains(tagent.getId())) {
-                            tagentVoList.add(tagent);
-                            tagentIdSet.add(tagent.getId());
-                        }
-                    }
-                }
-                this.batchUpgradeTagent(tagentVoList, pkgVersion, auditId);
-            }
-        }
-
+        batchUpgradeTagent(tagentList,pkgVersion,auditId);
         //插入此次升级记录
-        audit.setCount(tagentIdSet.size());
+        audit.setCount(tagentList.size());
         StringBuilder stringBuilder = new StringBuilder();
         if (CollectionUtils.isNotEmpty(networkVoList)) {
             for (NetworkVo networkVo : networkVoList) {
