@@ -5,6 +5,10 @@
 
 package codedriver.module.tagent.tagenthandler.handler;
 
+import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
+import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
@@ -40,10 +44,19 @@ public class TagentReLoadHandler extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
+        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
+        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagentVo.getAccountId());
+        if (accountVo == null) {
+            throw new ResourceCenterAccountNotFoundException();
+        }
+
         JSONObject paramJson = new JSONObject();
         paramJson.put("type", TagentAction.RELOAD.getValue());
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", tagentVo.getPort());
+        paramJson.put("user", tagentVo.getUser());
+        paramJson.put("credential", accountVo.getPasswordCipher());
         String result = null;
         String url = runnerVo.getUrl() + "api/rest/tagent/reload";
         try {
