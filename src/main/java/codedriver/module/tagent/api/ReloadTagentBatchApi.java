@@ -13,7 +13,9 @@ import codedriver.framework.restful.annotation.Param;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
+import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentSearchVo;
+import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.service.TagentService;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -22,20 +24,25 @@ import javax.annotation.Resource;
 
 /**
  * @author longrf
- * @date 2022/9/19 11:09
+ * @date 2022/11/3 10:13
  */
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class BatchTagentActionApi extends PrivateApiComponentBase {
+public class ReloadTagentBatchApi extends PrivateApiComponentBase {
 
     @Resource
     TagentService tagentService;
 
     @Override
     public String getName() {
-        return "批量操作tagent";
+        return "批量重启tagent";
+    }
+
+    @Override
+    public String getToken() {
+        return "tagent/exec/batch/reload";
     }
 
     @Override
@@ -44,19 +51,13 @@ public class BatchTagentActionApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "action", type = ApiParamType.STRING, desc = "tagent动作（reload(重启)、resetcred(重置密码)）"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
             @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
     })
-    @Description(desc = "批量操作tagent")
+    @Description(desc = "批量重启tagent")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return tagentService.batchExecTagentChannelAction(paramObj.getString("action"), paramObj.toJavaObject(TagentSearchVo.class));
-    }
-
-    @Override
-    public String getToken() {
-        return "tagent/exec/batch/action";
+        return tagentService.batchExecTagentChannelAction(TagentAction.RELOAD.getValue(), paramObj.toJavaObject(TagentSearchVo.class), new TagentMessageVo());
     }
 }
