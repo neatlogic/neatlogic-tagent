@@ -6,7 +6,6 @@ package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.exception.type.ParamIrregularException;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.Input;
 import codedriver.framework.restful.annotation.OperationType;
@@ -25,20 +24,25 @@ import javax.annotation.Resource;
 
 /**
  * @author longrf
- * @date 2022/9/19 11:09
+ * @date 2022/11/3 10:13
  */
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class BatchTagentActionApi extends PrivateApiComponentBase {
+public class ReloadTagentBatchApi extends PrivateApiComponentBase {
 
     @Resource
     TagentService tagentService;
 
     @Override
     public String getName() {
-        return "批量操作tagent";
+        return "批量重启tagent";
+    }
+
+    @Override
+    public String getToken() {
+        return "tagent/exec/batch/reload";
     }
 
     @Override
@@ -47,27 +51,13 @@ public class BatchTagentActionApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "action", type = ApiParamType.STRING, isRequired = true, desc = "tagent动作（reload(重启)、resetcred(重置密码)、batchSaveConfig(批量修改配置文件)）"),
-            @Param(name = "configKeyValueJson", type = ApiParamType.STRING, desc = "配置key、value的Json，此参数在tction为 batchSaveConfig时才会用到"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
             @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
     })
-    @Description(desc = "批量操作tagent")
+    @Description(desc = "批量重启tagent")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentMessageVo tagentMessageVo = new TagentMessageVo();
-        if (TagentAction.BATCH_SAVE_CONFIG.getValue().equals(paramObj.getString("action"))) {
-            if (paramObj.getJSONObject("configKeyValueJson") == null) {
-                throw new ParamIrregularException("configKeyValueJson");
-            }
-            tagentMessageVo.setData(paramObj.getJSONObject("configKeyValueJson").toString());
-        }
-        return tagentService.batchExecTagentChannelAction(paramObj.getString("action"), paramObj.toJavaObject(TagentSearchVo.class), tagentMessageVo);
-    }
-
-    @Override
-    public String getToken() {
-        return "tagent/exec/batch/action";
+        return tagentService.batchExecTagentChannelAction(TagentAction.RELOAD.getValue(), paramObj.toJavaObject(TagentSearchVo.class), new TagentMessageVo());
     }
 }

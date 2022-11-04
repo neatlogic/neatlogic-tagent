@@ -30,19 +30,19 @@ import javax.annotation.Resource;
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
-public class ReloadTagentConfigBatchApi extends PrivateApiComponentBase {
+public class ReSetTagentPasswordBatchApi extends PrivateApiComponentBase {
 
     @Resource
     TagentService tagentService;
 
     @Override
     public String getName() {
-        return "批量重启tagent";
+        return "批量修改tagent密码";
     }
 
     @Override
     public String getToken() {
-        return "tagent/exec/config/batch/reload";
+        return "tagent/exec/password/batch/reset";
     }
 
     @Override
@@ -55,9 +55,9 @@ public class ReloadTagentConfigBatchApi extends PrivateApiComponentBase {
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
             @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
     })
-    @Description(desc = "批量重启tagent")
+    @Description(desc = "批量修改tagent密码")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return tagentService.batchExecTagentChannelAction(TagentAction.RELOAD.getValue(), paramObj.toJavaObject(TagentSearchVo.class), new TagentMessageVo());
+        return tagentService.batchExecTagentChannelAction(TagentAction.RESET_CREDENTIAL.getValue(), paramObj.toJavaObject(TagentSearchVo.class), new TagentMessageVo());
     }
 }

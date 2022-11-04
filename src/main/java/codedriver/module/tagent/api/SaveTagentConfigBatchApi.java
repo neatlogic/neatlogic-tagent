@@ -51,7 +51,7 @@ public class SaveTagentConfigBatchApi extends PrivateApiComponentBase {
     }
 
     @Input({
-            @Param(name = "configKeyValueJson", type = ApiParamType.STRING, isRequired = true, desc = "配置key、value的Json，此参数在tction为 batchSaveConfig时才会用到"),
+            @Param(name = "configKeyValueJson", type = ApiParamType.JSONOBJECT, isRequired = true, desc = "配置key、value的Json"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
             @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段列表"),
             @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
