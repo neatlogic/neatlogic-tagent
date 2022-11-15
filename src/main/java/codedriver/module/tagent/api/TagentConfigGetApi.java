@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -45,7 +46,10 @@ public class TagentConfigGetApi extends PrivateApiComponentBase {
     @Description(desc = "获取Tagent配置接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        JSONObject returnJson = new JSONObject();
         TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
-        return tagentService.execTagentCmd(message, TagentAction.GET_CONFIG.getValue());
+        returnJson.put("configJson", tagentService.execTagentCmd(message, TagentAction.GET_CONFIG.getValue()));
+        returnJson.put("requiredFieldList", Arrays.asList("credential", "listen.port", "proxy.registeraddress", "tenant"));
+        return returnJson;
     }
 }
