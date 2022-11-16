@@ -142,7 +142,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         tagentVo.setRunnerGroupId(runnerGroupVo.getId());
         paramObj.put("runnerGroupId", runnerGroupVo.getId());
 
-        //保存tagent os
+        //保存tagent osType
         if (StringUtils.isNotBlank(tagentVo.getOsType())) {
             String osType = tagentVo.getOsType();
             TagentOSVo os = tagentMapper.getOsByName(osType.toLowerCase());
@@ -155,6 +155,10 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             }
         }
 
+        //保存tagent osbit
+        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
+            tagentMapper.insertOsBit(tagentVo.getOsbit());
+        }
         tagentService.saveTagentAndAccount(tagentVo);
         return tagentVo;
     }
