@@ -155,7 +155,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             }
         }
 
-        //保存tagent osBit
+        //保存tagent osbit
         if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
             tagentMapper.insertOsBit(tagentVo.getOsbit());
         }
