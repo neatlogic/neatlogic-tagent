@@ -109,7 +109,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                     tagent.setRunnerId(runnerVo.getId());
                 }
             }
-            //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
+            //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
             tagentService.updateTagentById(tagent);
 
             //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号

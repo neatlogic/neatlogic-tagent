@@ -5,6 +5,7 @@
 package codedriver.module.tagent.api;
 
 import codedriver.framework.auth.core.AuthAction;
+import codedriver.framework.common.dto.ValueTextVo;
 import codedriver.framework.restful.annotation.Description;
 import codedriver.framework.restful.annotation.OperationType;
 import codedriver.framework.restful.annotation.Output;
@@ -13,21 +14,23 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
-import codedriver.framework.tagent.dto.TagentOSVo;
+import codedriver.framework.tagent.dto.TagentOsBitVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author longrf
- * @date 2022/10/21 11:36
+ * @date 2022/11/15 14：14
  */
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class TagentOSTypeListApi extends PrivateApiComponentBase {
+public class ListTagentOsBitApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
@@ -39,7 +42,7 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
 
     @Override
     public String getToken() {
-        return "tagent/ostype/list";
+        return "tagent/osbit/list";
     }
 
     @Override
@@ -47,12 +50,18 @@ public class TagentOSTypeListApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "查询TagentOS类型接口")
+    @Description(desc = "查询Tagent的cpu架构类型接口")
     @Output({
-            @Param(explode = TagentOSVo[].class, desc = "tagentOS类型列表")
+            @Param(explode = TagentOsBitVo[].class, desc = "tagent的cpu架构类型列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return tagentMapper.getTagentOSTypeList();
+        List<ValueTextVo> returnList = new ArrayList<>();
+        List<TagentOsBitVo> osBitList = tagentMapper.getTagentOsBitList();
+        for (TagentOsBitVo osBitVo : osBitList) {
+            returnList.add(new ValueTextVo(osBitVo.getName(), osBitVo.getName()));
+        }
+        returnList.add(new ValueTextVo("default", "default"));
+        return returnList;
     }
 }

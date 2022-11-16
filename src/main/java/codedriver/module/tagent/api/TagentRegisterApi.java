@@ -17,6 +17,7 @@ import codedriver.framework.restful.annotation.*;
 import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.publicapi.PublicApiComponentBase;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
+import codedriver.framework.tagent.dto.TagentOsBitVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.TagentIdIsRepeatException;
@@ -152,6 +153,19 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                 TagentOSVo newOS = new TagentOSVo(osType);
                 tagentMapper.insertOs(newOS);
                 tagentVo.setOsId(newOS.getId());
+            }
+        }
+
+        //保存tagent os
+        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
+            String osBitName = tagentVo.getOsbit();
+            TagentOsBitVo osBitVo = tagentMapper.getOsBitByName(osBitName);
+            if (osBitVo != null) {
+                tagentVo.setOsbitId(osBitVo.getId());
+            } else {
+                TagentOsBitVo newOsBitVo = new TagentOsBitVo(osBitName);
+                tagentMapper.insertOsBit(newOsBitVo);
+                tagentVo.setOsbitId(newOsBitVo.getId());
             }
         }
 
