@@ -14,7 +14,6 @@ import codedriver.framework.restful.constvalue.OperationTypeEnum;
 import codedriver.framework.restful.core.privateapi.PrivateApiComponentBase;
 import codedriver.framework.tagent.auth.label.TAGENT_BASE;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
-import codedriver.framework.tagent.dto.TagentOsBitVo;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +36,7 @@ public class ListTagentOsBitApi extends PrivateApiComponentBase {
 
     @Override
     public String getName() {
-        return "查询TagentOS类型列表";
+        return "查询Tagent的cpu架构类型列表";
     }
 
     @Override
@@ -50,16 +49,16 @@ public class ListTagentOsBitApi extends PrivateApiComponentBase {
         return null;
     }
 
-    @Description(desc = "查询Tagent的cpu架构类型接口")
+    @Description(desc = "查询Tagent的cpu架构类型列表接口")
     @Output({
-            @Param(explode = TagentOsBitVo[].class, desc = "tagent的cpu架构类型列表")
+            @Param(explode = ValueTextVo[].class, desc = "tagent的cpu架构类型列表")
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         List<ValueTextVo> returnList = new ArrayList<>();
-        List<TagentOsBitVo> osBitList = tagentMapper.getTagentOsBitList();
-        for (TagentOsBitVo osBitVo : osBitList) {
-            returnList.add(new ValueTextVo(osBitVo.getName(), osBitVo.getName()));
+        List<String> osBitList = tagentMapper.getTagentOsBitList();
+        for (String osbit : osBitList) {
+            returnList.add(new ValueTextVo(osbit, osbit));
         }
         returnList.add(new ValueTextVo("default", "default"));
         return returnList;
