@@ -110,7 +110,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(tagentIp);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
             //注册后同步信息到资源中心
-            AfterRegisterJobManager.executeAll(tagentVo);
+//            AfterRegisterJobManager.executeAll(tagentVo);
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
             returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
