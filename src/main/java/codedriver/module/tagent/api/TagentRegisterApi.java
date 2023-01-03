@@ -97,7 +97,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             if (StringUtils.isBlank(tagentIp)) {
                 throw new TagentIpIsEmptyException(paramObj);
             }
-            if (Objects.isNull(tagentPort)) {
+            if (tagentPort == null) {
                 throw new TagentPortIsEmptyException(paramObj);
             }
             //避免tagent注册时 id重复

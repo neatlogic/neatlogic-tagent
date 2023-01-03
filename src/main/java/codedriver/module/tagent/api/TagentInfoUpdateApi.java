@@ -153,7 +153,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
 
             List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             List<String> newIpStringList = new ArrayList<>();
-            if (!Objects.isNull(jsonObj.getString("ipString"))) {
+            if (jsonObj.getString("ipString") != null) {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
             }
             List<String> newIpList = newIpStringList;
