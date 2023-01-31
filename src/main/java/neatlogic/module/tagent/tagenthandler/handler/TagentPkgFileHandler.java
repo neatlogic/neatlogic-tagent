@@ -1,0 +1,51 @@
+/*
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
+ * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
+ */
+
+package neatlogic.module.tagent.tagenthandler.handler;
+
+import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.auth.core.AuthActionChecker;
+import neatlogic.framework.file.core.FileTypeHandlerBase;
+import neatlogic.framework.file.dto.FileVo;
+import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
+import neatlogic.framework.tagent.dao.mapper.TagentMapper;
+import neatlogic.framework.tagent.exception.TagentPkgVersionIdNotFoundException;
+import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TagentPkgFileHandler extends FileTypeHandlerBase {
+
+    @Autowired
+    private TagentMapper tagentMapper;
+
+    @Override
+    protected boolean myDeleteFile(FileVo fileVo, JSONObject paramObj) {
+        Long pkgVersionId = paramObj.getLong("pkgVersionId");
+        if (tagentMapper.getTagentVersionById(pkgVersionId) == null) {
+            throw new TagentPkgVersionIdNotFoundException(pkgVersionId);
+        }
+        tagentMapper.deleteTagentVersionById(pkgVersionId);
+        return tagentMapper.getTagentPkgFileIdUsedCount(fileVo.getId()) <= 0;
+    }
+
+    @Override
+    public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
+        return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
+    }
+
+    @Override
+    public String getName() {
+        return "TAGENT";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "tagent安装包文件";
+    }
+
+
+}
