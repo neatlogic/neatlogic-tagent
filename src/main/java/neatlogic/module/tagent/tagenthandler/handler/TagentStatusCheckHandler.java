@@ -46,7 +46,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         JSONObject paramJson = new JSONObject();
         paramJson.put("ip", tagentVo.getIp());
         paramJson.put("port", (tagentVo.getPort()).toString());
-        paramJson.put("type", message.getName());
+        paramJson.put("type", TagentAction.STATUS_CHECK.getValue());
         String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
         String result = null;
         String disConnectReason = "";

@@ -16,27 +16,32 @@
 
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
+import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.runner.RunnerGroupIdNotFoundException;
-import neatlogic.framework.exception.runner.RunnerGroupRunnerListEmptyException;
+import neatlogic.framework.exception.runner.*;
+import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentOSVo;
 import neatlogic.framework.tagent.dto.TagentVo;
-import neatlogic.framework.tagent.exception.TagentIdIsRepeatException;
+import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.exception.TagentIpIsEmptyException;
+import neatlogic.framework.tagent.exception.TagentMultipleException;
 import neatlogic.framework.tagent.exception.TagentPortIsEmptyException;
+import neatlogic.framework.tagent.exception.TagentStatusIsSuccessException;
 import neatlogic.framework.tagent.register.core.AfterRegisterJobManager;
 import neatlogic.framework.tagent.service.TagentService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.RestUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -102,23 +107,50 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         JSONObject resultJson = new JSONObject();
         JSONObject data = new JSONObject();
         //agent ip
-        String tagentIp = paramObj.getString("ip");
-        Integer tagentPort = paramObj.getInteger("port");
+        String insertTagentIp = paramObj.getString("ip");
+        Integer insertTagentPort = paramObj.getInteger("port");
         try {
-            if (StringUtils.isBlank(tagentIp)) {
+            if (StringUtils.isBlank(insertTagentIp)) {
                 throw new TagentIpIsEmptyException(paramObj);
             }
-            if (tagentPort == null) {
+            if (insertTagentPort == null) {
                 throw new TagentPortIsEmptyException(paramObj);
             }
-            //避免tagent注册时 id重复
+
+            TagentVo insertTagentVo = paramObj.toJavaObject(TagentVo.class);
             if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
-                TagentVo oldTagent = tagentMapper.getTagentById(Long.valueOf(paramObj.getString("tagentId")));
-                if (oldTagent != null && (!StringUtils.equals(oldTagent.getIp(), tagentIp) || !Objects.equals(oldTagent.getPort(), Integer.valueOf(paramObj.getString("port"))))) {
-                    throw new TagentIdIsRepeatException(oldTagent.getId(), oldTagent.getIp(), oldTagent.getPort());
+                Long insertTagentId = Long.valueOf(paramObj.getString("tagentId"));
+                TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
+                if (oldTagent != null) {
+                    if (Objects.equals(oldTagent.getPort(), insertTagentPort)) {
+                        if (StringUtils.equals(oldTagent.getIp(), insertTagentIp)) {
+                            //输入ip和主ip相同 =》刷状态，查看tagent状态
+                            checkTagentStatus(oldTagent);
+                            insertTagentVo.setId(oldTagent.getId());
+                        } else {
+                            List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(insertTagentId);
+                            if (oldIpList.contains(insertTagentIp)) {
+                                //输入ip和副ip相同 =》刷状态，查看tagent状态
+                                checkTagentStatus(oldTagent);
+                                insertTagentVo.setId(oldTagent.getId());
+                            } else {
+                                //ip不相同,根据输入ip和输入port查询tagent
+                                insertTagentVo.setId(getTagentByIpAndPort(insertTagentIp, insertTagentPort));
+                            }
+                        }
+                    } else {
+                        //port不相同,根据输入ip和输入port查询tagent
+                        insertTagentVo.setId(getTagentByIpAndPort(insertTagentIp, insertTagentPort));
+                    }
+                } else {
+                    //通过id找不到tagent，根据输入ip和输入port查询tagent
+                    insertTagentVo.setId(getTagentByIpAndPort(insertTagentIp, insertTagentPort));
                 }
+            } else {
+                //无输入id，根据输入ip和输入port查询tagent
+                insertTagentVo.setId(getTagentByIpAndPort(insertTagentIp, insertTagentPort));
             }
-            RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(tagentIp);
+            RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(insertTagentIp);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
             //注册后同步信息到资源中心
             AfterRegisterJobManager.executeAll(tagentVo);
@@ -230,6 +262,55 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         data.put("proxyPort", tagentRunnerVo.getPort());*/
         data.put("proxyGroupId", runnerGroupId);
         data.put("proxyList", runnerArray);
+    }
+
+    private Long getTagentByIpAndPort(String insertTagentIp, Integer insertTagentPort) {
+        List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
+        if (CollectionUtils.isNotEmpty(oldTagentList)) {
+            if (oldTagentList.size() == 1) {
+                checkTagentStatus(oldTagentList.get(0));
+                return oldTagentList.get(0).getId();
+            } else {
+                //通过输入ip和输入port找到多个个tagent，注册失败
+                throw new TagentMultipleException(oldTagentList);
+            }
+        } else {
+            //新tagent，直接注册
+            return null;
+        }
+    }
+
+    private void checkTagentStatus(TagentVo tagentVo) {
+        //刷状态，查看tagent状态
+        if (tagentVo.getRunnerId() == null) {
+            throw new RunnerNotFoundException();
+        }
+        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+        if (runnerVo == null) {
+            throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
+        }
+        if (StringUtils.isBlank(runnerVo.getUrl())) {
+            throw new RunnerUrlIsNullException(runnerVo.getId());
+        }
+        JSONObject paramJson = new JSONObject();
+        paramJson.put("ip", tagentVo.getIp());
+        paramJson.put("port", (tagentVo.getPort()).toString());
+        paramJson.put("type", TagentAction.STATUS_CHECK.getValue());
+        String url = runnerVo.getUrl() + "api/rest/tagent/status/check";
+        String result = null;
+        try {
+            RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
+            result = RestUtil.sendPostRequest(restVo);
+            JSONObject runnerResultJson = JSONObject.parseObject(result);
+            if (runnerResultJson.containsKey("Status") && "OK".equals(runnerResultJson.getString("Status"))) {
+                //注册失败，抛异常（已存在活动的tagent，可能是ip冲突造成）
+                throw new TagentStatusIsSuccessException();
+            } else {
+                //未连接状态，使用表id注册
+            }
+        } catch (JSONException ex) {
+            //未连接状态，使用表id注册
+        }
     }
 
 
