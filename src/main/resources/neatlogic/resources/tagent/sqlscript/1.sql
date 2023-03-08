@@ -1,7 +1,7 @@
 -- ----------------------------
 -- Table structure for tagent
 -- ----------------------------
-CREATE TABLE `tagent` (
+CREATE TABLE IF NOT EXISTS `tagent` (
   `id` bigint unsigned NOT NULL COMMENT 'tagent Id',
   `ip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'tagentIP',
   `port` int NOT NULL COMMENT 'tagent注册端口',
@@ -30,7 +30,7 @@ CREATE TABLE `tagent` (
 -- ----------------------------
 -- Table structure for tagent_ip
 -- ----------------------------
-CREATE TABLE `tagent_ip` (
+CREATE TABLE IF NOT EXISTS `tagent_ip` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `tagent_id` bigint NOT NULL COMMENT 'tagentId',
   `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '目标主机的网卡IP',
@@ -41,7 +41,7 @@ CREATE TABLE `tagent_ip` (
 -- ----------------------------
 -- Table structure for tagent_os
 -- ----------------------------
-CREATE TABLE `tagent_os` (
+CREATE TABLE IF NOT EXISTS `tagent_os` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作系统名称',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
@@ -56,7 +56,7 @@ CREATE TABLE `tagent_os` (
 -- ----------------------------
 -- Table structure for tagent_osbit
 -- ----------------------------
-CREATE TABLE `tagent_osbit` (
+CREATE TABLE IF NOT EXISTS `tagent_osbit` (
   `osbit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'tagent cpu架构',
   PRIMARY KEY (`osbit`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent cpu架构表';
@@ -64,7 +64,7 @@ CREATE TABLE `tagent_osbit` (
 -- ----------------------------
 -- Table structure for tagent_upgrade_audit
 -- ----------------------------
-CREATE TABLE `tagent_upgrade_audit` (
+CREATE TABLE IF NOT EXISTS `tagent_upgrade_audit` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `count` bigint DEFAULT NULL COMMENT '升级个数',
   `fcd` timestamp(3) NULL DEFAULT NULL COMMENT '时间',
@@ -76,7 +76,7 @@ CREATE TABLE `tagent_upgrade_audit` (
 -- ----------------------------
 -- Table structure for tagent_upgrade_detail
 -- ----------------------------
-CREATE TABLE `tagent_upgrade_detail` (
+CREATE TABLE IF NOT EXISTS `tagent_upgrade_detail` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `audit_id` bigint DEFAULT NULL COMMENT '记录id,关联 flow_tagent_upgrade_audit表',
   `ip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'tagent ip',
@@ -92,7 +92,7 @@ CREATE TABLE `tagent_upgrade_detail` (
 -- ----------------------------
 -- Table structure for tagent_version
 -- ----------------------------
-CREATE TABLE `tagent_version` (
+CREATE TABLE IF NOT EXISTS `tagent_version` (
   `id` bigint NOT NULL COMMENT '主键',
   `os_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'os类型',
   `version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '版本',
