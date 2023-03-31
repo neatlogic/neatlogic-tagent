@@ -116,39 +116,35 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                 throw new TagentPortIsEmptyException(paramObj);
             }
 
-            Long insertTagentId = null;
-            String tagentIdString = paramObj.getString("tagentId");
-            if (StringUtils.isNotEmpty(tagentIdString)) {
-                insertTagentId = Long.valueOf(tagentIdString);
-            }
-            if (StringUtils.isNotBlank(paramObj.getString("tagentId"))) {
+            Long insertTagentId = paramObj.getLong("tagentId");
+            if (insertTagentId != null) {
                 TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
                 if (oldTagent != null) {
                     if (Objects.equals(oldTagent.getPort(), insertTagentPort)) {
                         if (StringUtils.equals(oldTagent.getIp(), insertTagentIp)) {
-                            //输入ip和主ip相同 =》刷状态，查看tagent状态
+                            //输入ip和主ip相同
                             checkTagentStatus(oldTagent);
                         } else {
                             List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(insertTagentId);
                             if (oldIpList.contains(insertTagentIp)) {
-                                //输入ip和副ip相同 =》刷状态，查看tagent状态
+                                //输入ip和副ip相同
                                 checkTagentStatus(oldTagent);
                             } else {
-                                //ip不相同,根据输入ip和输入port查询tagent
-                                insertTagentId = getTagentByIpAndPort(insertTagentIp, insertTagentPort);
+                                //ip不相同
+                                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
                             }
                         }
                     } else {
-                        //port不相同,根据输入ip和输入port查询tagent
-                        insertTagentId = getTagentByIpAndPort(insertTagentIp, insertTagentPort);
+                        //port不相同
+                        insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
                     }
                 } else {
-                    //通过id找不到tagent，根据输入ip和输入port查询tagent
-                    insertTagentId = getTagentByIpAndPort(insertTagentIp, insertTagentPort);
+                    //通过id找不到tagent
+                    insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
                 }
             } else {
-                //无输入id，根据输入ip和输入port查询tagent
-                insertTagentId = getTagentByIpAndPort(insertTagentIp, insertTagentPort);
+                //无输入id
+                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
             }
             paramObj.put("tagentId", insertTagentId);
             RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(insertTagentIp);
@@ -264,7 +260,14 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         data.put("proxyList", runnerArray);
     }
 
-    private Long getTagentByIpAndPort(String insertTagentIp, Integer insertTagentPort) {
+    /**
+     * 根据和输入ip和输入port找tagentId
+     *
+     * @param insertTagentIp   输入ip
+     * @param insertTagentPort 输入port
+     * @return tagentId
+     */
+    private Long getTagentIdByIpAndPort(String insertTagentIp, Integer insertTagentPort) {
         List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
         if (CollectionUtils.isNotEmpty(oldTagentList)) {
             if (oldTagentList.size() == 1) {
@@ -280,8 +283,14 @@ public class TagentRegisterApi extends PublicApiComponentBase {
         }
     }
 
+    /**
+     * 刷新tagent的连接状态
+     * 不管是runnerId为空、runner不存在、runner连接不上、tagent状态为未连接，都视为重新tagent注册
+     * 只有是发现tagent是连接状态，才抛异常（ip冲突）
+     *
+     * @param tagentVo tagentVo
+     */
     private void checkTagentStatus(TagentVo tagentVo) {
-        //刷状态，查看tagent状态
         if (tagentVo.getRunnerId() == null) {
             return;
         }
