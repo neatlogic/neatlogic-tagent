@@ -304,7 +304,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
             }
             JSONObject resultJson = requestUtil.getResultJson();
             if (resultJson.containsKey("Status") && "OK".equals(resultJson.getString("Status"))) {
-                //注册失败，抛异常（已存在活动的tagent，可能是ip冲突造成）
+                //tagent正在连接状态，注册失败，抛异常（已存在活动的tagent，可能是ip冲突造成）
                 throw new TagentStatusIsSuccessException();
             } else {
                 //未连接状态，使用表id注册
