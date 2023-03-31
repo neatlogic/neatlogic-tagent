@@ -272,7 +272,7 @@ public class TagentRegisterApi extends PublicApiComponentBase {
                 return oldTagentList.get(0).getId();
             } else {
                 //通过输入ip和输入port找到多个个tagent，注册失败
-                throw new TagentMultipleException(oldTagentList);
+                throw new TagentMultipleException(insertTagentIp, insertTagentPort, oldTagentList);
             }
         } else {
             //新tagent，直接注册
