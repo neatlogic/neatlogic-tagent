@@ -1,5 +1,6 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
@@ -19,7 +20,6 @@ import neatlogic.framework.tagent.exception.TagentActionNotFoundException;
 import neatlogic.framework.tagent.exception.TagentIdNotFoundException;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
