@@ -149,7 +149,13 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
             IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
             AccountVo tagentAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
-            AccountProtocolVo protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByProtocolName("tagent");
+            String protocolName;
+            if (tagent.getPort() == 3939) {
+                protocolName = "tagent";
+            } else {
+                protocolName = "tagent." + tagent.getPort();
+            }
+            AccountProtocolVo protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByProtocolName(protocolName);
 
             List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             List<String> newIpStringList = new ArrayList<>();
@@ -166,6 +172,10 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                 //新增tagent ip和帐号
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+                    List<String> sameIpList = resourceAccountCrossoverMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
+                    if (CollectionUtils.isNotEmpty(sameIpList)) {
+                        insertTagentIpList = insertTagentIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
+                    }
                     for (String ip : insertTagentIpList) {
                         AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
                         resourceAccountCrossoverMapper.insertAccount(newAccountVo);
