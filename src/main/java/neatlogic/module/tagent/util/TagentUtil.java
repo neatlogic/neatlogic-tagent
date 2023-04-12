@@ -2,9 +2,6 @@ package neatlogic.module.tagent.util;
 
 import neatlogic.framework.tagent.dto.TagentVersionVo;
 import neatlogic.module.tagent.common.Constants;
-import neatlogic.module.tagent.common.config.TagentConfig;
-
-import java.io.File;
 
 public class TagentUtil {
 
@@ -102,15 +99,5 @@ public class TagentUtil {
 //    }
 
 
-    public static void checkTagentBaseFile() {
-        File fileBase = new File(TagentConfig.TAGENT_PATH + File.separator + Constants.tagentBasePath);
-        if (!fileBase.exists()) {
-            throw new RuntimeException("tagent 安装基础文件路径不存在");
-        } else {
-            File[] fileArray = fileBase.listFiles();
-            if (fileArray.length == 0) {
-                throw new RuntimeException("tagent 安装包文件目录为空");
-            }
-        }
-    }
+
 }
