@@ -101,3 +101,29 @@ CREATE TABLE IF NOT EXISTS `tagent_version` (
   `file_id` bigint NOT NULL COMMENT '关联file表，用于下载安装包',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent版本';
+
+-- ----------------------------
+-- Table structure for tagent_account
+-- ----------------------------
+
+CREATE TABLE IF NOT EXISTS `tagent_account` (
+    `id` bigint NOT NULL COMMENT '主键id',
+    `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
+    `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '密码',
+    `protocol_id` bigint NOT NULL COMMENT 'tgent协议id',
+    `fcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '创建人',
+    `fcd` timestamp NULL DEFAULT NULL COMMENT '创建时间',
+    `lcu` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '修改人',
+    `lcd` timestamp NULL DEFAULT NULL COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name` (`name`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent账号表\n';
+
+-- ----------------------------
+-- Table structure for tagent_account_ip
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `tagent_account_ip` (
+   `account_id` bigint NOT NULL COMMENT '账号id',
+    `ip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '账号对应的ip',
+    PRIMARY KEY (`account_id`,`ip`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent账号ip表';

@@ -1,9 +1,9 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountVo;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
@@ -12,10 +12,10 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
+import neatlogic.framework.tagent.dto.TagentAccountVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -148,7 +148,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     private void updateTagentIpAndAccount(JSONObject jsonObj, TagentVo tagent) {
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
             IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-            AccountVo tagentAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+            TagentAccountVo tagentAccountVo = tagentMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
             String protocolName;
             if (tagent.getPort() == 3939) {
                 protocolName = "tagent";
@@ -172,14 +172,16 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                 //新增tagent ip和帐号
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-                    List<String> sameIpList = resourceAccountCrossoverMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
+                    List<String> sameIpList = tagentMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
                     if (CollectionUtils.isNotEmpty(sameIpList)) {
                         insertTagentIpList = insertTagentIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
                     }
                     for (String ip : insertTagentIpList) {
-                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                        resourceAccountCrossoverMapper.insertAccount(newAccountVo);
-                        resourceAccountCrossoverMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
+//                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                        TagentAccountVo newAccountVo = new TagentAccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                        tagentMapper.insertAccount(newAccountVo);
+//                        resourceAccountCrossoverMapper.insertAccount(newAccountVo);
+                        tagentMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
                     }
                 }
             }
