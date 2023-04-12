@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `tagent_account` (
     `lcd` timestamp NULL DEFAULT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_name` (`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent账号表\n';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='tagent账号表';
 
 -- ----------------------------
 -- Table structure for tagent_account_ip
