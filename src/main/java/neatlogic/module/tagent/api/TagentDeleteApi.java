@@ -106,6 +106,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
 //                IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
 //                accountService.deleteAccount(deletedAccountIdList);
                 tagentMapper.deleteAccountListByIdList(deletedAccountIdList);
+                tagentMapper.deleteAccountIpListByAccountIdList(deletedAccountIdList);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }
