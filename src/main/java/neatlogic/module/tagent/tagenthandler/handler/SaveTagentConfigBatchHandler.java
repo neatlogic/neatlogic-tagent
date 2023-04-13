@@ -15,13 +15,14 @@
  */
 package neatlogic.module.tagent.tagenthandler.handler;
 
-import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountVo;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
+import neatlogic.framework.tagent.dao.mapper.TagentMapper;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
@@ -29,9 +30,9 @@ import neatlogic.framework.tagent.exception.TagentActionFailedException;
 import neatlogic.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import neatlogic.framework.util.RestUtil;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author longrf
@@ -40,6 +41,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SaveTagentConfigBatchHandler  extends TagentHandlerBase {
+
+    @Resource
+    TagentMapper tagentMapper;
+
     @Override
     public String getHandler() {
         return null;
@@ -57,9 +62,9 @@ public class SaveTagentConfigBatchHandler  extends TagentHandlerBase {
 
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
-        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+//        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
-        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagentVo.getAccountId());
+        AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }

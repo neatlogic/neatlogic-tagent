@@ -1,17 +1,15 @@
 package neatlogic.module.tagent.api;
 
-import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountVo;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -56,11 +54,11 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
         if (tagent.getAccountId() == null) {
             throw new ResourceCenterAccountNotFoundException();
         }
-        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-        AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagent.getAccountId());
+//        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+        AccountBaseVo accountVo = tagentMapper.getAccountById(tagent.getAccountId());
         accountVo.setPasswordCipher(null);
         accountVo.setPasswordPlain(paramObj.getString("credential"));
-        resourceAccountCrossoverMapper.updateAccount(accountVo);
+        tagentMapper.updateAccount(accountVo);
         return null;
 
     }
