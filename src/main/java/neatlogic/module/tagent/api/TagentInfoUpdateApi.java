@@ -12,7 +12,7 @@ import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.tagent.dto.TagentAccountVo;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
@@ -148,7 +148,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     private void updateTagentIpAndAccount(JSONObject jsonObj, TagentVo tagent) {
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
             IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-            TagentAccountVo tagentAccountVo = tagentMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+            AccountBaseVo tagentAccountVo = tagentMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
             String protocolName;
             if (tagent.getPort() == 3939) {
                 protocolName = "tagent";
@@ -178,7 +178,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                     }
                     for (String ip : insertTagentIpList) {
 //                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                        TagentAccountVo newAccountVo = new TagentAccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
+                        AccountBaseVo newAccountVo = new AccountBaseVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
                         tagentMapper.insertAccount(newAccountVo);
 //                        resourceAccountCrossoverMapper.insertAccount(newAccountVo);
                         tagentMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));

@@ -12,7 +12,7 @@ import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.tagent.dto.TagentAccountVo;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentVersionVo;
 import neatlogic.framework.tagent.dto.TagentVo;
@@ -62,7 +62,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
 //        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
-        TagentAccountVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
+        AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new ResourceCenterAccountNotFoundException();
         }

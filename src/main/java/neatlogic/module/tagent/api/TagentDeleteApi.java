@@ -24,7 +24,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.tagent.dto.TagentAccountVo;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.exception.TagentHasBeenConnectedException;
@@ -95,7 +95,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                         deletedIpList = deletedIpList.stream().filter(item -> !neededIpList.contains(item)).collect(toList());
                     }
                     for (String ip : deletedIpList) {
-                        TagentAccountVo deletedAccountVo = tagentMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
+                        AccountBaseVo deletedAccountVo = tagentMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
                         if (deletedAccountVo != null) {
                             deletedAccountIdList.add(deletedAccountVo.getId());
                         }
