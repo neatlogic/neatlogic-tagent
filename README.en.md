@@ -6,14 +6,8 @@
 （1）tagent side configuration：<br>
 Enter the '/opt/agent/run/root/conf' directory<br>
 Edit the tagent.conf file<br>
-Mandatory parameter description：
-|  Mandatory parameter  |  Remarks  |
-|  --------  |  ----  |
-|  credential  |  Encrypted password string  |
-|  proxy.group  |  The IP address and heartbeat port of the runner  |
-|  proxy.registeraddress  |  The registered address of the tagent in the runner must also be accompanied by the tenant's uuid  |
-|  tagent.id  |  tagent's id  |
-|  tenant  |  tenant's uuid  |
+Key parameter description：<br>
+![img.png](README_IMAGES/img3.png)
 
 Taking the installation of the tagent on 192.168.0.25, the runner on 192.168.0.32 (service port 8084, heartbeat port 8888), and the neatlogic on 192.168.0.25 (tenant test) as examples：
 ```
