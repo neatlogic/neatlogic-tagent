@@ -9,16 +9,16 @@ Edit the tagent.conf file<br>
 Key parameter description：<br>
 ![img.png](README_IMAGES/img3.png)
 
-Taking the installation of the tagent on 192.168.0.25, the runner on 192.168.0.32 (service port 8084, heartbeat port 8888), and the neatlogic on 192.168.0.25 (tenant test) as examples：
+Taking the installation of the tagent on 192.168.0.25, the runner on 192.168.0.21 (service port 8084, heartbeat port 8888), and the neatlogic on 192.168.0.25 (tenant test) as examples：
 ```
 credential={ENCRYPTED}19chdeh34c738cb575fef816607
 exec.timeout=900
 listen.addr=0.0.0.0
 listen.backlog=16
 listen.port=3939
-proxy.group=192.168.0.32:8888
+proxy.group=192.168.0.21:8888
 proxy.group.id=
-proxy.registeraddress=http://192.168.0.32:8084/autoexecrunner/public/api/rest/tagent/register?tenant=test
+proxy.registeraddress=http://192.168.0.21:8084/autoexecrunner/public/api/rest/tagent/register?tenant=test
 read.timeout=5
 tagent.id=123
 tenant=test
