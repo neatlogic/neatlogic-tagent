@@ -65,7 +65,7 @@ service tagent stop
 <br>
 <br>
 ### 4、注册时id、ip相关逻辑
-![img_1.png](README_IMAGES/img4.png)
+![img_1.png](README_IMAGES/img3.png)
 注：<br>
 （1）两个tagent的包含ip可以重叠，但不可以包含其他tagent的主ip，注册时出现此情况会抛异常【包含了其他tagent主ip】<br>
 （2）通过tagent主ip找到两个及两个以上tagent，抛异常【当前主ip被多个tagent包含】<br>

@@ -7,7 +7,17 @@
 Enter the '/opt/agent/run/root/conf' directory<br>
 Edit the tagent.conf file<br>
 Key parameter description：<br>
-![img.png](README_IMAGES/img3.png)
+
+|          key          |                                              notes                                              | Is it mandatory |
+|:---------------------:|:-----------------------------------------------------------------------------------------------:|:---------------:|
+|      credential       |                                    Encrypted password string                                    |       Yes       |
+|      listen.port      |                                      The port of the agent                                      |       Yes       |
+|      proxy.group      |                                      Runner group ip: port                                      |       No        |
+|    proxy.group.id     |                                         Runner group id                                         |       No        |
+| proxy.registeraddress | The registered address of the agent in the runner must also be accompanied by the tenant's uuid |       Yes       |
+|       tagent.id       |                                            tagent id                                            |       No        |
+|        tenant         |                                           tenant uuid                                           |       Yes       |
+
 
 Taking the installation of the tagent on 192.168.0.25, the runner on 192.168.0.21 (service port 8084, heartbeat port 8888), and the neatlogic on 192.168.0.25 (tenant test) as examples：
 ```
@@ -50,7 +60,7 @@ PS：<br>
 <br>
 <br>
 ### 4、Logic related to ID and IP during registration
-![img_1.png](README_IMAGES/img4.png)
+![img_1.png](README_IMAGES/img3.png)
 PS：<br>
 （1）The containing IPs of two agents can overlap, but cannot include the main IPs of other agents. If this situation occurs during registration, an exception will be thrown [including the main IPs of other agents]<br>
 （2）Find two or more agents through the main agent IP and throw an exception [the current main IP is contained by multiple agents]<br>
