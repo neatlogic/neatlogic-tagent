@@ -7,7 +7,17 @@
 进入/opt/tagent/run/root/conf目录<br>
 编辑tagent.conf文件<br>
 关键参数说明：<br>
-![img.png](README_IMAGES/img3.png)
+
+|           参数           |               备注                | 是否必填  |
+|:----------------------:|:-------------------------------:|:-----:|
+|       credential       |             加密后的密码串             |   是   |
+|      listen.port       |            tagent的端口            |   是   |
+|      proxy.group       |         runner组ip:port          |   否   |
+|     proxy.group.id     |            runner组id            |   否   |
+| proxy.registeraddress  | tagent在runner的注册地址，还需带上租户的uuid  |   是   |
+|       tagent.id        |            tagent id            |   否   |
+|         tenant         |             租户uuid              |   是   |
+
 
 以安装在192.168.0.25的tagent、192.168.0.21的runner（服务端口为8084，心跳端口为8888）、192.168.0.25的neatlogic（租户为test）为例：
 ```
@@ -55,7 +65,7 @@ service tagent stop
 <br>
 <br>
 ### 4、注册时id、ip相关逻辑
-![img_1.png](README_IMAGES/img4.png)
+![img_1.png](README_IMAGES/img3.png)
 注：<br>
 （1）两个tagent的包含ip可以重叠，但不可以包含其他tagent的主ip，注册时出现此情况会抛异常【包含了其他tagent主ip】<br>
 （2）通过tagent主ip找到两个及两个以上tagent，抛异常【当前主ip被多个tagent包含】<br>
