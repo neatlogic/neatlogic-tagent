@@ -7,7 +7,17 @@
 进入/opt/tagent/run/root/conf目录<br>
 编辑tagent.conf文件<br>
 关键参数说明：<br>
-![img.png](README_IMAGES/img3.png)
+
+|           参数           |               备注                | 是否必填  |
+|:----------------------:|:-------------------------------:|:-----:|
+|       credential       |             加密后的密码串             |   是   |
+|      listen.port       |            tagent的端口            |   是   |
+|      proxy.group       |         runner组ip:port          |   否   |
+|     proxy.group.id     |            runner组id            |   否   |
+| proxy.registeraddress  | tagent在runner的注册地址，还需带上租户的uuid  |   是   |
+|       tagent.id        |            tagent id            |   否   |
+|         tenant         |             租户uuid              |   是   |
+
 
 以安装在192.168.0.25的tagent、192.168.0.21的runner（服务端口为8084，心跳端口为8888）、192.168.0.25的neatlogic（租户为test）为例：
 ```
