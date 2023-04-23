@@ -18,15 +18,15 @@ package neatlogic.module.tagent.tagenthandler.handler;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
+import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.exception.TagentActionFailedException;
 import neatlogic.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerBase;
@@ -63,7 +63,7 @@ public class TagentReLoadHandler extends TagentHandlerBase {
         //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
         AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
-            throw new ResourceCenterAccountNotFoundException();
+            throw new TagentAccountNotFoundException(tagentVo.getAccountId());
         }
 
         JSONObject paramJson = new JSONObject();

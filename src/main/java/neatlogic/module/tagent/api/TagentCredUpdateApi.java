@@ -9,6 +9,7 @@ import neatlogic.framework.restful.core.publicapi.PublicApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentVo;
+import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,9 @@ public class TagentCredUpdateApi extends PublicApiComponentBase {
         }
 //        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
         AccountBaseVo accountVo = tagentMapper.getAccountById(tagent.getAccountId());
+        if (accountVo == null) {
+            throw new TagentAccountNotFoundException(tagent.getAccountId());
+        }
         accountVo.setPasswordCipher(null);
         accountVo.setPasswordPlain(paramObj.getString("credential"));
         tagentMapper.updateAccount(accountVo);

@@ -24,6 +24,7 @@ import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
+import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -65,6 +66,10 @@ public class GetTagentAccountApi extends PrivateApiComponentBase {
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        return tagentMapper.getAccountById(paramObj.getLong("id"));
+        AccountBaseVo accountBaseVo = tagentMapper.getAccountById(paramObj.getLong("id"));
+        if (accountBaseVo == null) {
+            throw new TagentAccountNotFoundException(paramObj.getLong("id"));
+        }
+        return accountBaseVo;
     }
 }
