@@ -2,7 +2,7 @@ package neatlogic.module.tagent.tagenthandler.handler;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
@@ -12,15 +12,11 @@ import neatlogic.framework.file.dao.mapper.FileMapper;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentVersionVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
-import neatlogic.framework.tagent.exception.TagentActionFailedException;
-import neatlogic.framework.tagent.exception.TagentPkgNotFoundException;
-import neatlogic.framework.tagent.exception.TagentPkgVersionAndDefaultVersionAreNotfoundException;
-import neatlogic.framework.tagent.exception.TagentRunnerConnectRefusedException;
+import neatlogic.framework.tagent.exception.*;
 import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import neatlogic.framework.util.RestUtil;
@@ -64,7 +60,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
         //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
         AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
-            throw new ResourceCenterAccountNotFoundException();
+            throw new TagentAccountNotFoundException(tagentVo.getAccountId());
         }
         String result = StringUtils.EMPTY;
         String pkgVersion = message.getPkgVersion();
