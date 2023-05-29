@@ -1,26 +1,40 @@
-[Chinese](README.md) / English
+[中文](README.md) / English
+<p align="left">
+    <a href="https://opensource.org/licenses/Apache-2.0" alt="License">
+        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a>
+    <a target="_blank" href="https://join.slack.com/t/neatlogichome/shared_invite/zt-1w037axf8-r_i2y4pPQ1Z8FxOkAbb64w">
+        <img src="https://img.shields.io/badge/Slack-Neatlogic-orange" /></a>
+</p>
 
-## tagent registration
+---
 
-### 1、configuration
-（1）tagent side configuration：<br>
-Enter the '/opt/agent/run/root/conf' directory<br>
-Edit the tagent.conf file<br>
-Key parameter description：<br>
+## About
 
-|          key          |                                              notes                                              | Is it mandatory |
-|:---------------------:|:-----------------------------------------------------------------------------------------------:|:---------------:|
-|      credential       |                                    Encrypted password string                                    |       Yes       |
-|      listen.port      |                                      The port of the agent                                      |       Yes       |
-|      proxy.group      |                                      Runner group ip: port                                      |       No        |
-|    proxy.group.id     |                                         Runner group id                                         |       No        |
-| proxy.registeraddress | The registered address of the agent in the runner must also be accompanied by the tenant's uuid |       Yes       |
-|       tagent.id       |                                            tagent id                                            |       No        |
-|        tenant         |                                           tenant uuid                                           |       Yes       |
+neatlogic-agent is the maintenance platform for [Tagent](../../../neatlogic-tagent-client/blob/master/README.en.md),
+mainly used to manage the status of tagent.
 
+## Tagent Registration
 
-Taking the installation of the tagent on 192.168.0.25, the runner on 192.168.0.21 (service port 8084, heartbeat port 8888), and the neatlogic on 192.168.0.25 (tenant test) as examples：
-```
+### Configuration
+
+#### Tagent-side Configuration
+
+Go to the /opt/tagent/run/root/conf directory and edit the tagent.conf file. Key parameter details:
+
+| Parameter             | Remarks                                                         | Required |
+|:----------------------|:----------------------------------------------------------------|:---------|
+| credential            | Encrypted password string                                       | Yes      |
+| listen.port           | Port of the tagent                                              | Yes      |
+| proxy.group           | runner group ip:port                                            | No       |
+| proxy.group.id        | runner group id                                                 | No       |
+| proxy.registeraddress | Registration address of tagent in runner, including tenant UUID | Yes      |
+| tagent.id             | tagent id                                                       | No       |
+| tenant                | Tenant UUID                                                     | Yes      |
+
+Example for a tagent installed on 192.168.0.25, runner on 192.168.0.21 (service port 8084, heartbeat port 8888), and
+neatlogic on 192.168.0.25 (tenant: test):
+
+```properties
 credential={ENCRYPTED}19chdeh34c738cb575fef816607
 exec.timeout=900
 listen.addr=0.0.0.0
@@ -33,38 +47,59 @@ read.timeout=5
 tagent.id=123
 tenant=test
 ```
-（2）neatlogic side configuration<br>
-Add the runner group on the Tagent Groups management page, and the range of the network segment must include the IP address of the tagent.
+
+#### Neatlogic-side Configuration
+
+Add the runner group on the Executor Group Management page, and the network range must include the tagent's IP address.
 ![img.png](README_IMAGES/img.png)
 ![img.png](README_IMAGES/img1.png)
 
-### 2、Start the tagent service
+#### Start Tagent Service
 
-**1、Start the tagent service command**
-```
+**1. Start the Tagent service command**
+
+```shell
 service tagent start
+or:
 /bin/systemctl start tagent.service
 ```
-**2、Stop the tagent service command**
-```
+
+**2. Stop the Tagent service command**
+
+```shell
 service tagent stop
+or:
 /bin/systemctl stop tagent.service 
 ```
-### 3、Three terminal flowchart during registration
+
+## Registration Flow Among the Three Parties
 
 ![img.png](README_IMAGES/img2.png)
-PS：<br>
-（1）When registering in Neatlogic, first determine which network segment of the runner group the tagent's IP is in, match it with the runner group, and then use the runner within the group;<br>
-（2）After registering the tagent on Neatlogic, if the heartbeat between the agent and the runner is normal, the agent's information will be updated to the neatlogic.<br>
-（3）On the Neatlogic side, a series of operations on the agent will be executed through the runner side's command for the agent.
-<br>
-<br>
-### 4、Logic related to ID and IP during registration
+
+Note:
+
++ During the registration in neatlogic, the IP of the tagent is first determined to be within which runner group's
+  network range. Once matched with a runner group, the runner within the group will be used.
++ After tagent registers with neatlogic, the information of tagent will be updated to neatlogic as long as the heartbeat
+  between tagent and runner is normal.
++ A series of operations on tagent in neatlogic will be executed through the runner.
+
+## Logic of Registration ID and IP
+
 ![img_1.png](README_IMAGES/img3.png)
-PS：<br>
-（1）The containing IPs of two agents can overlap, but cannot include the main IPs of other agents. If this situation occurs during registration, an exception will be thrown [including the main IPs of other agents]<br>
-（2）Find two or more agents through the main agent IP and throw an exception [the current main IP is contained by multiple agents]<br>
-（3）Registration found that the agent is still connected and threw an exception [IP conflict]<br>
-（4）When the ports are the same, the registered IP is included by an existing agent and is considered the same agent<br>
-（5）Same IP and different ports are considered as another agent<br>
-（6）When the ports are the same, each IP will correspond to a agent account. If there are overlapping IPs, each IP will only correspond to one account<br>
+
+Note:
+
++ Overlapping IPs of two tagents are allowed, but they cannot contain the primary IP of
+
+other tagents. An exception will be thrown during registration if this situation occurs【Contains the primary IP of other
+tagents】.
+
++ If two or more tagents are found through the primary IP of tagent, an exception will be thrown【The current primary IP
+  is included in multiple tagents】.
++ If tagent is still in a connected state during registration, an exception will be thrown【IP conflict】.
++ When the port is the same, if the registration IP is contained by an existing tagent, it is considered the same
+  tagent.
++ If the IP is the same but the port is different, it is considered a different tagent.
++ When the port is the same, each IP will correspond to a tagent account. In the case of overlapping IPs, one IP will
+  only correspond to one account.
