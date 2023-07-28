@@ -59,7 +59,7 @@ public class TagentConfigGetHandler extends TagentHandlerBase {
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
 //        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-        //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
+        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
         AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new TagentAccountNotFoundException(tagentVo.getAccountId());

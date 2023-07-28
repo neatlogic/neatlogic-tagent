@@ -1,3 +1,19 @@
+/*
+ * Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package neatlogic.module.tagent.tagenthandler.handler;
 
 import com.alibaba.fastjson.JSONException;
@@ -57,7 +73,7 @@ public class TagentUpgradeHandler extends TagentHandlerBase {
     @Override
     public JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception {
 //        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-        //验证tagent对应的帐号是否存在，以便后续从该帐号获取对应密文
+        //验证tagent对应的账号是否存在，以便后续从该账号获取对应密文
         AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
         if (accountVo == null) {
             throw new TagentAccountNotFoundException(tagentVo.getAccountId());

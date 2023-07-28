@@ -1,3 +1,19 @@
+/*
+ * Copyright(c) 2023 NeatLogic Co., Ltd. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package neatlogic.module.tagent.api;
 
 import com.alibaba.fastjson.JSONObject;
@@ -112,7 +128,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
             tagentService.updateTagentById(tagent);
 
-            //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和帐号
+            //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
             updateTagentIpAndAccount(paramObj, tagent);
 
             //4、 当组信息与cache不一致时，更新cache
@@ -164,12 +180,12 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
             }
             List<String> newIpList = newIpStringList;
 
-            //删除多余的tagent ip和帐号
+            //删除多余的tagent ip和账号
             tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
 
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 List<String> insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
-                //新增tagent ip和帐号
+                //新增tagent ip和账号
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
                     List<String> sameIpList = tagentMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
