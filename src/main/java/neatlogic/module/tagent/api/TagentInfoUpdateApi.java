@@ -90,6 +90,7 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
     @Input({@Param(name = "agentId", type = ApiParamType.LONG, desc = "tagentId"),
             @Param(name = "pcpu", type = ApiParamType.STRING, desc = "cpu"),
             @Param(name = "ip", type = ApiParamType.STRING, desc = "ip"),
+            @Param(name = "mgmtIp", type = ApiParamType.STRING, desc = "mgmtIp"),
             @Param(name = "mem", type = ApiParamType.STRING, desc = "内存"),
             @Param(name = "runnerId", type = ApiParamType.LONG, desc = "runner Id"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "端口"),
@@ -113,9 +114,13 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
         long id = paramObj.getLong("agentId");
         try {
             TagentVo tagent = new TagentVo(paramObj);
-            Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+            String tagentIp = tagent.getIp();
+            if (paramObj.containsKey("mgmtIp") && StringUtils.isNotBlank(paramObj.getString("mgmtIp"))) {
+                tagentIp = paramObj.getString("mgmtIp");
+            }
+            Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagentIp, tagent.getPort());
             if (tagentId == null) {
-                throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
+                throw new TagentNotFoundException(tagentIp, tagent.getPort());
             }
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
