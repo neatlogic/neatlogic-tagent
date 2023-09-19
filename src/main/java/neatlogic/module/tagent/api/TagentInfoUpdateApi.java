@@ -123,6 +123,8 @@ public class TagentInfoUpdateApi extends PublicApiComponentBase {
                 RunnerVo runnerVo = runnerMapper.getRunnerByNettyIpAndNettyPort(tagent.getRunnerIp(), tagent.getRunnerPort());
                 if (runnerVo != null) {
                     tagent.setRunnerId(runnerVo.getId());
+                } else {
+                    logger.error(tagent.getRunnerIp() + ":" + tagent.getRunnerPort() + "没有找到匹配的runner,请确认执行器管理是否存在该runner");
                 }
             }
             //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
