@@ -10,7 +10,6 @@ import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,6 @@ public class TagentStatusUpdateApi extends PublicApiComponentBase {
 
     @Input({
             @Param(name = "ip", type = ApiParamType.STRING, desc = "tagentIP"),
-            @Param(name = "mgmtIp", type = ApiParamType.STRING, desc = "mgmtIp"),
             @Param(name = "port", type = ApiParamType.INTEGER, desc = "tagent端口"),
             @Param(name = "status", type = ApiParamType.ENUM, rule = "disconnected,connected", isRequired = true, desc = "tagent状态"),
             @Param(name = "runnerId", type = ApiParamType.STRING, desc = "runner id"),
@@ -59,16 +57,13 @@ public class TagentStatusUpdateApi extends PublicApiComponentBase {
         boolean status = true;
         String returnData = null;
         try {
-            if (paramObj.containsKey("mgmtIp") && StringUtils.isNotBlank(paramObj.getString("mgmtIp"))) {
-                paramObj.put("ip", paramObj.getString("mgmtIp"));
-            }
             paramObj.put("runnerIp", IpUtil.getIpAddr(UserContext.get().getRequest()));
             TagentVo tagent = JSONObject.toJavaObject(paramObj, TagentVo.class);
             Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             if (tagentId == null) {
                 throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
             }
-            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagent.getStatus(), tagent.getDisConnectReason(), tagentId);
+            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagent.getStatus(),tagent.getDisConnectReason(),tagentId);
         } catch (Exception e) {
             status = false;
             logger.error(e.getMessage(), e);
