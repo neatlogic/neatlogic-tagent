@@ -48,6 +48,15 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
         return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
     }
 
+    /**
+     * 校验附件是否允许删除
+     * @param fileVo 附件信息
+     * @return
+     */
+    public boolean validDeleteFile(FileVo fileVo) {
+        return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
+    }
+
     @Override
     public String getName() {
         return "TAGENT";
