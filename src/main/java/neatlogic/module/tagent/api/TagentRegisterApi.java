@@ -119,6 +119,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             }
 
             Long insertTagentId = paramObj.getLong("tagentId");
+            List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
             if (insertTagentId != null) {
                 TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
                 if (oldTagent != null) {
@@ -133,29 +134,31 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                                 checkTagentStatus(oldTagent);
                             } else {
                                 //ip不相同
-                                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
+                                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
                             }
                         }
                     } else {
                         //port不相同
-                        insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
+                        insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
                     }
                 } else {
                     //通过id找不到tagent
-                    insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
+                    insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
                 }
             } else {
                 //无输入id
-                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort);
+                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
             }
             paramObj.put("tagentId", insertTagentId);
             RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(insertTagentIp);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
-            //注册后同步信息到资源中心
-            AfterRegisterJobManager.executeAll(tagentVo);
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
             returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
+            if (CollectionUtils.isEmpty(oldTagentList)) {
+                //注册后同步信息到资源中心
+                AfterRegisterJobManager.executeAll(tagentVo);
+            }
             resultJson.put("Status", "OK");
             resultJson.put("Data", data);
         } catch (Exception ex) {
@@ -267,10 +270,10 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
      *
      * @param insertTagentIp   输入ip
      * @param insertTagentPort 输入port
+     * @param oldTagentList    已存在的tagent
      * @return tagentId
      */
-    private Long getTagentIdByIpAndPort(String insertTagentIp, Integer insertTagentPort) {
-        List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
+    private Long getTagentIdByIpAndPort(String insertTagentIp, Integer insertTagentPort, List<TagentVo> oldTagentList) {
         if (CollectionUtils.isNotEmpty(oldTagentList)) {
             if (oldTagentList.size() == 1) {
                 checkTagentStatus(oldTagentList.get(0));
