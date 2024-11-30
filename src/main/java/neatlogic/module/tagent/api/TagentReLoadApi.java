@@ -1,10 +1,12 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -18,6 +20,7 @@ import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.exception.TagentActionNotFoundException;
 import neatlogic.framework.tagent.exception.TagentIdNotFoundException;
+import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class TagentReLoadApi extends PrivateApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
+
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getName() {
@@ -56,13 +62,17 @@ public class TagentReLoadApi extends PrivateApiComponentBase {
     @Description(desc = "重启Tagent接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
+        TagentMessageVo message = JSON.toJavaObject(paramObj, TagentMessageVo.class);
         JSONObject result = null;
         TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
         if (tagent == null) {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
-        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        TagentVo tagentMG = tagentService.getTagentMGById(tagent.getId());
+        if (tagentMG == null || tagentMG.getRunnerId() == null) {
+            throw new RunnerNotFoundByTagentRunnerIdException(tagent.getId());
+        }
+        RunnerVo runner = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RELOAD.getValue());
         if (tagentHandler == null) {
             throw new TagentActionNotFoundException(TagentAction.RELOAD.getValue());

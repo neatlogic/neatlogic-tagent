@@ -1,9 +1,13 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -14,10 +18,9 @@ import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.exception.TagentActionNotFoundException;
 import neatlogic.framework.tagent.exception.TagentIdNotFoundException;
+import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,9 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
 
     @Resource
     RunnerMapper runnerMapper;
+
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getName() {
@@ -62,7 +68,7 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
     @Description(desc = "查看Tagent日志接口")
     @Override
     public Object myDoService(JSONObject paramObj, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        TagentMessageVo message = JSONObject.toJavaObject(paramObj, TagentMessageVo.class);
+        TagentMessageVo message = JSON.toJavaObject(paramObj, TagentMessageVo.class);
         TagentVo tagent = tagentMapper.getTagentById(message.getTagentId());
         if (tagent == null) {
             throw new TagentIdNotFoundException(message.getTagentId());
@@ -71,7 +77,11 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
         if (tagentHandler == null) {
             throw new TagentActionNotFoundException(TagentAction.GET_LOGS.getValue());
         }
-        RunnerVo runner = runnerMapper.getRunnerById(tagent.getRunnerId());
+        TagentVo tagentMG = tagentService.getTagentMGById(tagent.getId());
+        if(tagentMG == null || tagentMG.getRunnerId() == null){
+            throw new RunnerNotFoundByTagentRunnerIdException(tagent.getId());
+        }
+        RunnerVo runner = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         JSONArray tbodyList = new JSONArray();
         JSONArray data = tagentHandler.execTagentCmd(message, tagent, runner).getJSONArray("Data");
         if (CollectionUtils.isNotEmpty(data)) {

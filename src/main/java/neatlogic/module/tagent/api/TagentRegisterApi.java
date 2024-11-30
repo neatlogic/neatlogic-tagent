@@ -24,10 +24,7 @@ import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.runner.RunnerGroupIdNotFoundException;
-import neatlogic.framework.exception.runner.RunnerGroupRunnerListEmptyException;
-import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
-import neatlogic.framework.exception.runner.RunnerUrlIsNullException;
+import neatlogic.framework.exception.runner.*;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -299,9 +296,13 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         if (tagentVo.getRunnerId() == null) {
             return;
         }
-        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+        TagentVo tagentMG = tagentService.getTagentMGById(tagentVo.getId());
+        if(tagentMG == null || tagentMG.getRunnerId() == null){
+            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+        }
+        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         if (runnerVo == null) {
-            throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
+            throw new RunnerIdNotFoundException(tagentMG.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
             throw new RunnerUrlIsNullException(runnerVo.getId());

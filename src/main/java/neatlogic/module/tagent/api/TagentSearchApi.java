@@ -1,6 +1,7 @@
 package neatlogic.module.tagent.api;
 
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
@@ -9,13 +10,16 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
+import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.util.TableResultUtil;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
@@ -23,6 +27,9 @@ import java.util.List;
 public class TagentSearchApi extends PrivateApiComponentBase {
     @Resource
     TagentMapper tagentMapper;
+
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getToken() {
@@ -61,7 +68,32 @@ public class TagentSearchApi extends PrivateApiComponentBase {
         if (rowNum > 0) {
             tagentVo.setRowNum(rowNum);
             returnTagentList = tagentMapper.searchTagent(tagentVo);
+            if(CollectionUtils.isNotEmpty(returnTagentList)){
+                List<TagentVo> tagentMGList = tagentService.getTagentListMGByTagentIds(returnTagentList.stream().map(TagentVo::getId).collect(Collectors.toList()));
+                if(CollectionUtils.isNotEmpty(tagentMGList)){
+                    Map<Long,TagentVo> tagentMGMap = tagentMGList.stream().collect(Collectors.toMap(TagentVo::getId, e -> e));
+                            returnTagentList.forEach(tagent -> {
+                        if(tagentMGMap.containsKey(tagent.getId())){
+                            TagentVo tagentMG = tagentMGMap.get(tagent.getId());
+                            tagent.setIp(tagentMG.getIp());
+                            tagent.setVersion(tagentMG.getVersion());
+                            tagent.setRunnerId(tagentMG.getRunnerId());
+                            tagent.setRunnerPort(tagentMG.getRunnerPort());
+                            tagent.setRunnerGroupId(tagentMG.getRunnerGroupId());
+                            if(tagentMG.getOsId() != null) {
+                                tagent.setOsId(tagentMG.getOsId());
+                            }
+                            tagent.setStatus(tagentMG.getStatus());
+                            tagent.setPcpu(tagentMG.getPcpu());
+                            tagent.setMem(tagentMG.getMem());
+                            tagent.setDisConnectReason(tagentMG.getDisConnectReason());
+                            tagent.setLcd(tagentMG.getLcd());
+                        }
+                    });
+                }
+            }
         }
+
         return TableResultUtil.getResult(returnTagentList, tagentVo);
     }
 }

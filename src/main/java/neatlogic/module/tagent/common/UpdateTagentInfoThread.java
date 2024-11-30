@@ -20,16 +20,20 @@ package neatlogic.module.tagent.common;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountProtocolNotFoundException;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
+import neatlogic.framework.dao.mapper.TenantMapper;
+import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
+import neatlogic.framework.util.mongodb.MongoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +54,25 @@ public class UpdateTagentInfoThread {
     private TagentService tagentService;
 
     @Resource
+    private MongoService mongoService;
+
+    @Resource
+    private TenantMapper tenantMapper;
+
+    @Resource
     private TagentMapper tagentMapper;
     private static final Logger logger = LoggerFactory.getLogger(UpdateTagentInfoThread.class);
     private static final NeatLogicUniqueBlockingQueue<TagentVo> blockingQueue = new NeatLogicUniqueBlockingQueue<>(50000);
 
     @PostConstruct
     public void init() {
+        TenantContext.init();
+        List<TenantVo> tenantVoList = tenantMapper.getAllActiveTenant();
+        for (TenantVo tenantVo : tenantVoList) {
+            TenantContext.get().switchTenant(tenantVo.getUuid()).setUseMasterDatabase(false);
+            mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+        }
+        TenantContext.get().setUseMasterDatabase(true);
         Thread t = new Thread(new NeatLogicThread("INSERT-USER-SESSION-MANAGER") {
             @Override
             protected void execute() {
@@ -136,7 +153,7 @@ public class UpdateTagentInfoThread {
         blockingQueue.offer(tagentVo);
     }
 
-    public static int getSize(){
+    public static int getSize() {
         return blockingQueue.size();
     }
 }
