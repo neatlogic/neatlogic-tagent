@@ -79,6 +79,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
                             tagent.setVersion(tagentMG.getVersion());
                             tagent.setRunnerId(tagentMG.getRunnerId());
                             tagent.setRunnerPort(tagentMG.getRunnerPort());
+                            tagent.setRunnerIp(tagentMG.getRunnerIp());
                             tagent.setRunnerGroupId(tagentMG.getRunnerGroupId());
                             if(tagentMG.getOsId() != null) {
                                 tagent.setOsId(tagentMG.getOsId());

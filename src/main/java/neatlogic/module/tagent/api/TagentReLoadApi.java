@@ -6,7 +6,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentIdException;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.Input;
 import neatlogic.framework.restful.annotation.OperationType;
@@ -70,7 +70,7 @@ public class TagentReLoadApi extends PrivateApiComponentBase {
         }
         TagentVo tagentMG = tagentService.getTagentMGById(tagent.getId());
         if (tagentMG == null || tagentMG.getRunnerId() == null) {
-            throw new RunnerNotFoundByTagentRunnerIdException(tagent.getId());
+            throw new RunnerNotFoundByTagentIdException(tagent.getId(), tagent.getIp());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(TagentAction.RELOAD.getValue());

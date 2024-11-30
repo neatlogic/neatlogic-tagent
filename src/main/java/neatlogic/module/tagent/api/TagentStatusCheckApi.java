@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
-import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentIdException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -80,7 +80,7 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
         }
         TagentVo tagentMG = tagentService.getTagentMGById(tagentVo.getId());
         if (tagentMG == null || tagentMG.getRunnerId() == null) {
-            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+            throw new RunnerNotFoundByTagentIdException(tagentVo.getId(),tagentVo.getIp());
         }
         if (runnerMapper.getRunnerById(tagentMG.getRunnerId()) == null) {
             tagentVo.setDisConnectReason("runner 不存在");

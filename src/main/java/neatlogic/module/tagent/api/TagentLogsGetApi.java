@@ -7,7 +7,7 @@ import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentIdException;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateBinaryStreamApiComponentBase;
@@ -78,8 +78,8 @@ public class TagentLogsGetApi extends PrivateBinaryStreamApiComponentBase {
             throw new TagentActionNotFoundException(TagentAction.GET_LOGS.getValue());
         }
         TagentVo tagentMG = tagentService.getTagentMGById(tagent.getId());
-        if(tagentMG == null || tagentMG.getRunnerId() == null){
-            throw new RunnerNotFoundByTagentRunnerIdException(tagent.getId());
+        if (tagentMG == null || tagentMG.getRunnerId() == null) {
+            throw new RunnerNotFoundByTagentIdException(tagent.getId(), tagent.getIp());
         }
         RunnerVo runner = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         JSONArray tbodyList = new JSONArray();

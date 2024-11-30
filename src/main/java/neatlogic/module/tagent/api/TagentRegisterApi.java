@@ -297,8 +297,8 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             return;
         }
         TagentVo tagentMG = tagentService.getTagentMGById(tagentVo.getId());
-        if(tagentMG == null || tagentMG.getRunnerId() == null){
-            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+        if (tagentMG == null || tagentMG.getRunnerId() == null) {
+            throw new RunnerNotFoundByTagentIdException(tagentVo.getId(), tagentVo.getIp());
         }
         RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         if (runnerVo == null) {
