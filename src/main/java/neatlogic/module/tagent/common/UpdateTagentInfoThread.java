@@ -29,6 +29,7 @@ import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountPr
 import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.TenantMapper;
 import neatlogic.framework.dto.TenantVo;
+import neatlogic.framework.store.mongodb.MongoDbManager;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
@@ -70,7 +71,10 @@ public class UpdateTagentInfoThread {
         List<TenantVo> tenantVoList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantVoList) {
             TenantContext.get().switchTenant(tenantVo.getUuid()).setUseMasterDatabase(false);
-            mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+            //如果租户没初始化mongodb,则无需创建collection
+            if (MongoDbManager.getMongoClient(tenantVo.getUuid()) != null) {
+                mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+            }
         }
         TenantContext.get().setUseMasterDatabase(true);
         Thread t = new Thread(new NeatLogicThread("INSERT-USER-SESSION-MANAGER") {
