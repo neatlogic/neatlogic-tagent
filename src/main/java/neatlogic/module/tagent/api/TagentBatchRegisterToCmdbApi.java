@@ -1,16 +1,16 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
-import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.register.core.AfterRegisterJobManager;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
+import neatlogic.framework.tagent.service.TagentService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ import java.util.List;
 public class TagentBatchRegisterToCmdbApi extends PrivateApiComponentBase {
 
     @Resource
-    TagentMapper tagentMapper;
+    TagentService tagentService;
 
     @Override
     public String getName() {
@@ -44,12 +44,19 @@ public class TagentBatchRegisterToCmdbApi extends PrivateApiComponentBase {
     @Description(desc = "批量同步已注册的tagent信息到CMDB接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
-        TagentVo paramTagentVo = new TagentVo();
-        paramTagentVo.setStatus("connected");
-        List<TagentVo> tagentVoList = tagentMapper.searchTagent(paramTagentVo);
-        if (CollectionUtils.isNotEmpty(tagentVoList)) {
-            for (TagentVo tagentVo : tagentVoList) {
-                AfterRegisterJobManager.executeAll(tagentVo);
+        TagentVo tagentVo = new TagentVo();
+        long rowNum = tagentService.getTagentListMGCount(tagentVo);
+        if (rowNum > 0) {
+            tagentVo.setPageSize(100);
+            tagentVo.setRowNum((int)rowNum);
+            for (int i = 0; i < tagentVo.getPageCount(); i++) {
+                tagentVo.setCurrentPage(i + 1);
+                List<TagentVo> tagentList = tagentService.searchTagentListMG(tagentVo);
+                if (CollectionUtils.isNotEmpty(tagentList)) {
+                    for (TagentVo tagent : tagentList) {
+                        AfterRegisterJobManager.executeAll(tagent);
+                    }
+                }
             }
         }
         return null;
