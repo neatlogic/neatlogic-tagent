@@ -4,26 +4,27 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.runner.RunnerHttpRequestException;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
-import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.enums.TagentStatus;
+import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerBase;
 import neatlogic.framework.util.HttpRequestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 @Component
 public class TagentStatusCheckHandler extends TagentHandlerBase {
 
     Logger logger = LoggerFactory.getLogger(TagentStatusCheckHandler.class);
 
-    @Autowired
-    private TagentMapper tagentMapper;
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getHandler() {
@@ -65,11 +66,11 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             tagentStatus = TagentStatus.DISCONNECTED.getValue();
-            disConnectReason = "runner返回：" + (resultJson != null ? resultJson.toString() : null);
+            disConnectReason = "runner返回：" + (resultJson != null ? resultJson.toString() : null) +";"+ex.getMessage();
         } finally {
             tagentVo.setStatus(tagentStatus);
             tagentVo.setDisConnectReason(disConnectReason);
-            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagentVo.getStatus(), tagentVo.getDisConnectReason(), tagentVo.getId());
+            tagentService.updateTagentMGById(tagentVo);
         }
         paramJson.put("status", tagentStatus);
         paramJson.put("disConnectReason", disConnectReason);

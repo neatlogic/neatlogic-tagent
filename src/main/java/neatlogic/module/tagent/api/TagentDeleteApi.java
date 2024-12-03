@@ -28,6 +28,7 @@ import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.exception.TagentHasBeenConnectedException;
 import neatlogic.framework.tagent.exception.TagentIdNotFoundException;
+import neatlogic.framework.tagent.service.TagentService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,9 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
+
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getName() {
@@ -74,10 +78,11 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
         Long id = paramObj.getLong("id");
         if (id != null) {
             TagentVo tagent = tagentMapper.getTagentById(id);
+            TagentVo tagentMG = tagentService.getTagentMGById(id);
             if (tagent == null) {
                 throw new TagentIdNotFoundException(id);
             }
-            if (!StringUtils.equals(tagent.getStatus(), TagentStatus.CONNECTED.getValue())) {
+            if (!StringUtils.equals(tagentMG.getStatus(), TagentStatus.CONNECTED.getValue())) {
                 List<Long> deletedAccountIdList = new ArrayList<>();
                 deletedAccountIdList.add(tagent.getAccountId());
                 List<String> deletedIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
@@ -106,6 +111,7 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
 //                accountService.deleteAccount(deletedAccountIdList);
                 tagentMapper.deleteAccountListByIdList(deletedAccountIdList);
                 tagentMapper.deleteAccountIpListByAccountIdList(deletedAccountIdList);
+                tagentService.deleteTagentMGById(id);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
             }

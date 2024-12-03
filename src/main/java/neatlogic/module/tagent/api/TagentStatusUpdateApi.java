@@ -1,5 +1,6 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -10,6 +11,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
+import neatlogic.framework.tagent.service.TagentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
+
+    @Resource
+    TagentService tagentService;
 
     @Override
     public String getName() {
@@ -58,12 +63,13 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
         String returnData = null;
         try {
             paramObj.put("runnerIp", IpUtil.getIpAddr(UserContext.get().getRequest()));
-            TagentVo tagent = JSONObject.toJavaObject(paramObj, TagentVo.class);
+            TagentVo tagent = JSON.toJavaObject(paramObj, TagentVo.class);
             Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             if (tagentId == null) {
                 throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
             }
-            tagentMapper.updateTagentStatusAndDisConnectReasonById(tagent.getStatus(),tagent.getDisConnectReason(),tagentId);
+            tagent.setId(tagentId);
+            tagentService.updateTagentMGById(tagent);
         } catch (Exception e) {
             status = false;
             logger.error(e.getMessage(), e);
