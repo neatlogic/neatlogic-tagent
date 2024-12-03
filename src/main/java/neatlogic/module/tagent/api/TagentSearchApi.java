@@ -5,26 +5,28 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.runner.RunnerMapper;
+import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
-import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.util.TableResultUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
 public class TagentSearchApi extends PrivateApiComponentBase {
     @Resource
-    TagentMapper tagentMapper;
+    RunnerMapper runnerMapper;
 
     @Resource
     TagentService tagentService;
@@ -66,6 +68,18 @@ public class TagentSearchApi extends PrivateApiComponentBase {
         if (rowNum > 0) {
             tagentVo.setRowNum((int) rowNum);
             tagentMGList = tagentService.searchTagentListMG(tagentVo);
+            if (CollectionUtils.isNotEmpty(tagentMGList)) {
+                Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).collect(Collectors.toSet());
+                if (CollectionUtils.isNotEmpty(runnerGroupIdSet)) {
+                    List<RunnerGroupVo> runnerGroupVos = runnerMapper.getRunnerGroupByIdList(new ArrayList<>(runnerGroupIdSet));
+                    if (CollectionUtils.isNotEmpty(runnerGroupVos)) {
+                        Map<Long, String> runnerGroupIdNameMap = runnerGroupVos.stream().collect(Collectors.toMap(RunnerGroupVo::getId, RunnerGroupVo::getName));
+                        for (TagentVo tagent : tagentMGList) {
+                            tagent.setRunnerGroupName(runnerGroupIdNameMap.get(tagent.getRunnerGroupId()));
+                        }
+                    }
+                }
+            }
         }
         return TableResultUtil.getResult(tagentMGList, tagentVo);
     }
