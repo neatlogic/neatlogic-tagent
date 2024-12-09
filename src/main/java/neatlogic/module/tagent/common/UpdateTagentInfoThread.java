@@ -17,6 +17,7 @@
 
 package neatlogic.module.tagent.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
@@ -77,12 +78,13 @@ public class UpdateTagentInfoThread {
             }
         }
         TenantContext.get().setUseMasterDatabase(true);
-        Thread t = new Thread(new NeatLogicThread("INSERT-USER-SESSION-MANAGER") {
+        Thread t = new Thread(new NeatLogicThread("UPDATE-TAGENT-INFO-MANAGER") {
             @Override
             protected void execute() {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         TagentVo tagentVo = blockingQueue.take();
+                        logger.debug("====TagentUpdateInfo-take:" + JSON.toJSONString(tagentVo));
                         //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
                         tagentService.updateTagentById(tagentVo);
                         //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号

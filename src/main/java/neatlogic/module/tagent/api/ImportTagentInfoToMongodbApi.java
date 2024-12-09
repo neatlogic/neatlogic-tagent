@@ -15,18 +15,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.module.tagent.api;
 
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
-import neatlogic.framework.restful.annotation.Description;
-import neatlogic.framework.restful.annotation.Input;
-import neatlogic.framework.restful.annotation.OperationType;
-import neatlogic.framework.restful.annotation.Output;
+import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.dao.mapper.TenantMapper;
+import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.store.mongodb.MongoDbManager;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.service.TagentService;
+import neatlogic.framework.util.mongodb.MongoService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -42,7 +45,14 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
     TagentMapper tagentMapper;
 
     @Resource
+    TenantMapper tenantMapper;
+
+    @Resource
     TagentService tagentService;
+    @Resource
+    private MongoTemplate mongoTemplate;
+    @Resource
+    private MongoService mongoService;
 
     @Override
     public String getName() {
@@ -61,11 +71,21 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
 
     @Description(desc = "nmta.importtagentinfotomongodbapi.description.desc")
     @Input({
+            @Param(name = "isReCreateTagentInfo", type = ApiParamType.INTEGER, desc = "是否删除重建_tagent_info集合，1:是，0:否。默认不删除重建")
     })
     @Output({
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        Integer isReCreateTagentInfo = 0;
+        if (paramObj.getInteger("isReCreateTagentInfo") != null) {
+            isReCreateTagentInfo = paramObj.getInteger("isReCreateTagentInfo");
+        }
+        if (isReCreateTagentInfo == 1 && MongoDbManager.getMongoClient(TenantContext.get().getTenantUuid()) != null) {
+            mongoTemplate.dropCollection("_tagent_info");
+            mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+        }
+
         TagentVo tagentVo = new TagentVo();
         int rowNum = tagentMapper.searchTagentCount(tagentVo);
         if (rowNum > 0) {

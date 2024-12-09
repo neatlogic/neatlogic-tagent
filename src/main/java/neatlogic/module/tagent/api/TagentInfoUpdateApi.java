@@ -15,7 +15,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
@@ -116,6 +118,7 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
             //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
             //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
             tagent.setParam(paramObj);
+            logger.debug("====TagentUpdateInfo-api:" + JSON.toJSONString(tagent));
             UpdateTagentInfoThread.addUpdateTagent(tagent);
             //4、 当组信息与cache不一致时，更新cache
             Long runnerGroupId = paramObj.getLong("proxyGroupId");
@@ -148,6 +151,7 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
         }
         result.put("Status", updateStatus ? "OK" : "ERROR");
         result.put("Message", updateStatus ? "tagent cpu and memory update succeed" : message);
+        result.put("serverId", Config.SCHEDULE_SERVER_ID);
         return result;
     }
 

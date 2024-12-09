@@ -18,6 +18,7 @@ package neatlogic.module.tagent.api;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
@@ -261,6 +262,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         data.put("proxyIp", tagentRunnerVo.getHost());
         data.put("proxyPort", tagentRunnerVo.getPort());*/
         data.put("proxyGroupId", runnerGroupId);
+        data.put("serverId", Config.SCHEDULE_SERVER_ID);
         data.put("proxyList", runnerArray);
     }
 
