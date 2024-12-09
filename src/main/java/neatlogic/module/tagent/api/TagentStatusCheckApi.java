@@ -80,12 +80,12 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
         }
         TagentVo tagentMG = tagentService.getTagentMGById(tagentVo.getId());
         if (tagentMG == null || tagentMG.getRunnerId() == null) {
-            throw new RunnerNotFoundByTagentIdException(tagentVo.getId(),tagentVo.getIp());
+            throw new RunnerNotFoundByTagentIdException(tagentVo.getId(), tagentVo.getIp());
         }
         if (runnerMapper.getRunnerById(tagentMG.getRunnerId()) == null) {
             tagentVo.setDisConnectReason("runner 不存在");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-            tagentService.updateTagentMGById(tagentVo);
+            tagentService.updateTagentMGById(tagentVo, false);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("disConnectReason", tagentVo.getDisConnectReason());
             return jsonObject;
