@@ -101,9 +101,9 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
         JSONObject result = new JSONObject();
         try {
             TagentVo tagent = new TagentVo(paramObj);
-            Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-            if (tagentId == null) {
-                throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
+            TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
+            if (tagentVo == null) {
+                throw new TagentNotFoundException(paramObj.getLong("agentId"), tagent.getIp(), tagent.getPort());
             }
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
