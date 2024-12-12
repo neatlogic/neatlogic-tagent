@@ -139,6 +139,7 @@ public class UpdateTagentInfoThread {
                 //新增tagent ip和账号
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+                    tagentService.updateIpListMG(tagent.getId(), newIpList);
                     List<String> sameIpList = tagentMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
                     if (CollectionUtils.isNotEmpty(sameIpList)) {
                         insertTagentIpList = insertTagentIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
