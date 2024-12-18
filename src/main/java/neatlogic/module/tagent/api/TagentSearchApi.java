@@ -69,7 +69,7 @@ public class TagentSearchApi extends PrivateApiComponentBase {
             tagentVo.setRowNum((int) rowNum);
             tagentMGList = tagentService.searchTagentListMG(tagentVo);
             if (CollectionUtils.isNotEmpty(tagentMGList)) {
-                Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).collect(Collectors.toSet());
+                Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).filter(Objects::nonNull).collect(Collectors.toSet());
                 if (CollectionUtils.isNotEmpty(runnerGroupIdSet)) {
                     List<RunnerGroupVo> runnerGroupVos = runnerMapper.getRunnerGroupByIdList(new ArrayList<>(runnerGroupIdSet));
                     if (CollectionUtils.isNotEmpty(runnerGroupVos)) {

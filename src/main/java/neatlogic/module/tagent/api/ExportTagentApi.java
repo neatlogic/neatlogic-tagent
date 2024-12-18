@@ -106,17 +106,19 @@ public class ExportTagentApi extends PrivateBinaryStreamApiComponentBase {
             for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
                 List<TagentVo> tagentMGList = tagentService.searchTagentListMG(search);
                 if (CollectionUtils.isNotEmpty(tagentMGList)) {
-                    Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).collect(Collectors.toSet());
+                    Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).filter(Objects::nonNull).collect(Collectors.toSet());
                     if (CollectionUtils.isNotEmpty(runnerGroupIdSet)) {
                         List<RunnerGroupVo> runnerGroupVos = runnerMapper.getRunnerGroupByIdList(new ArrayList<>(runnerGroupIdSet));
                         if (CollectionUtils.isNotEmpty(runnerGroupVos)) {
                             Map<Long, String> runnerGroupIdNameMap = runnerGroupVos.stream().collect(Collectors.toMap(RunnerGroupVo::getId, RunnerGroupVo::getName));
                             for (TagentVo tagent : tagentMGList) {
                                 tagent.setRunnerGroupName(runnerGroupIdNameMap.get(tagent.getRunnerGroupId()));
-                                Map<String, Object> dataMap = tagentVoConvertDataMap(tagent);
-                                sheetBuilder.addData(dataMap);
                             }
                         }
+                    }
+                    for (TagentVo tagent : tagentMGList) {
+                        Map<String, Object> dataMap = tagentVoConvertDataMap(tagent);
+                        sheetBuilder.addData(dataMap);
                     }
                 }
             }
