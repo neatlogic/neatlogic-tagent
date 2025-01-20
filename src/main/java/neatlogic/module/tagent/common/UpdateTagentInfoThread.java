@@ -35,6 +35,7 @@ import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
+import neatlogic.framework.util.I18nUtils;
 import neatlogic.framework.util.mongodb.MongoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -71,10 +72,16 @@ public class UpdateTagentInfoThread {
         TenantContext.init();
         List<TenantVo> tenantVoList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantVoList) {
-            TenantContext.get().switchTenant(tenantVo.getUuid()).setUseMasterDatabase(false);
-            //如果租户没初始化mongodb,则无需创建collection
-            if (MongoDbManager.getMongoClient(tenantVo.getUuid()) != null) {
-                mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+            try {
+                TenantContext.get().switchTenant(tenantVo.getUuid()).setUseMasterDatabase(false);
+                //如果租户没初始化mongodb,则无需创建collection
+                if (MongoDbManager.getMongoClient(tenantVo.getUuid()) != null) {
+                    mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                System.out.println("  ✖" + I18nUtils.getStaticMessage("租户:{0} 无法连接mongodb，请核对neatlogic库mongodb表中对应租户的认证信息，并确认mongdb服务正常后", tenantVo.getUuid()));
+                System.exit(1);
             }
         }
         TenantContext.get().setUseMasterDatabase(true);
