@@ -80,7 +80,7 @@ public class UpdateTagentInfoThread {
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                System.out.println("  ✖" + I18nUtils.getStaticMessage("租户:{0} 无法连接mongodb，请核对neatlogic库mongodb表中对应租户的认证信息，并确认mongdb服务正常后", tenantVo.getUuid()));
+                System.out.println("  ✖" + I18nUtils.getStaticMessage("nmtc.updatetagentinfothread.init.mongodbexception", tenantVo.getUuid()));
                 System.exit(1);
             }
         }
