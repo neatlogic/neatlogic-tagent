@@ -104,6 +104,7 @@ public class ExportTagentApi extends PrivateBinaryStreamApiComponentBase {
             search.setPageSize(100);
             int pageCount = search.getPageCount();
             for (int currentPage = 1; currentPage <= pageCount; currentPage++) {
+                search.setCurrentPage(currentPage);
                 List<TagentVo> tagentMGList = tagentService.searchTagentListMG(search);
                 if (CollectionUtils.isNotEmpty(tagentMGList)) {
                     Set<Long> runnerGroupIdSet = tagentMGList.stream().filter(Objects::nonNull).map(TagentVo::getRunnerGroupId).filter(Objects::nonNull).collect(Collectors.toSet());
