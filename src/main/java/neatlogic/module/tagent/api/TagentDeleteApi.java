@@ -17,17 +17,16 @@ package neatlogic.module.tagent.api;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.exception.TagentHasBeenConnectedException;
-import neatlogic.framework.tagent.exception.TagentIdNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +79,9 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
             TagentVo tagent = tagentMapper.getTagentById(id);
             TagentVo tagentMG = tagentService.getTagentMGById(id);
             if (tagent == null) {
-                throw new TagentIdNotFoundException(id);
+                //mongodb tagent过时数据删除
+                tagentService.deleteTagentMGById(id);
+                return null;
             }
             if (!StringUtils.equals(tagentMG.getStatus(), TagentStatus.CONNECTED.getValue())) {
                 List<Long> deletedAccountIdList = new ArrayList<>();
