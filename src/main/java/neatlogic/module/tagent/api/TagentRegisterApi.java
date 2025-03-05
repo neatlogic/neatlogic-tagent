@@ -25,6 +25,7 @@ import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.runner.*;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
@@ -161,8 +162,8 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             resultJson.put("Data", data);
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
-            resultJson.put("Message", ex.getMessage());
-            resultJson.put("Status", "ERROR");
+            //返回给tagent的错误信息少一些
+            throw new ApiRuntimeException(ex.getMessage(),ex);
         }
         return resultJson;
     }
