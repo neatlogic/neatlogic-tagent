@@ -19,8 +19,11 @@ package neatlogic.module.tagent.common;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.ClientSessionOptions;
+import com.mongodb.client.ClientSession;
 import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
+import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
@@ -35,12 +38,15 @@ import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.I18nUtils;
 import neatlogic.framework.util.mongodb.MongoService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -61,6 +67,9 @@ public class UpdateTagentInfoThread {
 
     @Resource
     private TenantMapper tenantMapper;
+
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     @Resource
     private TagentMapper tagentMapper;
@@ -89,18 +98,35 @@ public class UpdateTagentInfoThread {
             @Override
             protected void execute() {
                 while (!Thread.currentThread().isInterrupted()) {
+                    ClientSession session = null;
+                    TransactionStatus tx = TransactionUtil.openTx();
                     try {
                         TagentVo tagentVo = blockingQueue.take();
+
+                        session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
+                        session.startTransaction();
+                        MongodbSessionContext.init(session);
                         logger.debug("====TagentUpdateInfo-take:" + JSON.toJSONString(tagentVo));
                         //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
                         tagentService.updateTagentById(tagentVo);
                         //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
                         updateTagentIpAndAccount(tagentVo);
+                        TransactionUtil.commitTx(tx);
+                        session.commitTransaction();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
+                        //返回给tagent的错误信息少一些
+                        TransactionUtil.rollbackTx(tx);
+                        if (session != null) {
+                            session.abortTransaction();
+                        }
+                    }finally {
+                        if (session != null) {
+                            session.close();
+                        }
                     }
                 }
             }

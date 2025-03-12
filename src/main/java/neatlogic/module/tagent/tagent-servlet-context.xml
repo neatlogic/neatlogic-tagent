@@ -27,6 +27,8 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
+	<tx:annotation-driven transaction-manager="transactionManagerMongoDb" />
+
 	<aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="false" />
 
 	<mvc:annotation-driven />

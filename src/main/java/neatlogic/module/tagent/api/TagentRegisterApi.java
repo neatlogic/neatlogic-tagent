@@ -18,6 +18,9 @@ package neatlogic.module.tagent.api;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.ClientSessionOptions;
+import com.mongodb.client.ClientSession;
+import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.IpUtil;
@@ -46,6 +49,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +71,9 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
 
     @Resource
     TagentService tagentService;
+
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     @Override
     public String getName() {
@@ -106,6 +113,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultJson = new JSONObject();
         JSONObject data = new JSONObject();
+        ClientSession session = null;
         //agent ip
         String insertTagentIp = paramObj.getString("ip");
         Integer insertTagentPort = paramObj.getInteger("port");
@@ -150,6 +158,10 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             }
             paramObj.put("tagentId", insertTagentId);
             RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(insertTagentIp);
+            // 获取当前事务会话
+            session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
+            session.startTransaction();
+            MongodbSessionContext.init(session);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
@@ -160,10 +172,18 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             }
             resultJson.put("Status", "OK");
             resultJson.put("Data", data);
+            session.commitTransaction();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             //返回给tagent的错误信息少一些
-            throw new ApiRuntimeException(ex.getMessage(),ex);
+            if (session != null) {
+                session.abortTransaction();
+            }
+            throw new ApiRuntimeException(ex.getMessage(), ex);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
         return resultJson;
     }
