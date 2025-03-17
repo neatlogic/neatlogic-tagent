@@ -106,7 +106,9 @@ public class UpdateTagentInfoThread {
                         session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
                         session.startTransaction();
                         MongodbSessionContext.init(session);
-                        logger.debug("====TagentUpdateInfo-take:" + JSON.toJSONString(tagentVo));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("====TagentUpdateInfo-take:{}", JSON.toJSONString(tagentVo));
+                        }
                         //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
                         tagentService.updateTagentById(tagentVo);
                         //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
@@ -123,7 +125,7 @@ public class UpdateTagentInfoThread {
                         if (session != null) {
                             session.abortTransaction();
                         }
-                    }finally {
+                    } finally {
                         if (session != null) {
                             session.close();
                         }

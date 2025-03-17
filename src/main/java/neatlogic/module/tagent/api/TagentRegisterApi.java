@@ -117,6 +117,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         //agent ip
         String insertTagentIp = paramObj.getString("ip");
         Integer insertTagentPort = paramObj.getInteger("port");
+        Long insertTagentId = paramObj.getLong("tagentId");
         try {
             if (StringUtils.isBlank(insertTagentIp)) {
                 throw new TagentIpIsEmptyException(paramObj);
@@ -125,7 +126,6 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 throw new TagentPortIsEmptyException(paramObj);
             }
 
-            Long insertTagentId = paramObj.getLong("tagentId");
             List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
             if (insertTagentId != null) {
                 TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
@@ -166,20 +166,18 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
             returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
-            if (CollectionUtils.isEmpty(oldTagentList)) {
-                //注册后同步信息到资源中心
-                AfterRegisterJobManager.executeAll(tagentVo);
-            }
+            AfterRegisterJobManager.executeAll(tagentVo);
             resultJson.put("Status", "OK");
             resultJson.put("Data", data);
             session.commitTransaction();
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
             //返回给tagent的错误信息少一些
             if (session != null) {
                 session.abortTransaction();
             }
-            throw new ApiRuntimeException(ex.getMessage(), ex);
+            String errorMsg = String.format("TagentRegister failed! id:%d,ip:%s,port:%d,%s", insertTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
+            logger.error(errorMsg, ex);
+            throw new ApiRuntimeException(errorMsg, ex);
         } finally {
             if (session != null) {
                 session.close();
