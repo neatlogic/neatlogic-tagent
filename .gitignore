@@ -1,3 +1,4 @@
 /target/
 /.idea/
 /neatlogic-tagent.iml
+.flattened-pom.xml
