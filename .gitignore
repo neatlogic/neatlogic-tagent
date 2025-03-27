@@ -1,4 +1,11 @@
-/target/
-/.idea/
+target
+*.iml
+bin
+.class
+.svn
+.settings
+.classpath
+.project
+logs/
 .flattened-pom.xml
-/neatlogic-tagent.iml
+.DS_Store
