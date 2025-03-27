@@ -99,10 +99,10 @@ public class UpdateTagentInfoThread {
             protected void execute() {
                 while (!Thread.currentThread().isInterrupted()) {
                     ClientSession session = null;
-                    TransactionStatus tx = TransactionUtil.openTx();
+                    TransactionStatus tx=null;
                     try {
                         TagentVo tagentVo = blockingQueue.take();
-
+                        tx = TransactionUtil.openTx();
                         session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
                         session.startTransaction();
                         MongodbSessionContext.init(session);
@@ -121,7 +121,9 @@ public class UpdateTagentInfoThread {
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                         //返回给tagent的错误信息少一些
-                        TransactionUtil.rollbackTx(tx);
+                        if(tx != null) {
+                            TransactionUtil.rollbackTx(tx);
+                        }
                         if (session != null) {
                             session.abortTransaction();
                         }
