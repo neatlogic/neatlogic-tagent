@@ -121,11 +121,20 @@ public class UpdateTagentInfoThread {
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                         //返回给tagent的错误信息少一些
-                        if(tx != null) {
-                            TransactionUtil.rollbackTx(tx);
+                        try {
+                            if (tx != null) {
+                                TransactionUtil.rollbackTx(tx);
+                            }
+                        } catch (Exception rollbackEx) {
+                            logger.error("mysql transaction rollback failed：" + rollbackEx.getMessage(), rollbackEx);
                         }
-                        if (session != null) {
-                            session.abortTransaction();
+                        // MongoDB 事务回滚时捕获异常
+                        try {
+                            if (session != null) {
+                                session.abortTransaction();
+                            }
+                        } catch (Exception abortEx) {
+                            logger.error("mongodb transaction abort failed" + abortEx.getMessage(), abortEx);
                         }
                     } finally {
                         if (session != null) {
