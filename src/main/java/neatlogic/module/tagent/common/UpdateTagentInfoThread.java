@@ -167,6 +167,7 @@ public class UpdateTagentInfoThread {
             //删除多余的tagent ip和账号
             if (CollectionUtils.isNotEmpty(oldIpList)) {
                 tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
+                tagentService.updateIpListMG(tagent.getId(), newIpList);
             }
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 List<String> insertTagentIpList = newIpList;
