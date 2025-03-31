@@ -137,8 +137,12 @@ public class UpdateTagentInfoThread {
                             logger.error("mongodb transaction abort failed" + abortEx.getMessage(), abortEx);
                         }
                     } finally {
-                        if (session != null) {
-                            session.close();
+                        try {
+                            if (session != null) {
+                                session.close();
+                            }
+                        } catch (Exception ex) {
+                            logger.error("mongodb session close failed" + ex.getMessage(), ex);
                         }
                     }
                 }
