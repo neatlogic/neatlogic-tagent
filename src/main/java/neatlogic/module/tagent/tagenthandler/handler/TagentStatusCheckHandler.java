@@ -64,7 +64,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
                 disConnectReason = resultJson.getString("Message");
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+            //logger.error(ex.getMessage(), ex);
             tagentStatus = TagentStatus.DISCONNECTED.getValue();
             disConnectReason = "runner返回：" + (resultJson != null ? resultJson.toString() : null) + ";" + ex.getMessage();
         } finally {

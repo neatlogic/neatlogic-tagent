@@ -17,7 +17,6 @@ package neatlogic.module.tagent.api;
 
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -28,16 +27,11 @@ import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.exception.TagentHasBeenConnectedException;
 import neatlogic.framework.tagent.service.TagentService;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional
@@ -84,34 +78,10 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 return null;
             }
             if (!StringUtils.equals(tagentMG.getStatus(), TagentStatus.CONNECTED.getValue())) {
-                List<Long> deletedAccountIdList = new ArrayList<>();
-                deletedAccountIdList.add(tagent.getAccountId());
-                List<String> deletedIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-
                 //删除tagent
                 tagentMapper.deleteTagentById(id);
+                tagentMapper.deleteAccountById(tagent.getAccountId());
                 tagentMapper.deleteAllIpByTagentId(id);
-
-//                IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-                if (CollectionUtils.isNotEmpty(deletedIpList)) {
-                    //两个tagent之间的包含ip列表存在有相同部分的情况，所以根据需要删除的包含ip列表获取仍然需要的tagent的ip
-                    List<String> neededIpList = tagentMapper.getTagentIpListByIpList(deletedIpList);
-                    if (CollectionUtils.isNotEmpty(neededIpList)) {
-                        deletedIpList = deletedIpList.stream().filter(item -> !neededIpList.contains(item)).collect(toList());
-                    }
-                    for (String ip : deletedIpList) {
-                        AccountBaseVo deletedAccountVo = tagentMapper.getTagentAccountByIpAndPort(ip, tagent.getPort());
-                        if (deletedAccountVo != null) {
-                            deletedAccountIdList.add(deletedAccountVo.getId());
-                        }
-                    }
-                }
-
-                //删掉该tagent account
-//                IResourceCenterAccountCrossoverService accountService = CrossoverServiceFactory.getApi(IResourceCenterAccountCrossoverService.class);
-//                accountService.deleteAccount(deletedAccountIdList);
-                tagentMapper.deleteAccountListByIdList(deletedAccountIdList);
-                tagentMapper.deleteAccountIpListByAccountIdList(deletedAccountIdList);
                 tagentService.deleteTagentMGById(id);
             } else {
                 throw new TagentHasBeenConnectedException(tagent);
