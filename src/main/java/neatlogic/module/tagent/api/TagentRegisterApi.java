@@ -118,6 +118,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         String insertTagentIp = paramObj.getString("ip");
         Integer insertTagentPort = paramObj.getInteger("port");
         Long insertTagentId = paramObj.getLong("tagentId");
+        Long finalTagentId = null;
         try {
             if (StringUtils.isBlank(insertTagentIp)) {
                 throw new TagentIpIsEmptyException(paramObj);
@@ -163,6 +164,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             session.startTransaction();
             MongodbSessionContext.init(session);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
+            finalTagentId = tagentVo.getId();
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
             returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
@@ -175,7 +177,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             if (session != null) {
                 session.abortTransaction();
             }
-            String errorMsg = String.format("TagentRegister failed! id:%d,ip:%s,port:%d,%s", insertTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
+            String errorMsg = String.format("TagentRegister failed! id:%d,finalTagentId:%d,ip:%s,port:%d,%s", insertTagentId, finalTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
             logger.error(errorMsg, ex);
             throw new ApiRuntimeException(errorMsg, ex);
         } finally {
