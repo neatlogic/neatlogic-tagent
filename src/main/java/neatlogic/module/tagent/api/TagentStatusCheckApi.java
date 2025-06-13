@@ -75,17 +75,21 @@ public class TagentStatusCheckApi extends PrivateApiComponentBase {
     public Object myDoService(JSONObject paramObj) throws Exception {
         TagentMessageVo message = JSON.toJavaObject(paramObj, TagentMessageVo.class);
         TagentVo tagentVo = tagentMapper.getTagentById(message.getTagentId());
+        TagentVo tagentMG = tagentService.getTagentMGById(message.getTagentId());
         if (tagentVo == null) {
+            //存在历史垃圾数据,则删除
+            if (tagentMG != null) {
+                tagentService.deleteTagentMGById(message.getTagentId());
+            }
             throw new TagentIdNotFoundException(message.getTagentId());
         }
-        TagentVo tagentMG = tagentService.getTagentMGById(tagentVo.getId());
         if (tagentMG == null || tagentMG.getRunnerId() == null) {
             throw new RunnerNotFoundByTagentIdException(tagentVo.getId(), tagentVo.getIp());
         }
         if (runnerMapper.getRunnerById(tagentMG.getRunnerId()) == null) {
             tagentVo.setDisConnectReason("runner 不存在");
             tagentVo.setStatus(TagentStatus.DISCONNECTED.getValue());
-            tagentService.updateTagentMGById(tagentVo, false);
+            tagentService.updateTagentMGByIpAndPort(tagentVo, false);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("disConnectReason", tagentVo.getDisConnectReason());
             return jsonObject;

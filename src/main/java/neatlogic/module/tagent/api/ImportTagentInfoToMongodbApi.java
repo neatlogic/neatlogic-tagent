@@ -96,7 +96,7 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
                 List<TagentVo> tagentList = tagentMapper.searchTagent(tagentVo);
                 if (CollectionUtils.isNotEmpty(tagentList)) {
                     for (TagentVo tagent : tagentList) {
-                        tagentService.updateTagentMGById(tagent, true);
+                        tagentService.updateTagentMGByIpAndPort(tagent, true);
                     }
                 }
             }

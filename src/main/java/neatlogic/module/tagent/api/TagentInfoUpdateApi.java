@@ -117,7 +117,7 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
             }
             if (tagentMGVo == null) {
                 //历史数据,需补充同步到mongodb
-                tagentService.updateTagentMGById(tagentVo, true);
+                tagentService.updateTagentMGByIpAndPort(tagentVo, true);
             }
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {

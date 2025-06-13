@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -199,7 +200,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         Long tagentId = paramObj.getLong("tagentId");
         paramObj.put("id", tagentId);
         paramObj.remove("tagentId");
-        TagentVo tagentVo = JSONObject.toJavaObject(paramObj, TagentVo.class);
+        TagentVo tagentVo = JSON.toJavaObject(paramObj, TagentVo.class);
         if (tagentId == null) {
             tagentVo.setIsFirstCreate(1);
         }
