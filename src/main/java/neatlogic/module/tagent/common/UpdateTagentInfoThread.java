@@ -80,7 +80,7 @@ public class UpdateTagentInfoThread {
         List<TenantVo> tenantVoList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantVoList) {
             try {
-                TenantContext.get().switchTenant(tenantVo.getUuid());//.setUseMasterDatabase(false);
+                TenantContext.get().switchTenant(tenantVo.getUuid());
                 //如果租户没初始化mongodb,则无需创建collection
                 if (MongoDbManager.getMongoClient(tenantVo.getUuid()) != null) {
                     mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
@@ -91,7 +91,6 @@ public class UpdateTagentInfoThread {
                 System.exit(1);
             }
         }
-       // TenantContext.get().setUseMasterDatabase(true);
         Thread t = new Thread(new NeatLogicThread("UPDATE-TAGENT-INFO-MANAGER") {
             @Override
             protected void execute() {
