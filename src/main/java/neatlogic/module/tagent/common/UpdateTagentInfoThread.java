@@ -26,8 +26,6 @@ import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountProtocolNotFoundException;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
@@ -36,12 +34,12 @@ import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.store.mongodb.MongoDbManager;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
-import neatlogic.framework.tagent.exception.TagentAccountNotFoundException;
 import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.I18nUtils;
 import neatlogic.framework.util.mongodb.MongoService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -82,7 +80,7 @@ public class UpdateTagentInfoThread {
         List<TenantVo> tenantVoList = tenantMapper.getAllActiveTenant();
         for (TenantVo tenantVo : tenantVoList) {
             try {
-                TenantContext.get().switchTenant(tenantVo.getUuid()).setUseMasterDatabase(false);
+                TenantContext.get().switchTenant(tenantVo.getUuid());
                 //如果租户没初始化mongodb,则无需创建collection
                 if (MongoDbManager.getMongoClient(tenantVo.getUuid()) != null) {
                     mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
@@ -93,13 +91,12 @@ public class UpdateTagentInfoThread {
                 System.exit(1);
             }
         }
-        TenantContext.get().setUseMasterDatabase(true);
         Thread t = new Thread(new NeatLogicThread("UPDATE-TAGENT-INFO-MANAGER") {
             @Override
             protected void execute() {
                 while (!Thread.currentThread().isInterrupted()) {
                     ClientSession session = null;
-                    TransactionStatus tx=null;
+                    TransactionStatus tx = null;
                     try {
                         TagentVo tagentVo = blockingQueue.take();
                         tx = TransactionUtil.openTx();
@@ -113,8 +110,9 @@ public class UpdateTagentInfoThread {
                         tagentService.updateTagentById(tagentVo);
                         //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
                         updateTagentIpAndAccount(tagentVo);
-                        TransactionUtil.commitTx(tx);
                         session.commitTransaction();
+                        TransactionUtil.commitTx(tx);
+
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;
@@ -156,10 +154,6 @@ public class UpdateTagentInfoThread {
         JSONObject jsonObj = tagent.getParam();
         if (Objects.equals(jsonObj.getString("needUpdateTagentIp"), "1")) {
             IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-            AccountBaseVo tagentAccountVo = tagentMapper.getTagentAccountByIpAndPort(tagent.getIp(), tagent.getPort());
-            if (tagentAccountVo == null) {
-                throw new TagentAccountNotFoundException(tagent.getIp(), tagent.getPort());
-            }
             String protocolName;
             if (tagent.getPort() == 3939) {
                 protocolName = "tagent";
@@ -172,15 +166,18 @@ public class UpdateTagentInfoThread {
             }
             List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
             List<String> newIpStringList = new ArrayList<>();
-            if (jsonObj.getString("ipString") != null) {
+            if (StringUtils.isNotBlank(jsonObj.getString("ipString"))) {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
             }
             List<String> newIpList = newIpStringList;
 
+            boolean isUpdateMG = false;
             //删除多余的tagent ip和账号
             if (CollectionUtils.isNotEmpty(oldIpList)) {
-                tagentService.deleteTagentIpList(oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList()), tagent);
-                tagentService.updateIpListMG(tagent.getId(), newIpList);
+                for (String ip : oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList())) {
+                    tagentMapper.deleteTagentIp(tagent.getId(), ip);
+                    isUpdateMG = true;
+                }
             }
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 List<String> insertTagentIpList = newIpList;
@@ -190,19 +187,12 @@ public class UpdateTagentInfoThread {
                 //新增tagent ip和账号
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
                     tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-                    tagentService.updateIpListMG(tagent.getId(), newIpList);
-                    List<String> sameIpList = tagentMapper.getAccountIpByIpListAndPort(insertTagentIpList, tagent.getPort());
-                    if (CollectionUtils.isNotEmpty(sameIpList)) {
-                        insertTagentIpList = insertTagentIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
-                    }
-                    for (String ip : insertTagentIpList) {
-//                        AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                        AccountBaseVo newAccountVo = new AccountBaseVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagentAccountVo.getPasswordPlain());
-                        tagentMapper.insertAccount(newAccountVo);
-//                        resourceAccountCrossoverMapper.insertAccount(newAccountVo);
-                        tagentMapper.insertAccountIp(new AccountIpVo(newAccountVo.getId(), newAccountVo.getIp()));
-                    }
+                    isUpdateMG = true;
                 }
+            }
+
+            if (isUpdateMG) {
+                tagentService.updateIpListMG(tagent.getId(), newIpList);
             }
         }
     }

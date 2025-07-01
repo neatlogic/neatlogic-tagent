@@ -44,15 +44,6 @@ CREATE TABLE IF NOT EXISTS `tagent_account`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'tagent账号表';
 
 -- ----------------------------
--- Table structure for tagent_account_ip
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `tagent_account_ip`  (
-  `account_id` bigint NOT NULL COMMENT '账号id',
-  `ip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '账号对应的ip',
-  PRIMARY KEY (`account_id`, `ip`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'tagent账号ip表';
-
--- ----------------------------
 -- Table structure for tagent_ip
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `tagent_ip`  (

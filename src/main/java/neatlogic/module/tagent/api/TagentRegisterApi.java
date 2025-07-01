@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -118,6 +119,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         String insertTagentIp = paramObj.getString("ip");
         Integer insertTagentPort = paramObj.getInteger("port");
         Long insertTagentId = paramObj.getLong("tagentId");
+        Long finalTagentId = null;
         try {
             if (StringUtils.isBlank(insertTagentIp)) {
                 throw new TagentIpIsEmptyException(paramObj);
@@ -163,6 +165,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             session.startTransaction();
             MongodbSessionContext.init(session);
             TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
+            finalTagentId = tagentVo.getId();
             //排序保证tagent获取的runner顺序不变
             List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
             returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
@@ -175,7 +178,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
             if (session != null) {
                 session.abortTransaction();
             }
-            String errorMsg = String.format("TagentRegister failed! id:%d,ip:%s,port:%d,%s", insertTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
+            String errorMsg = String.format("TagentRegister failed! id:%d,finalTagentId:%d,ip:%s,port:%d,%s", insertTagentId, finalTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
             logger.error(errorMsg, ex);
             throw new ApiRuntimeException(errorMsg, ex);
         } finally {
@@ -197,7 +200,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         Long tagentId = paramObj.getLong("tagentId");
         paramObj.put("id", tagentId);
         paramObj.remove("tagentId");
-        TagentVo tagentVo = JSONObject.toJavaObject(paramObj, TagentVo.class);
+        TagentVo tagentVo = JSON.toJavaObject(paramObj, TagentVo.class);
         if (tagentId == null) {
             tagentVo.setIsFirstCreate(1);
         }

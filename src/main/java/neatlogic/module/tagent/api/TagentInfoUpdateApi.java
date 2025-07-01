@@ -29,6 +29,7 @@ import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.exception.TagentNotFoundException;
+import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.module.tagent.common.UpdateTagentInfoThread;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,9 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
 
     @Resource
     private RunnerMapper runnerMapper;
+
+    @Resource
+    private TagentService tagentService;
 
     @Override
     public String getName() {
@@ -101,9 +105,19 @@ public class TagentInfoUpdateApi extends PrivateApiComponentBase {
         JSONObject result = new JSONObject();
         try {
             TagentVo tagent = new TagentVo(paramObj);
-            TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
+            TagentVo tagentVo = tagentMapper.getTagentDetailById(tagent.getId());
+            TagentVo tagentMGVo = tagentService.getTagentMGById(tagent.getId());
+
             if (tagentVo == null) {
+                //存在历史垃圾数据,则删除
+                if (tagentMGVo != null) {
+                    tagentService.deleteTagentMGById(tagent.getId());
+                }
                 throw new TagentNotFoundException(paramObj.getLong("agentId"), tagent.getIp(), tagent.getPort());
+            }
+            if (tagentMGVo == null) {
+                //历史数据,需补充同步到mongodb
+                tagentService.updateTagentMGByIpAndPort(tagentVo, true);
             }
             // 1、根据tagent runner ip和port 绑定runner id
             if (StringUtils.isNotBlank(tagent.getRunnerIp())) {
