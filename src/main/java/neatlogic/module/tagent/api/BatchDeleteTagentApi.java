@@ -31,7 +31,6 @@ import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.service.TagentService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
 @AuthAction(action = TAGENT_BASE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class BatchDeleteTagentApi extends PrivateApiComponentBase {
