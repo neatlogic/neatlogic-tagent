@@ -63,6 +63,11 @@ public class TagentSearchApi extends PrivateApiComponentBase {
     @Override
     public Object myDoService(JSONObject jsonObj) throws Exception {
         TagentVo tagentVo = JSON.toJavaObject(jsonObj, TagentVo.class);
+        Integer pageSize = jsonObj.getInteger("pageSize");
+        if (pageSize != null) {
+            tagentVo.setMaxPageSize(1000);
+            tagentVo.setPageSize(pageSize);
+        }
         List<TagentVo> tagentMGList = new ArrayList<>();
         long rowNum = tagentService.getTagentListMGCount(tagentVo);
         if (rowNum > 0) {
