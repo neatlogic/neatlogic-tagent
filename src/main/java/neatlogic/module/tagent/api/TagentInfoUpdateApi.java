@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public class TagentInfoUpdateApi extends PrivateApiComponentBase {
 
 
-    private Logger logger = LoggerFactory.getLogger(TagentInfoUpdateApi.class);
+    private final Logger logger = LoggerFactory.getLogger(TagentInfoUpdateApi.class);
 
     @Resource
     private TagentMapper tagentMapper;
