@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.module.tagent.tagenthandler.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
@@ -63,7 +64,7 @@ public class TagentLogsGetHandler extends TagentHandlerBase {
         try {
             RestVo restVo = new RestVo.Builder(url, AuthenticateType.BUILDIN.getValue()).setPayload(paramJson).build();
             result = RestUtil.sendPostRequest(restVo);
-            JSONObject resultJson = JSONObject.parseObject(result);
+            JSONObject resultJson = JSON.parseObject(result);
             if (!resultJson.containsKey("Status") || !"OK".equals(resultJson.getString("Status"))) {
                 throw new TagentActionFailedException(runnerVo, resultJson.getString("Message"));
             }
