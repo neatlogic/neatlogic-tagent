@@ -19,11 +19,9 @@ package neatlogic.module.tagent.common;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.ClientSessionOptions;
 import com.mongodb.client.ClientSession;
 import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
-import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
@@ -100,9 +98,6 @@ public class UpdateTagentInfoThread {
                     try {
                         TagentVo tagentVo = blockingQueue.take();
                         tx = TransactionUtil.openTx();
-                        session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
-                        session.startTransaction();
-                        MongodbSessionContext.init(session);
                         if (logger.isDebugEnabled()) {
                             logger.debug("====TagentUpdateInfo-take:{}", JSON.toJSONString(tagentVo));
                         }
@@ -110,7 +105,6 @@ public class UpdateTagentInfoThread {
                         tagentService.updateTagentById(tagentVo);
                         //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
                         updateTagentIpAndAccount(tagentVo);
-                        session.commitTransaction();
                         TransactionUtil.commitTx(tx);
 
                     } catch (InterruptedException e) {
@@ -124,23 +118,7 @@ public class UpdateTagentInfoThread {
                                 TransactionUtil.rollbackTx(tx);
                             }
                         } catch (Exception rollbackEx) {
-                            logger.error("mysql transaction rollback failed：" + rollbackEx.getMessage(), rollbackEx);
-                        }
-                        // MongoDB 事务回滚时捕获异常
-                        try {
-                            if (session != null) {
-                                session.abortTransaction();
-                            }
-                        } catch (Exception abortEx) {
-                            logger.error("mongodb transaction abort failed" + abortEx.getMessage(), abortEx);
-                        }
-                    } finally {
-                        try {
-                            if (session != null) {
-                                session.close();
-                            }
-                        } catch (Exception ex) {
-                            logger.error("mongodb session close failed" + ex.getMessage(), ex);
+                            logger.error("mysql transaction rollback failed：{}", rollbackEx.getMessage(), rollbackEx);
                         }
                     }
                 }

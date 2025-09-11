@@ -19,9 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.ClientSessionOptions;
 import com.mongodb.client.ClientSession;
-import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.util.IpUtil;
@@ -29,14 +27,12 @@ import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.runner.*;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
-import neatlogic.framework.tagent.dto.TagentOSVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.exception.TagentIpIsEmptyException;
@@ -50,9 +46,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Comparator;
@@ -60,7 +54,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Transactional
 @Service
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class TagentRegisterApi extends PrivateApiComponentBase {
@@ -72,9 +65,6 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
 
     @Resource
     TagentService tagentService;
-
-    @Resource
-    private MongoTemplate mongoTemplate;
 
     @Override
     public String getName() {
@@ -110,123 +100,74 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
     @Output({
             @Param(name = "Data", type = ApiParamType.JSONOBJECT, desc = "tagent注册结果信息（包括tagentId、runner组id、组内runner id列表）")
     })
+    //@ResubmitInterval(value = 5)
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
         JSONObject resultJson = new JSONObject();
         JSONObject data = new JSONObject();
         ClientSession session = null;
         //agent ip
-        String insertTagentIp = paramObj.getString("ip");
-        Integer insertTagentPort = paramObj.getInteger("port");
-        Long insertTagentId = paramObj.getLong("tagentId");
-        Long finalTagentId = null;
-        try {
-            if (StringUtils.isBlank(insertTagentIp)) {
-                throw new TagentIpIsEmptyException(paramObj);
-            }
-            if (insertTagentPort == null) {
-                throw new TagentPortIsEmptyException(paramObj);
-            }
+        String tagentIpParam = paramObj.getString("ip");
+        Integer tagentPortParam = paramObj.getInteger("port");
+        Long tagentIdParam = paramObj.getLong("tagentId");
+        Long insertTagentId = tagentIdParam;
+        TagentVo tagentVo = null;
 
-            List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(insertTagentIp, insertTagentPort);
-            if (insertTagentId != null) {
-                TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
-                if (oldTagent != null) {
-                    if (Objects.equals(oldTagent.getPort(), insertTagentPort)) {
-                        if (StringUtils.equals(oldTagent.getIp(), insertTagentIp)) {
-                            //输入ip和主ip相同
+        if (StringUtils.isBlank(tagentIpParam)) {
+            throw new TagentIpIsEmptyException(paramObj);
+        }
+        if (tagentPortParam == null) {
+            throw new TagentPortIsEmptyException(paramObj);
+        }
+
+        List<TagentVo> oldTagentList = tagentMapper.getTagentByIpOrTagentIpAndPort(tagentIpParam, tagentPortParam);
+        if (insertTagentId != null) {
+            TagentVo oldTagent = tagentMapper.getTagentById(insertTagentId);
+            if (oldTagent != null) {
+                if (Objects.equals(oldTagent.getPort(), tagentPortParam)) {
+                    if (StringUtils.equals(oldTagent.getIp(), tagentIpParam)) {
+                        //输入ip和主ip相同
+                        checkTagentStatus(oldTagent);
+                    } else {
+                        List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(insertTagentId);
+                        if (oldIpList.contains(tagentIpParam)) {
+                            //输入ip和副ip相同
                             checkTagentStatus(oldTagent);
                         } else {
-                            List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(insertTagentId);
-                            if (oldIpList.contains(insertTagentIp)) {
-                                //输入ip和副ip相同
-                                checkTagentStatus(oldTagent);
-                            } else {
-                                //ip不相同
-                                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
-                            }
+                            //ip不相同
+                            insertTagentId = getTagentIdByIpAndPort(tagentIpParam, tagentPortParam, oldTagentList);
                         }
-                    } else {
-                        //port不相同
-                        insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
                     }
                 } else {
-                    //通过id找不到tagent
-                    insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
+                    //port不相同
+                    insertTagentId = getTagentIdByIpAndPort(tagentIpParam, tagentPortParam, oldTagentList);
                 }
             } else {
-                //无输入id
-                insertTagentId = getTagentIdByIpAndPort(insertTagentIp, insertTagentPort, oldTagentList);
+                //通过id找不到tagent
+                insertTagentId = getTagentIdByIpAndPort(tagentIpParam, tagentPortParam, oldTagentList);
             }
-            paramObj.put("tagentId", insertTagentId);
-            RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(insertTagentIp);
-            // 获取当前事务会话
-            session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
-            session.startTransaction();
-            MongodbSessionContext.init(session);
-            TagentVo tagentVo = saveTagent(paramObj, runnerGroupVo);
-            finalTagentId = tagentVo.getId();
-            //排序保证tagent获取的runner顺序不变
-            List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
-            returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
-            AfterRegisterJobManager.executeAll(tagentVo);
-            resultJson.put("Status", "OK");
-            resultJson.put("Data", data);
-            session.commitTransaction();
-        } catch (Exception ex) {
-            //返回给tagent的错误信息少一些
-            if (session != null) {
-                session.abortTransaction();
-            }
-            String errorMsg = String.format("TagentRegister failed! id:%d,finalTagentId:%d,ip:%s,port:%d,%s", insertTagentId, finalTagentId, insertTagentIp, insertTagentPort, ex.getMessage());
-            logger.error(errorMsg, ex);
-            throw new ApiRuntimeException(errorMsg, ex);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
+        } else {
+            //无输入id
+            insertTagentId = getTagentIdByIpAndPort(tagentIpParam, tagentPortParam, oldTagentList);
         }
-        return resultJson;
-    }
-
-    /**
-     * 保存tagent
-     *
-     * @param paramObj      入参
-     * @param runnerGroupVo runner组
-     * @return tagent
-     */
-    private TagentVo saveTagent(JSONObject paramObj, RunnerGroupVo runnerGroupVo) {
-        Long tagentId = paramObj.getLong("tagentId");
-        paramObj.put("id", tagentId);
+        paramObj.put("tagentId", insertTagentId);
+        RunnerGroupVo runnerGroupVo = getRunnerGroupByAgentIp(tagentIpParam);
+        // 获取当前事务会话
+        paramObj.put("id", insertTagentId);
         paramObj.remove("tagentId");
-        TagentVo tagentVo = JSON.toJavaObject(paramObj, TagentVo.class);
-        if (tagentId == null) {
+        tagentVo = JSON.toJavaObject(paramObj, TagentVo.class);
+        if (insertTagentId == null) {
             tagentVo.setIsFirstCreate(1);
         }
-        tagentVo.setRunnerGroupId(runnerGroupVo.getId());
+        tagentService.saveTagent(tagentVo, runnerGroupVo);
+        //排序保证tagent获取的runner顺序不变
+        List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
+        returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
+        AfterRegisterJobManager.executeAll(tagentVo);
+        resultJson.put("Status", "OK");
+        resultJson.put("Data", data);
 
-        //保存tagent osType
-        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
-            String osType = tagentVo.getOsType();
-            TagentOSVo os = tagentMapper.getOsByName(osType.toLowerCase());
-            if (os != null) {
-                tagentVo.setOsId(os.getId());
-                tagentVo.setOsName(os.getName());
-            } else {
-                TagentOSVo newOS = new TagentOSVo(osType);
-                tagentMapper.insertOs(newOS);
-                tagentVo.setOsId(newOS.getId());
-                tagentVo.setOsName(newOS.getName());
-            }
-        }
-
-        //保存tagent osbit
-        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
-            tagentMapper.insertOsBit(tagentVo.getOsbit());
-        }
-        tagentService.saveTagentAndAccount(tagentVo);
-        return tagentVo;
+        return resultJson;
     }
 
     /**
