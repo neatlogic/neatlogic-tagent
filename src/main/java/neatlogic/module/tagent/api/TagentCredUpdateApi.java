@@ -62,7 +62,7 @@ public class TagentCredUpdateApi extends PrivateApiComponentBase {
         }
         accountVo.setPasswordCipher(null);
         accountVo.setPasswordPlain(paramObj.getString("credential"));
-        tagentMapper.updateAccount(accountVo);
+        tagentMapper.updateAccountById(accountVo);
         return null;
 
     }

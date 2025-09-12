@@ -24,6 +24,7 @@ import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountProtocolNotFoundException;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
@@ -142,7 +143,17 @@ public class UpdateTagentInfoThread {
             if (protocolVo == null) {
                 throw new ResourceCenterAccountProtocolNotFoundException(protocolName);
             }
-            List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+            /*如果心跳ip和原ip不一样，更新tagent ip和账号name*/
+            TagentVo tagentOld = tagentMapper.getTagentById(tagent.getId());
+            if (!Objects.equals(tagentOld.getIp(), jsonObj.getString("ip"))) {
+                tagentMapper.updateTagentIpById(tagentOld.getId(), jsonObj.getString("ip"));
+                AccountBaseVo accountBaseVo = new AccountBaseVo();
+                accountBaseVo.setId(tagentOld.getAccountId());
+                accountBaseVo.setName(jsonObj.getString("ip") + "_" + jsonObj.getString("port") + "_tagent");
+                tagentMapper.updateAccountNameById(accountBaseVo);
+            }
+            /*更新ipList*/
+            List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(tagent.getId());
             List<String> newIpStringList = new ArrayList<>();
             if (StringUtils.isNotBlank(jsonObj.getString("ipString"))) {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));

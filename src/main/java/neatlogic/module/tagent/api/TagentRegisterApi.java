@@ -27,6 +27,7 @@ import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.runner.*;
 import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
@@ -41,12 +42,14 @@ import neatlogic.framework.tagent.exception.TagentPortIsEmptyException;
 import neatlogic.framework.tagent.exception.TagentStatusIsSuccessException;
 import neatlogic.framework.tagent.register.core.AfterRegisterJobManager;
 import neatlogic.framework.tagent.service.TagentService;
+import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.HttpRequestUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Resource;
 import java.util.Comparator;
@@ -159,7 +162,21 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         if (insertTagentId == null) {
             tagentVo.setIsFirstCreate(1);
         }
-        tagentService.saveTagent(tagentVo, runnerGroupVo);
+        TransactionStatus tx = null;
+        try {
+            tx = TransactionUtil.openTx();
+            tagentService.saveTagent(tagentVo, runnerGroupVo);
+            TransactionUtil.commitTx(tx);
+        } catch (Exception ex) {
+            if (tx != null) {
+                TransactionUtil.rollbackTx(tx);
+            }
+            //手动回滚mongodb
+            tagentService.rollbackMongodb(tagentVo);
+            String errorMsg = String.format("TagentRegister failed! paramId:%d,insertTagentId:%d,finalTagentId:%d,ip:%s,port:%d,%s", tagentIdParam, insertTagentId, tagentVo != null ? tagentVo.getId() : null, tagentIpParam, tagentPortParam, ex.getMessage());
+            logger.error(errorMsg, ex);
+            throw new ApiRuntimeException(errorMsg, ex);
+        }
         //排序保证tagent获取的runner顺序不变
         List<RunnerVo> runnerList = runnerGroupVo.getRunnerList().stream().sorted(Comparator.comparing(RunnerVo::getId)).collect(Collectors.toList());
         returnData(data, runnerList, tagentVo.getId(), runnerGroupVo.getId());
