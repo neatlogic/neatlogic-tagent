@@ -33,6 +33,7 @@ import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.store.mongodb.MongoDbManager;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
+import neatlogic.framework.tagent.exception.TagentIpConflictException;
 import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.I18nUtils;
@@ -102,10 +103,10 @@ public class UpdateTagentInfoThread {
                         if (logger.isDebugEnabled()) {
                             logger.debug("====TagentUpdateInfo-take:{}", JSON.toJSONString(tagentVo));
                         }
-                        //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
-                        tagentService.updateTagentById(tagentVo);
-                        //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
+                        //当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
                         updateTagentIpAndAccount(tagentVo);
+                        //更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
+                        tagentService.updateTagentById(tagentVo);
                         TransactionUtil.commitTx(tx);
 
                     } catch (InterruptedException e) {
@@ -146,6 +147,10 @@ public class UpdateTagentInfoThread {
             /*如果心跳ip和原ip不一样，更新tagent ip和账号name*/
             TagentVo tagentOld = tagentMapper.getTagentById(tagent.getId());
             if (!Objects.equals(tagentOld.getIp(), jsonObj.getString("ip"))) {
+                TagentVo tagentExist = tagentMapper.getTagentByIpAndPortAndIdNot(jsonObj.getString("ip"),jsonObj.getInteger("port"), tagent.getId());
+                if(tagentExist!= null){
+                    throw new TagentIpConflictException(jsonObj.getString("ip"), jsonObj.getInteger("port"));
+                }
                 tagentMapper.updateTagentIpById(tagentOld.getId(), jsonObj.getString("ip"));
                 AccountBaseVo accountBaseVo = new AccountBaseVo();
                 accountBaseVo.setId(tagentOld.getAccountId());
@@ -181,7 +186,7 @@ public class UpdateTagentInfoThread {
             }
 
             if (isUpdateMG) {
-                tagentService.updateIpListMG(tagent.getId(), newIpList);
+                tagent.setIpList(newIpList);
             }
         }
     }
