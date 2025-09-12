@@ -172,7 +172,7 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
                 TransactionUtil.rollbackTx(tx);
             }
             //手动回滚mongodb
-            tagentService.rollbackMongodb(tagentVo);
+            tagentService.rollbackTagentMG(tagentVo);
             String errorMsg = String.format("TagentRegister failed! paramId:%d,insertTagentId:%d,finalTagentId:%d,ip:%s,port:%d,%s", tagentIdParam, insertTagentId, tagentVo != null ? tagentVo.getId() : null, tagentIpParam, tagentPortParam, ex.getMessage());
             logger.error(errorMsg, ex);
             throw new ApiRuntimeException(errorMsg, ex);
