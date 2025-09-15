@@ -69,7 +69,7 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
                 throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
             }
             tagent.setId(tagentId);
-            tagentService.updateTagentMGByIpAndPort(tagent,false);
+            tagentService.updateTagentMGByIdWithLock(tagent,false);
         } catch (Exception e) {
             status = false;
             logger.error(e.getMessage(), e);

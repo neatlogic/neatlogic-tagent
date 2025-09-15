@@ -19,13 +19,12 @@ package neatlogic.module.tagent.common;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.ClientSessionOptions;
 import com.mongodb.client.ClientSession;
 import neatlogic.framework.asynchronization.queue.NeatLogicUniqueBlockingQueue;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
-import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountProtocolNotFoundException;
 import neatlogic.framework.crossover.CrossoverServiceFactory;
@@ -34,6 +33,7 @@ import neatlogic.framework.dto.TenantVo;
 import neatlogic.framework.store.mongodb.MongoDbManager;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
+import neatlogic.framework.tagent.exception.TagentIpConflictException;
 import neatlogic.framework.tagent.service.TagentService;
 import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.I18nUtils;
@@ -100,17 +100,13 @@ public class UpdateTagentInfoThread {
                     try {
                         TagentVo tagentVo = blockingQueue.take();
                         tx = TransactionUtil.openTx();
-                        session = mongoTemplate.getMongoDatabaseFactory().getSession(ClientSessionOptions.builder().build());
-                        session.startTransaction();
-                        MongodbSessionContext.init(session);
                         if (logger.isDebugEnabled()) {
                             logger.debug("====TagentUpdateInfo-take:{}", JSON.toJSONString(tagentVo));
                         }
-                        //2、更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
-                        tagentService.updateTagentById(tagentVo);
-                        //3、当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
+                        //当 tagent ip 地址变化(切换网卡)时， 更新 agent ip和账号
                         updateTagentIpAndAccount(tagentVo);
-                        session.commitTransaction();
+                        //更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId、osbitId）
+                        tagentService.updateTagentById(tagentVo);
                         TransactionUtil.commitTx(tx);
 
                     } catch (InterruptedException e) {
@@ -124,23 +120,7 @@ public class UpdateTagentInfoThread {
                                 TransactionUtil.rollbackTx(tx);
                             }
                         } catch (Exception rollbackEx) {
-                            logger.error("mysql transaction rollback failed：" + rollbackEx.getMessage(), rollbackEx);
-                        }
-                        // MongoDB 事务回滚时捕获异常
-                        try {
-                            if (session != null) {
-                                session.abortTransaction();
-                            }
-                        } catch (Exception abortEx) {
-                            logger.error("mongodb transaction abort failed" + abortEx.getMessage(), abortEx);
-                        }
-                    } finally {
-                        try {
-                            if (session != null) {
-                                session.close();
-                            }
-                        } catch (Exception ex) {
-                            logger.error("mongodb session close failed" + ex.getMessage(), ex);
+                            logger.error("mysql transaction rollback failed：{}", rollbackEx.getMessage(), rollbackEx);
                         }
                     }
                 }
@@ -164,7 +144,21 @@ public class UpdateTagentInfoThread {
             if (protocolVo == null) {
                 throw new ResourceCenterAccountProtocolNotFoundException(protocolName);
             }
-            List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+            /*如果心跳ip和原ip不一样，更新tagent ip和账号name*/
+            TagentVo tagentOld = tagentMapper.getTagentById(tagent.getId());
+            if (!Objects.equals(tagentOld.getIp(), jsonObj.getString("ip"))) {
+                TagentVo tagentExist = tagentMapper.getTagentByIpAndPortAndIdNot(jsonObj.getString("ip"),jsonObj.getInteger("port"), tagent.getId());
+                if(tagentExist!= null){
+                    throw new TagentIpConflictException(jsonObj.getString("ip"), jsonObj.getInteger("port"));
+                }
+                tagentMapper.updateTagentIpById(tagentOld.getId(), jsonObj.getString("ip"));
+                AccountBaseVo accountBaseVo = new AccountBaseVo();
+                accountBaseVo.setId(tagentOld.getAccountId());
+                accountBaseVo.setName(jsonObj.getString("ip") + "_" + jsonObj.getString("port") + "_tagent");
+                tagentMapper.updateAccountNameById(accountBaseVo);
+            }
+            /*更新ipList*/
+            List<String> oldIpList = tagentMapper.getTagentIpListByTagentId(tagent.getId());
             List<String> newIpStringList = new ArrayList<>();
             if (StringUtils.isNotBlank(jsonObj.getString("ipString"))) {
                 newIpStringList = Arrays.asList(jsonObj.getString("ipString").split(","));
@@ -192,7 +186,7 @@ public class UpdateTagentInfoThread {
             }
 
             if (isUpdateMG) {
-                tagentService.updateIpListMG(tagent.getId(), newIpList);
+                tagent.setIpList(newIpList);
             }
         }
     }

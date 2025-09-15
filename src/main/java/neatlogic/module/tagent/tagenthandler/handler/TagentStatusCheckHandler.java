@@ -70,7 +70,7 @@ public class TagentStatusCheckHandler extends TagentHandlerBase {
         } finally {
             tagentVo.setStatus(tagentStatus);
             tagentVo.setDisConnectReason(disConnectReason);
-            tagentService.updateTagentMGByIpAndPort(tagentVo, false);
+            tagentService.updateTagentMGByIdWithLock(tagentVo, false);
         }
         paramJson.put("status", tagentStatus);
         paramJson.put("disConnectReason", disConnectReason);

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -77,7 +78,15 @@ public class TagentDeleteApi extends PrivateApiComponentBase {
                 tagentService.deleteTagentMGById(id);
                 return null;
             }
-            if (!StringUtils.equals(tagentMG.getStatus(), TagentStatus.CONNECTED.getValue())) {
+            if (tagentMG == null) {
+                //删除tagent
+                tagentMapper.deleteTagentById(id);
+                tagentMapper.deleteAccountById(tagent.getAccountId());
+                tagentMapper.deleteAllIpByTagentId(id);
+                return null;
+            }
+            //非已连接状态或tagent ip在mysql和mongodb不一致时（兼容垃圾数据）
+            if (!StringUtils.equals(tagentMG.getStatus(), TagentStatus.CONNECTED.getValue()) || !Objects.equals(tagentMG.getIp(), tagent.getIp())) {
                 //删除tagent
                 tagentMapper.deleteTagentById(id);
                 tagentMapper.deleteAccountById(tagent.getAccountId());

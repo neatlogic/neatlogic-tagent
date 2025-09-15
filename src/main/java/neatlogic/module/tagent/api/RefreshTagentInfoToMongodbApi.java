@@ -19,7 +19,6 @@ import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.auth.label.ADMIN;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.dao.mapper.TenantMapper;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
@@ -39,13 +38,10 @@ import java.util.List;
 @Service
 @AuthAction(action = ADMIN.class)
 @OperationType(type = OperationTypeEnum.SEARCH)
-public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
+public class RefreshTagentInfoToMongodbApi extends PrivateApiComponentBase {
 
     @Resource
     TagentMapper tagentMapper;
-
-    @Resource
-    TenantMapper tenantMapper;
 
     @Resource
     TagentService tagentService;
@@ -71,12 +67,20 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
 
     @Description(desc = "nmta.importtagentinfotomongodbapi.description.desc")
     @Input({
-            @Param(name = "isReCreateTagentInfo", type = ApiParamType.INTEGER, desc = "是否删除重建_tagent_info集合，1:是，0:否。默认不删除重建")
+            @Param(name = "isReCreateTagentInfo", type = ApiParamType.INTEGER, desc = "是否删除重建_tagent_info集合，1:是，0:否。默认不删除重建"),
+            @Param(name = "ipList", type = ApiParamType.JSONARRAY, desc = "需要重新更新的Tagent ip列表")
     })
     @Output({
     })
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
+        List<String> ipList = null;
+        if (paramObj.containsKey("ipList")) {
+            ipList = paramObj.getJSONArray("ipList").toJavaList(String.class);
+        }
+        TagentVo tagentVo = new TagentVo();
+        tagentVo.setIpList(ipList);
+
         Integer isReCreateTagentInfo = 0;
         if (paramObj.getInteger("isReCreateTagentInfo") != null) {
             isReCreateTagentInfo = paramObj.getInteger("isReCreateTagentInfo");
@@ -86,7 +90,7 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
             mongoService.createCollectionAndUniqueIndex("_tagent_info", "id", "unique_id");
         }
 
-        TagentVo tagentVo = new TagentVo();
+
         int rowNum = tagentMapper.searchTagentCount(tagentVo);
         if (rowNum > 0) {
             tagentVo.setPageSize(100);
@@ -96,7 +100,7 @@ public class ImportTagentInfoToMongodbApi extends PrivateApiComponentBase {
                 List<TagentVo> tagentList = tagentMapper.searchTagent(tagentVo);
                 if (CollectionUtils.isNotEmpty(tagentList)) {
                     for (TagentVo tagent : tagentList) {
-                        tagentService.updateTagentMGByIpAndPort(tagent, true);
+                        tagentService.updateTagentMGByIdWithLock(tagent, true);
                     }
                 }
             }
