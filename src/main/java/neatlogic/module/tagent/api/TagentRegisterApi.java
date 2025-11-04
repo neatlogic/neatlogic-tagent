@@ -196,12 +196,9 @@ public class TagentRegisterApi extends PrivateApiComponentBase {
         RunnerGroupVo runnerGroupVo = null;
         List<GroupNetworkVo> networkList = tagentMapper.getGroupNetworkList();
         //找到agent ip符合网端的runnerGroup,如果存在多个group,则只需要第一个group
-        for (int i = 0; i < networkList.size(); i++) {
-            GroupNetworkVo groupNetworkVo = networkList.get(i);
-            if (i == 0) {
-                runnerGroupVo = new RunnerGroupVo();
-            }
+        for (GroupNetworkVo groupNetworkVo : networkList) {
             if (IpUtil.isBelongSegment(agentIp, groupNetworkVo.getNetworkIp(), groupNetworkVo.getMask())) {
+                runnerGroupVo = new RunnerGroupVo();
                 runnerGroupVo.setId(groupNetworkVo.getGroupId());
                 runnerGroupVo.setName(groupNetworkVo.getName());
                 List<RunnerVo> runnerList = runnerMapper.getRunnerListByGroupId(runnerGroupVo.getId());
