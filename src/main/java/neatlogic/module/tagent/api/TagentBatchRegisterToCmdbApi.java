@@ -6,7 +6,7 @@ import neatlogic.framework.restful.annotation.Description;
 import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
+import neatlogic.framework.tagent.auth.label.TAGENT_MANAGE;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.register.core.AfterRegisterJobManager;
 import neatlogic.framework.tagent.service.TagentService;
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Transactional
 @Service
-@AuthAction(action = TAGENT_BASE.class)
+@AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class TagentBatchRegisterToCmdbApi extends PrivateApiComponentBase {
 

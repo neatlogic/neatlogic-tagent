@@ -21,9 +21,9 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.mongodb.client.ClientSession;
 import neatlogic.framework.auth.core.AuthAction;
-import neatlogic.framework.auth.label.NoAuth;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
@@ -35,6 +35,7 @@ import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
+import neatlogic.framework.tagent.auth.label.TAGENT_MANAGE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentAction;
@@ -60,7 +61,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@AuthAction(action = NoAuth.class)
+@AuthUser(SystemUser.AUTOEXEC)
+@AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class TagentRegisterApi extends PrivateApiComponentBase {
     private final Logger logger = LoggerFactory.getLogger(TagentRegisterApi.class);

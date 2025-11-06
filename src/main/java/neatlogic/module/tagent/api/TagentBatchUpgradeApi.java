@@ -1,5 +1,6 @@
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.thread.NeatLogicThread;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
@@ -10,14 +11,13 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
+import neatlogic.framework.tagent.auth.label.TAGENT_MANAGE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentSearchVo;
 import neatlogic.framework.tagent.dto.TagentUpgradeAuditVo;
 import neatlogic.framework.tagent.dto.TagentVersionVo;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.service.TagentService;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ import java.util.concurrent.CountDownLatch;
 
 @Service
 @Transactional
-@AuthAction(action = TAGENT_BASE.class)
+@AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.OPERATE)
 public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
 

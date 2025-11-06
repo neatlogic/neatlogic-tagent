@@ -21,7 +21,7 @@ import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
+import neatlogic.framework.tagent.auth.label.TAGENT_MANAGE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.TagentVo;
 import neatlogic.framework.tagent.enums.TagentStatus;
@@ -36,7 +36,7 @@ import java.util.Objects;
 
 @Service
 @Transactional
-@AuthAction(action = TAGENT_BASE.class)
+@AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.DELETE)
 public class TagentDeleteApi extends PrivateApiComponentBase {
 

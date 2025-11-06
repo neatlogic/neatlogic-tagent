@@ -1,6 +1,7 @@
 
 package neatlogic.module.tagent.api;
 
+import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.restful.annotation.Description;
@@ -9,17 +10,16 @@ import neatlogic.framework.restful.annotation.OperationType;
 import neatlogic.framework.restful.annotation.Param;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
 import neatlogic.framework.restful.core.privateapi.PrivateApiComponentBase;
-import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
+import neatlogic.framework.tagent.auth.label.TAGENT_MANAGE;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.enums.TagentAction;
 import neatlogic.framework.tagent.service.TagentService;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
 @Service
-@AuthAction(action = TAGENT_BASE.class)
+@AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TagentPasswordResetApi extends PrivateApiComponentBase {
     @Resource
