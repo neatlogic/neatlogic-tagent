@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
+import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.restful.annotation.*;
 import neatlogic.framework.restful.constvalue.OperationTypeEnum;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
 
 
 @Service
+@AuthUser(SystemUser.AUTOEXEC)
 @AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TagentStatusUpdateApi extends PrivateApiComponentBase {
