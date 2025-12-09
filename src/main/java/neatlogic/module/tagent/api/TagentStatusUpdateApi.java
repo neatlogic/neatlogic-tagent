@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 
 @Service
@@ -68,13 +69,29 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
         String returnData = null;
         try {
             paramObj.put("runnerIp", IpUtil.getIpAddr(UserContext.get().getRequest()));
-            TagentVo tagent = JSON.toJavaObject(paramObj, TagentVo.class);
-            Long tagentId = tagentMapper.getTagentIdByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-            if (tagentId == null) {
-                throw new TagentNotFoundException(tagent.getIp(), tagent.getPort());
+            TagentVo tagentPram = JSON.toJavaObject(paramObj, TagentVo.class);
+            TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(tagentPram.getIp(), tagentPram.getPort());
+            TagentVo tagentMGVo = tagentService.getTagentMGByIpAndPort(tagentPram.getIp(), tagentPram.getPort());
+            if (tagentVo == null) {
+                //存在历史垃圾数据,则删除
+                if (tagentMGVo != null) {
+                    tagentService.deleteTagentMGById(tagentPram.getId());
+                    tagentService.deleteTagentMGByIpPort(tagentPram.getIp(), tagentPram.getPort());
+                }
+                throw new TagentNotFoundException(tagentPram.getIp(), tagentPram.getPort());
             }
-            tagent.setId(tagentId);
-            tagentService.updateTagentMGByIdWithLock(tagent,false);
+
+            if(tagentMGVo != null && !Objects.equals(tagentVo.getId(), tagentMGVo.getId())) {
+                tagentService.deleteTagentMGById(tagentMGVo.getId());
+                tagentMGVo = null;
+            }
+
+            if (tagentMGVo == null) {
+                //历史数据,需补充同步到mongodb
+                tagentService.updateTagentMGByIdWithLock(tagentVo, true);
+            }
+            tagentPram.setId(tagentVo.getId());
+            tagentService.updateTagentMGByIdWithLock(tagentPram,false);
         } catch (Exception e) {
             status = false;
             logger.error(e.getMessage(), e);
