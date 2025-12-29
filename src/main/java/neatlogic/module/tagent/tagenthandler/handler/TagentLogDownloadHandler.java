@@ -14,7 +14,7 @@ package neatlogic.module.tagent.tagenthandler.handler;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.RunnerVo;
@@ -89,7 +89,7 @@ public class TagentLogDownloadHandler extends TagentHandlerBase {
             }
             String dataStr = resultJson.getString("Data");
             inputStream = new ByteArrayInputStream(dataStr.getBytes());
-            HttpServletResponse response = UserContext.get().getResponse();
+            HttpServletResponse response = RequestContext.get().getResponse();
             response.setHeader("Content-Disposition", " attachment; filename=\"" + URLEncoder.encode(message.getPath(), "UTF-8") + "\"");
             response.setContentType("application/octet-stream");
             outputStream = response.getOutputStream();

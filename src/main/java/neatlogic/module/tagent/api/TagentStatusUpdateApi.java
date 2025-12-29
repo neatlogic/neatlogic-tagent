@@ -2,7 +2,7 @@ package neatlogic.module.tagent.api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
+import neatlogic.framework.asynchronization.threadlocal.RequestContext;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.constvalue.ApiParamType;
 import neatlogic.framework.common.constvalue.systemuser.SystemUser;
@@ -68,7 +68,7 @@ public class TagentStatusUpdateApi extends PrivateApiComponentBase {
         boolean status = true;
         String returnData = null;
         try {
-            paramObj.put("runnerIp", IpUtil.getIpAddr(UserContext.get().getRequest()));
+            paramObj.put("runnerIp", IpUtil.getIpAddr(RequestContext.get().getRequest()));
             TagentVo tagentPram = JSON.toJavaObject(paramObj, TagentVo.class);
             TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(tagentPram.getIp(), tagentPram.getPort());
             TagentVo tagentMGVo = tagentService.getTagentMGByIpAndPort(tagentPram.getIp(), tagentPram.getPort());
