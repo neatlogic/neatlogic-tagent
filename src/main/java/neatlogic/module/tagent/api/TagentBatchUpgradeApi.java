@@ -60,14 +60,15 @@ public class TagentBatchUpgradeApi extends PrivateApiComponentBase {
     @Input({
             @Param(name = "pkgVersion", type = ApiParamType.STRING, isRequired = true, desc = "安装包版本"),
             @Param(name = "ipPortList", type = ApiParamType.JSONARRAY, desc = "ip,port列表"),
-            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段"),
-            @Param(name = "runnerGroupIdList", type = ApiParamType.JSONARRAY, desc = "执行器组id列表")
+            @Param(name = "networkVoList", type = ApiParamType.JSONARRAY, desc = "网段")
     })
     @Description(desc = "批量升级tagent接口")
     @Override
     public Object myDoService(JSONObject paramObj) throws Exception {
 
         String pkgVersion = paramObj.getString("pkgVersion");
+        // 批量升级不支持执行器组方式
+        paramObj.remove("runnerGroupIdList");
         TagentSearchVo tagentSearchVo = paramObj.toJavaObject(TagentSearchVo.class);
         List<TagentVo> tagentList = tagentService.getTagentList(tagentSearchVo);
 
