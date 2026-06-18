@@ -1,0 +1,65 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_upgrade_detail",
+  "label": "tagent升级",
+  "description": "tagent升级 可用于Tagent相关的状态跟踪、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "audit_id",
+      "type": "bigint",
+      "description": "记录id,关联 flow_tagent_upgrade_audit表。"
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "tagent ip。"
+    },
+    {
+      "name": "port",
+      "type": "varchar(20)",
+      "description": "tagent port。"
+    },
+    {
+      "name": "source_version",
+      "type": "varchar(50)",
+      "description": "原版本。"
+    },
+    {
+      "name": "target_version",
+      "type": "varchar(50)",
+      "description": "目标版本。"
+    },
+    {
+      "name": "result",
+      "type": "text",
+      "description": "结果。"
+    },
+    {
+      "name": "error",
+      "type": "text",
+      "description": "异常。"
+    },
+    {
+      "name": "status",
+      "type": "varchar(50)",
+      "description": "状态。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

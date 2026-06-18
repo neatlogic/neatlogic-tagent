@@ -1,0 +1,25 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_osbit",
+  "label": "tagent",
+  "description": "tagent cpu架构表 可用于Tagent相关数据的查询、筛选和报表展示。",
+  "fields": [
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "tagent cpu架构，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "osbit"
+      ],
+      "description": "主键索引，覆盖 osbit 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

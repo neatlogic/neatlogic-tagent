@@ -1,0 +1,136 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent",
+  "label": "tagent信息表",
+  "description": "tagent信息表 可用于Tagent相关的状态跟踪、时间维度统计、关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint unsigned",
+      "description": "tagent Id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "tagentIP，已建立普通索引，适合用于过滤、关联或排序查询。"
+    },
+    {
+      "name": "port",
+      "type": "int",
+      "description": "tagent注册端口。"
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "tagent名称。"
+    },
+    {
+      "name": "version",
+      "type": "varchar(50)",
+      "description": "tagent版本。"
+    },
+    {
+      "name": "os_id",
+      "type": "bigint",
+      "description": "osId。"
+    },
+    {
+      "name": "os_type",
+      "type": "varchar(20)",
+      "description": "系统类型。"
+    },
+    {
+      "name": "os_version",
+      "type": "varchar(200)",
+      "description": "系统版本。"
+    },
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "操作系统位数。"
+    },
+    {
+      "name": "account_id",
+      "type": "bigint",
+      "description": "账号id。"
+    },
+    {
+      "name": "runner_id",
+      "type": "bigint",
+      "description": "proxy_id。"
+    },
+    {
+      "name": "runner_group_id",
+      "type": "bigint",
+      "description": "proxy组id。"
+    },
+    {
+      "name": "runner_ip",
+      "type": "varchar(20)",
+      "description": "proxy ip。"
+    },
+    {
+      "name": "runner_port",
+      "type": "varchar(50)",
+      "description": "proxy netty端口。"
+    },
+    {
+      "name": "user",
+      "type": "varchar(20)",
+      "description": "tagent用户。"
+    },
+    {
+      "name": "pcpu",
+      "type": "varchar(50)",
+      "description": "cpu占用。"
+    },
+    {
+      "name": "mem",
+      "type": "varchar(50)",
+      "description": "内存占用。"
+    },
+    {
+      "name": "status",
+      "type": "varchar(50)",
+      "description": "tagent状态。"
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "创建时间。"
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "修改时间。"
+    },
+    {
+      "name": "disconnect_reason",
+      "type": "varchar(100)",
+      "description": "连接失败原因。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    },
+    {
+      "name": "idx_ip_port",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "ip",
+        "port"
+      ],
+      "description": "唯一索引，覆盖 ip、port 字段，适合用于精确检索、唯一性判断和去重查询。"
+    }
+  ]
+}

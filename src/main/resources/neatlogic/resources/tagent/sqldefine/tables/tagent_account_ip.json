@@ -1,0 +1,31 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_account_ip",
+  "label": "tagent账号ip表",
+  "description": "tagent账号ip表 可用于Tagent相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "bigint",
+      "description": "账号id，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "账号对应的ip，作为当前表记录的主键或唯一定位字段。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "account_id",
+        "ip"
+      ],
+      "description": "主键索引，覆盖 account_id、ip 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

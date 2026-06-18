@@ -1,0 +1,50 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_version",
+  "label": "tagent版本",
+  "description": "tagent版本 可用于Tagent相关的关联查询等报表查询场景。",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "主键，作为当前表记录的主键或唯一定位字段。"
+    },
+    {
+      "name": "os_type",
+      "type": "varchar(50)",
+      "description": "os类型。"
+    },
+    {
+      "name": "version",
+      "type": "varchar(50)",
+      "description": "版本。"
+    },
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "CPU架构 CPU框架。"
+    },
+    {
+      "name": "ignore_file",
+      "type": "text",
+      "description": "忽略目录或文件。"
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "关联file表，用于下载安装包。"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "主键索引，覆盖 id 字段，适合用于唯一定位记录和主表关联查询。"
+    }
+  ]
+}

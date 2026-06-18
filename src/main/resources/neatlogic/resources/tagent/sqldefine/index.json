@@ -1,0 +1,50 @@
+{
+  "moduleId": "tagent",
+  "tables": [
+    {
+      "name": "tagent",
+      "label": "tagent信息表",
+      "description": "tagent信息表 可用于Tagent相关的状态跟踪、时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "tagent_account",
+      "label": "tagent账号表",
+      "description": "tagent账号表 可用于Tagent相关的时间维度统计、关联查询等报表查询场景。"
+    },
+    {
+      "name": "tagent_account_ip",
+      "label": "tagent账号ip表",
+      "description": "tagent账号ip表 可用于Tagent相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "tagent_ip",
+      "label": "tagent",
+      "description": "tagent ip表（多网卡） 可用于Tagent相关的关联查询等报表查询场景。"
+    },
+    {
+      "name": "tagent_os",
+      "label": "tagent",
+      "description": "tagent os 可用于Tagent相关的时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "tagent_osbit",
+      "label": "tagent",
+      "description": "tagent cpu架构表 可用于Tagent相关数据的查询、筛选和报表展示。"
+    },
+    {
+      "name": "tagent_upgrade_audit",
+      "label": "tagent升级",
+      "description": "tagent升级 可用于Tagent相关的时间维度统计等报表查询场景。"
+    },
+    {
+      "name": "tagent_upgrade_detail",
+      "label": "tagent升级",
+      "description": "tagent升级 可用于Tagent相关的状态跟踪、关联查询等报表查询场景。"
+    },
+    {
+      "name": "tagent_version",
+      "label": "tagent版本",
+      "description": "tagent版本 可用于Tagent相关的关联查询等报表查询场景。"
+    }
+  ]
+}
