@@ -13,7 +13,6 @@
 package neatlogic.module.tagent.tagenthandler.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.file.core.FileTypeHandlerBase;
 import neatlogic.framework.file.dto.FileVo;
@@ -41,7 +40,7 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
 
     @Override
     public boolean valid(String userUuid, FileVo fileVo, JSONObject jsonObj) {
-        return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
+        return AuthActionChecker.check(TAGENT_BASE.class);
     }
 
     /**
@@ -50,7 +49,7 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
      * @return
      */
     public boolean validDeleteFile(FileVo fileVo) {
-        return AuthActionChecker.checkByUserUuid(UserContext.get().getUserUuid(), TAGENT_BASE.class.getSimpleName());
+        return AuthActionChecker.check(TAGENT_BASE.class);
     }
 
     @Override
