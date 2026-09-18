@@ -1,0 +1,46 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_ip",
+  "label": "Tagent",
+  "description": "The agent IP table (with multiple network cards) is used for related queries in tagent and other reporting scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Auto-incremented ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "tagent_id",
+      "type": "bigint",
+      "description": "TagentId. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "ip",
+      "type": "varchar(50)",
+      "description": "Target host's network interface IP."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_id_ip",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "tagent_id",
+        "ip"
+      ],
+      "description": "Unique index covering the tagent_id, IP fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent",
+  "label": "Agent Information Table",
+  "description": "The agent information table is used for tracking the status of agent-related operations, time dimension statistics, and association queries.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint unsigned",
+      "description": "Tagent ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "TagentIP. A standard index is defined on this field, making it suitable for filtering, join, and sort queries."
+    },
+    {
+      "name": "port",
+      "type": "int",
+      "description": "Registration port for agent."
+    },
+    {
+      "name": "name",
+      "type": "varchar(100)",
+      "description": "Agent name."
+    },
+    {
+      "name": "version",
+      "type": "varchar(50)",
+      "description": "Tagent version."
+    },
+    {
+      "name": "os_id",
+      "type": "bigint",
+      "description": "OsId."
+    },
+    {
+      "name": "os_type",
+      "type": "varchar(20)",
+      "description": "System type."
+    },
+    {
+      "name": "os_version",
+      "type": "varchar(200)",
+      "description": "System version."
+    },
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "Operating system bitness."
+    },
+    {
+      "name": "account_id",
+      "type": "bigint",
+      "description": "Account ID."
+    },
+    {
+      "name": "runner_id",
+      "type": "bigint",
+      "description": "Proxy_id."
+    },
+    {
+      "name": "runner_group_id",
+      "type": "bigint",
+      "description": "Proxy group ID."
+    },
+    {
+      "name": "runner_ip",
+      "type": "varchar(20)",
+      "description": "Proxy IP."
+    },
+    {
+      "name": "runner_port",
+      "type": "varchar(50)",
+      "description": "Proxy netty port."
+    },
+    {
+      "name": "user",
+      "type": "varchar(20)",
+      "description": "Agent user."
+    },
+    {
+      "name": "pcpu",
+      "type": "varchar(50)",
+      "description": "CPU utilization."
+    },
+    {
+      "name": "mem",
+      "type": "varchar(50)",
+      "description": "Memory usage."
+    },
+    {
+      "name": "status",
+      "type": "varchar(50)",
+      "description": "Agent status."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "Creation time."
+    },
+    {
+      "name": "lcd",
+      "type": "timestamp(3)",
+      "description": "Update the timestamp."
+    },
+    {
+      "name": "disconnect_reason",
+      "type": "varchar(100)",
+      "description": "Connection failure reason."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    },
+    {
+      "name": "idx_ip_port",
+      "type": "BTREE",
+      "unique": true,
+      "primary": false,
+      "columns": [
+        "ip",
+        "port"
+      ],
+      "description": "Unique index covering the IP, port fields, suitable for exact-match retrieval, uniqueness checks, and duplicate detection."
+    }
+  ]
+}

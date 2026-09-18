@@ -1,0 +1,50 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_version",
+  "label": "Agent Version",
+  "description": "The version is used for tagent-related queries and report scenarios.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "os_type",
+      "type": "varchar(50)",
+      "description": "OS type."
+    },
+    {
+      "name": "version",
+      "type": "varchar(50)",
+      "description": "Version."
+    },
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "CPU architecture and framework."
+    },
+    {
+      "name": "ignore_file",
+      "type": "text",
+      "description": "Ignore directory or file."
+    },
+    {
+      "name": "file_id",
+      "type": "bigint",
+      "description": "Associate the file table for downloading installation packages."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

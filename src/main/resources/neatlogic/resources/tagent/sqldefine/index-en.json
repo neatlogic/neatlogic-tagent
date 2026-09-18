@@ -1,0 +1,50 @@
+{
+  "moduleId": "tagent",
+  "tables": [
+    {
+      "name": "tagent",
+      "label": "Agent Information Table",
+      "description": "The agent information table is used for tracking the status of agent-related operations, time dimension statistics, and association queries."
+    },
+    {
+      "name": "tagent_account",
+      "label": "Agent Account Table",
+      "description": "The agent account table is used for time dimension statistical queries and association queries related to tagent."
+    },
+    {
+      "name": "tagent_account_ip",
+      "label": "Agent Account IP Table",
+      "description": "The agent account IP table is used for related queries and report queries related to tagent."
+    },
+    {
+      "name": "tagent_ip",
+      "label": "Tagent",
+      "description": "The agent IP table (with multiple network cards) is used for related queries in tagent and other reporting scenarios."
+    },
+    {
+      "name": "tagent_os",
+      "label": "Tagent",
+      "description": "The agent OS can be used for time dimension statistical queries related to tagent."
+    },
+    {
+      "name": "tagent_osbit",
+      "label": "Tagent",
+      "description": "The agent CPU architecture table is used for querying, filtering, and reporting tagent-related data."
+    },
+    {
+      "name": "tagent_upgrade_audit",
+      "label": "Agent Upgrade",
+      "description": "The agent upgrade is designed for scenarios involving time dimension statistical reports related to tagent."
+    },
+    {
+      "name": "tagent_upgrade_detail",
+      "label": "Agent Upgrade",
+      "description": "The agent upgrade is designed for reporting scenarios related to state tracking and query association in tagent."
+    },
+    {
+      "name": "tagent_version",
+      "label": "Agent Version",
+      "description": "The version is used for tagent-related queries and report scenarios."
+    }
+  ]
+}

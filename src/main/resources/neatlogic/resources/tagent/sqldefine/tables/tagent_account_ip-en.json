@@ -1,0 +1,31 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_account_ip",
+  "label": "Agent Account IP Table",
+  "description": "The agent account IP table is used for related queries and report queries related to tagent.",
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "bigint",
+      "description": "Account ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "The IP address corresponding to the account, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "account_id",
+        "ip"
+      ],
+      "description": "Primary key index covering the account_id, IP fields, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

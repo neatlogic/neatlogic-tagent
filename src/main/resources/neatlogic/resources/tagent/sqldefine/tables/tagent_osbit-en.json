@@ -1,0 +1,25 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_osbit",
+  "label": "Tagent",
+  "description": "The agent CPU architecture table is used for querying, filtering, and reporting tagent-related data.",
+  "fields": [
+    {
+      "name": "osbit",
+      "type": "varchar(50)",
+      "description": "Tagent CPU architecture, used as the primary key or unique identifier for records in this table."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "osbit"
+      ],
+      "description": "Primary key index covering the osbit field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

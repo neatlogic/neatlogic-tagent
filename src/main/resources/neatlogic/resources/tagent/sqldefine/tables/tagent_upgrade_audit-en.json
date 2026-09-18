@@ -1,0 +1,45 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_upgrade_audit",
+  "label": "Agent Upgrade",
+  "description": "The agent upgrade is designed for scenarios involving time dimension statistical reports related to tagent.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "count",
+      "type": "bigint",
+      "description": "Number of upgrades."
+    },
+    {
+      "name": "fcd",
+      "type": "timestamp(3)",
+      "description": "TIME."
+    },
+    {
+      "name": "network",
+      "type": "text",
+      "description": "Segment information."
+    },
+    {
+      "name": "fcu",
+      "type": "varchar(50)",
+      "description": "Upgrade operation user."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}

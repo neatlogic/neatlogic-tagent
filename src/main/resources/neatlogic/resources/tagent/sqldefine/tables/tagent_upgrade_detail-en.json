@@ -1,0 +1,65 @@
+{
+  "moduleId": "tagent",
+  "name": "tagent_upgrade_detail",
+  "label": "Agent Upgrade",
+  "description": "The agent upgrade is designed for reporting scenarios related to state tracking and query association in tagent.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "description": "Primary key ID, used as the primary key or unique identifier for records in this table."
+    },
+    {
+      "name": "audit_id",
+      "type": "bigint",
+      "description": "Record ID, associated with the flow_tagent_upgrade_audit table."
+    },
+    {
+      "name": "ip",
+      "type": "varchar(20)",
+      "description": "Tagent IP."
+    },
+    {
+      "name": "port",
+      "type": "varchar(20)",
+      "description": "Tagent port."
+    },
+    {
+      "name": "source_version",
+      "type": "varchar(50)",
+      "description": "Original version."
+    },
+    {
+      "name": "target_version",
+      "type": "varchar(50)",
+      "description": "Target version."
+    },
+    {
+      "name": "result",
+      "type": "text",
+      "description": "Result."
+    },
+    {
+      "name": "error",
+      "type": "text",
+      "description": "Alert."
+    },
+    {
+      "name": "status",
+      "type": "varchar(50)",
+      "description": "Status."
+    }
+  ],
+  "indexes": [
+    {
+      "name": "PRIMARY",
+      "type": "BTREE",
+      "unique": true,
+      "primary": true,
+      "columns": [
+        "id"
+      ],
+      "description": "Primary key index covering the ID field, suitable for uniquely identifying records and queries that join the primary table."
+    }
+  ]
+}
