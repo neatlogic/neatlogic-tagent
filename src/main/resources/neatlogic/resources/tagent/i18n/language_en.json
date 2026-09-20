@@ -1,0 +1,34 @@
+{
+  "nmta": {
+    "batchdeletetagentapi": {
+      "getname": "Batch delete tags"
+    },
+    "exporttagentapi": {
+      "getname": "Export Tagent List"
+    },
+    "gettagentqueueinfoapi": {
+      "getname": "Get tagent session queue information"
+    },
+    "importtagentinfotomongodbapi": {
+      "description": {
+        "desc": "Import tagent table data into MongoDB"
+      }
+    }
+  },
+  "nmtc": {
+    "updatetagentinfothread": {
+      "init": {
+        "mongodbexception": "Tenant: {0} is unable to connect to MongoDB. Please confirm that the MongoDB service is functioning properly and verify that the authentication information for the corresponding tenant in the MongoDB table of the netlogic library is correct before trying again"
+      }
+    }
+  },
+  "term": {
+    "tagent": {
+      "name": "Tagent",
+      "osid": "OS type ID",
+      "runnergroupid": "Runner group ID",
+      "status": "Tagent status",
+      "version": "Tagent version"
+    }
+  }
+}

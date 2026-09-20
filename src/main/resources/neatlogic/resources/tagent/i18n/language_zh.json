@@ -1,0 +1,34 @@
+{
+  "nmta": {
+    "batchdeletetagentapi": {
+      "getname": "批量删除tagent"
+    },
+    "exporttagentapi": {
+      "getname": "导出Tagent列表"
+    },
+    "gettagentqueueinfoapi": {
+      "getname": "获取tagent会话队列信息"
+    },
+    "importtagentinfotomongodbapi": {
+      "description": {
+        "desc": "导入tagent表数据进mongodb"
+      }
+    }
+  },
+  "nmtc": {
+    "updatetagentinfothread": {
+      "init": {
+        "mongodbexception": "租户:{0} 无法连接mongodb，请确认mongdb服务正常，并核对neatlogic库中的mongodb表对应租户的认证信息正确无误后重试"
+      }
+    }
+  },
+  "term": {
+    "tagent": {
+      "name": "tagent模块",
+      "osid": "OS类型id",
+      "runnergroupid": "runner组id",
+      "status": "tagent状态",
+      "version": "tagent版本"
+    }
+  }
+}
