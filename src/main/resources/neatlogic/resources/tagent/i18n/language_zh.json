@@ -1,4 +1,11 @@
 {
+  "file": {
+    "handler": {
+      "tagentpkgfilehandler": {
+        "displayname": "tagent安装包文件"
+      }
+    }
+  },
   "nmta": {
     "batchdeletetagentapi": {
       "getname": "批量删除tagent"

@@ -1,4 +1,11 @@
 {
+  "file": {
+    "handler": {
+      "tagentpkgfilehandler": {
+        "displayname": "Tagent Installation Package"
+      }
+    }
+  },
   "nmta": {
     "batchdeletetagentapi": {
       "getname": "Batch delete tags"

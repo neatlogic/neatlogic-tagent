@@ -15,6 +15,7 @@ package neatlogic.module.tagent.tagenthandler.handler;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthActionChecker;
 import neatlogic.framework.file.core.FileTypeHandlerBase;
+import neatlogic.framework.util.$;
 import neatlogic.framework.file.dto.FileVo;
 import neatlogic.framework.tagent.auth.label.TAGENT_BASE;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
@@ -57,9 +58,10 @@ public class TagentPkgFileHandler extends FileTypeHandlerBase {
         return "TAGENT";
     }
 
+    /** 返回当前语言环境下的文件类型显示名称。 */
     @Override
     public String getDisplayName() {
-        return "tagent安装包文件";
+        return $.t("file.handler.tagentpkgfilehandler.displayname");
     }
 
 
