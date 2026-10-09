@@ -17,7 +17,6 @@ import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.auth.core.AuthAction;
 import neatlogic.framework.common.config.Config;
 import neatlogic.framework.common.constvalue.ApiParamType;
-import neatlogic.framework.common.constvalue.systemuser.SystemUser;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.core.ApiRuntimeException;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AuthUser(SystemUser.AUTOEXEC)
+
 @AuthAction(action = TAGENT_MANAGE.class)
 @OperationType(type = OperationTypeEnum.UPDATE)
 public class TagentInfoUpdateApi extends PrivateApiComponentBase {
